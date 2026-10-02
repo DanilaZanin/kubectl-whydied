@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T19:10:55.764619Z",
+  "observedAt": "2026-10-02T21:02:27.414636Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-name-reuse",
     "name": "reuse",
-    "uid": "da8053f5-45b5-40f5-8b80-c878152e0b9c",
+    "uid": "5667b6a4-d267-40fe-94b7-f9347b5a6cc4",
     "exists": true,
     "phase": "Running",
-    "node": "wd-1370-3240-worker",
-    "startTime": "2026-10-02T19:10:54Z",
+    "node": "wd-1370-6832-worker",
+    "startTime": "2026-10-02T21:02:10Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -18,30 +18,30 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 0,
-      "currentState": "running since 2026-10-02T19:10:55Z",
+      "currentState": "running since 2026-10-02T21:02:11Z",
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T19:10:55Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T21:02:11Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
           "kind": "no-termination",
           "confidence": "confirmed",
-          "summary": "no termination is recorded for this container: it is running with restartCount=0 and no previous state",
+          "summary": "no termination is recorded for this container: it is running and the status has no previous state (restartCount=0)",
           "evidence": [
             {
               "kind": "pod-status",
               "object": "Pod wd-name-reuse/reuse",
-              "uid": "da8053f5-45b5-40f5-8b80-c878152e0b9c",
+              "uid": "5667b6a4-d267-40fe-94b7-f9347b5a6cc4",
               "field": "status.containerStatuses[app].state.running.startedAt",
-              "value": "2026-10-02T19:10:55Z",
-              "time": "2026-10-02T19:10:55Z"
+              "value": "2026-10-02T21:02:11Z",
+              "time": "2026-10-02T21:02:11Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-name-reuse/reuse",
-              "uid": "da8053f5-45b5-40f5-8b80-c878152e0b9c",
+              "uid": "5667b6a4-d267-40fe-94b7-f9347b5a6cc4",
               "field": "status.containerStatuses[app].restartCount",
               "value": "0"
             }
@@ -51,7 +51,7 @@
     }
   ],
   "notes": [
-    "4 event(s) for a pod with the same name but a different UID were ignored (UIDs: 3f950284-a84a-4db5-943a-cf5f9a1276fd). They belong to an earlier or later pod, not this one."
+    "4 event(s) for a pod with the same name but a different UID were ignored (UIDs: e25692ee-44f1-4cb5-92c4-64c1fa76a0e7). They belong to an earlier or later pod, not this one."
   ],
   "checked": [
     "pod status and spec",

@@ -119,3 +119,67 @@ func TestRestartedPods(t *testing.T) {
 		t.Fatalf("%v %+v", err, got)
 	}
 }
+
+// Item 12: an owner that was recreated under the same name is not part of the pod's chain.
+func TestRecreatedOwnerIsNotUsed(t *testing.T) {
+	objs := fixtureObjects()
+	for _, o := range objs {
+		if rs, ok := o.(*appsv1.ReplicaSet); ok {
+			rs.UID = "new-rs-uid" // the pod's ownerReference still says rs-uid
+		}
+	}
+	s, err := Collect(context.Background(), fake.NewClientset(objs...), Options{Namespace: "ns", Pod: "web-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(s.Owners) != 1 || s.Owners[0].Found || s.Owners[0].Revision != "" || string(s.Owners[0].UID) != "rs-uid" {
+		t.Fatalf("the recreated ReplicaSet's data must not be used: %+v", s.Owners)
+	}
+	found := false
+	for _, g := range s.Gaps {
+		found = found || (g.Source == "owner ReplicaSet/web-abc" && len(g.Reason) > 0)
+	}
+	if !found {
+		t.Fatalf("recreation must be reported as a gap: %+v", s.Gaps)
+	}
+}
+
+func podWithLast(id string) *corev1.Pod {
+	return &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "web-1", Namespace: "ns", UID: "pod-uid"},
+		Status: corev1.PodStatus{ContainerStatuses: []corev1.ContainerStatus{{Name: "app",
+			LastTerminationState: corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{ExitCode: 1, ContainerID: id}}}}}}
+}
+
+// Item 13: logs carry the pod UID, the selected source and containerID; a change
+// during collection becomes a gap.
+func TestLogsInstanceBinding(t *testing.T) {
+	cs := fake.NewClientset(podWithLast("containerd://a"))
+	s, _ := Collect(context.Background(), cs, Options{Namespace: "ns", Pod: "web-1", PreviousLogs: 5})
+	l, ok := s.Logs["app"]
+	if !ok || l.PodUID != "pod-uid" || l.ContainerID != "containerd://a" || l.Source != "lastState.terminated" || !l.Previous {
+		t.Fatalf("%+v", s.Logs)
+	}
+	for _, g := range s.Gaps {
+		if g.Source == "logs/app" || g.Source == "logs" {
+			t.Fatalf("no change, no gap: %+v", g)
+		}
+	}
+
+	cs2 := fake.NewClientset(podWithLast("containerd://a"))
+	gets := 0
+	cs2.PrependReactor("get", "pods", func(k8stesting.Action) (bool, runtime.Object, error) {
+		gets++
+		if gets >= 2 { // the recheck after the logs were read
+			return true, podWithLast("containerd://b"), nil
+		}
+		return false, nil, nil
+	})
+	s2, _ := Collect(context.Background(), cs2, Options{Namespace: "ns", Pod: "web-1", PreviousLogs: 5})
+	changed := false
+	for _, g := range s2.Gaps {
+		changed = changed || g.Source == "logs/app"
+	}
+	if !changed {
+		t.Fatalf("a containerID change during collection must be a gap: %+v", s2.Gaps)
+	}
+}

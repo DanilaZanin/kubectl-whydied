@@ -47,7 +47,9 @@ type HPA struct {
 // Logs holds an optional tail of container logs.
 type Logs struct {
 	Previous    bool     `json:"previous"`
-	ContainerID string   `json:"containerID,omitempty"`
+	PodUID      string   `json:"podUID,omitempty"`
+	Source      string   `json:"source,omitempty"`      // state.terminated or lastState.terminated at collection time
+	ContainerID string   `json:"containerID,omitempty"` // of the selected termination at collection time; the logs API does not return one
 	Lines       []string `json:"lines,omitempty"`
 }
 

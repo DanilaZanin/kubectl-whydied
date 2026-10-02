@@ -20,6 +20,16 @@ func statusListName(kind string) string {
 	return "containerStatuses"
 }
 
+func specListName(role string) string {
+	switch role {
+	case "init", "sidecar":
+		return "initContainers"
+	case "ephemeral":
+		return "ephemeralContainers"
+	}
+	return "containers"
+}
+
 func currentState(cs *corev1.ContainerStatus) string {
 	switch {
 	case cs.State.Running != nil:
@@ -36,64 +46,111 @@ func currentState(cs *corev1.ContainerStatus) string {
 	return "unknown"
 }
 
-func (a *analysis) container(ref collect.StatusRef) ContainerReport {
-	p := a.pod
+// isSynthesized reports whether the kubelet made up this termination (it did
+// not observe the process end). Its exit code says nothing about the cause and
+// must stay out of every causal heuristic.
+func isSynthesized(t *corev1.ContainerStateTerminated) bool {
+	return t != nil && (t.Reason == "ContainerStatusUnknown" || t.Reason == "RestartingAllContainers")
+}
+
+// inst is the container instance being explained: the selected termination and
+// everything needed to tie evidence to exactly that instance.
+type inst struct {
+	cs       *corev1.ContainerStatus
+	kind     string // status list kind: init | regular | ephemeral
+	role     string // init | sidecar | regular | ephemeral
+	spec     *corev1.Container
+	specPath string // spec.containers[app]
+	base     string // status.containerStatuses[app]
+	term     *corev1.ContainerStateTerminated
+	fromLast bool
+	path     string // base + .state.terminated or .lastState.terminated
+}
+
+func (a *analysis) newInst(ref collect.StatusRef) *inst {
 	cs := ref.Status
-	spec, role := containerSpec(p, cs.Name)
+	spec, role := containerSpec(a.pod, cs.Name)
 	if ref.Kind == "ephemeral" {
 		role = "ephemeral"
 	}
-	cr := ContainerReport{Name: cs.Name, Role: role, Image: cs.Image, RestartCount: cs.RestartCount, CurrentState: currentState(cs)}
-	term, fromLast := collect.LastTermination(cs)
-	base := fmt.Sprintf("status.%s[%s]", statusListName(ref.Kind), cs.Name)
-
-	if term != nil {
+	in := &inst{cs: cs, kind: ref.Kind, role: role, spec: spec,
+		specPath: fmt.Sprintf("spec.%s[%s]", specListName(role), cs.Name),
+		base:     fmt.Sprintf("status.%s[%s]", statusListName(ref.Kind), cs.Name)}
+	in.term, in.fromLast = collect.LastTermination(cs)
+	if in.term != nil {
 		src := "state.terminated"
-		if fromLast {
+		if in.fromLast {
 			src = "lastState.terminated"
 		}
-		cr.Termination = &Termination{
-			Source: src, ContainerID: term.ContainerID, ExitCode: term.ExitCode, Signal: term.Signal,
-			Reason: term.Reason, Message: term.Message, StartedAt: mt(term.StartedAt), FinishedAt: mt(term.FinishedAt),
-		}
+		in.path = in.base + "." + src
 	}
+	return in
+}
+
+func termInfo(t *corev1.ContainerStateTerminated, src string) *Termination {
+	return &Termination{Source: src, ContainerID: t.ContainerID, ExitCode: t.ExitCode, Signal: t.Signal,
+		Reason: t.Reason, Message: t.Message, StartedAt: mt(t.StartedAt), FinishedAt: mt(t.FinishedAt)}
+}
+
+func (a *analysis) container(ref collect.StatusRef) ContainerReport {
+	in := a.newInst(ref)
+	cs, term := in.cs, in.term
+	cr := ContainerReport{Name: cs.Name, Role: in.role, Image: cs.Image, RestartCount: cs.RestartCount, CurrentState: currentState(cs)}
 
 	var vs []Verdict
 	if term != nil {
-		path := base + "." + cr.Termination.Source
-		causes := append(a.probeKill(cs.Name, spec, term, path), a.postStart(cs.Name, term)...)
-		exit := a.exitVerdicts(spec, term, path, cs.Name)
+		src := "state.terminated"
+		if in.fromLast {
+			src = "lastState.terminated"
+		}
+		cr.Termination = termInfo(term, src)
+		probe, trig := a.probeKill(in)
+		hook := a.postStart(in)
+		exit := a.exitVerdicts(in, term, in.path)
 		if term.Reason == "OOMKilled" {
 			// The runtime's own report about this instance always comes first.
-			vs = append(exit, causes...)
+			vs = append(vs, exit...)
+			vs = append(vs, probe...)
+			vs = append(vs, hook...)
 		} else {
-			vs = append(causes, exit...)
+			vs = append(vs, probe...)
+			vs = append(vs, hook...)
+			vs = append(vs, exit...)
 		}
-		vs = append(vs, a.nodeOOM(term, path)...)
-		vs = append(vs, a.graceVerdict(cs.Name, term, path)...)
-		if term.Reason == "ContainerStatusUnknown" && cs.LastTerminationState.Terminated != nil {
-			// The synthesized status hides the real previous termination; show it too.
+		vs = append(vs, a.nodeOOM(in)...)
+		vs = append(vs, a.graceVerdict(in, trig)...)
+		// A synthesized state.terminated hides the real previous termination; show it too.
+		if isSynthesized(term) && !in.fromLast && cs.LastTerminationState.Terminated != nil {
 			prev := cs.LastTerminationState.Terminated
-			cr.Previous = &Termination{Source: "lastState.terminated", ContainerID: prev.ContainerID, ExitCode: prev.ExitCode,
-				Signal: prev.Signal, Reason: prev.Reason, Message: prev.Message, StartedAt: mt(prev.StartedAt), FinishedAt: mt(prev.FinishedAt)}
-			for _, v := range a.exitVerdicts(spec, prev, base+".lastState.terminated", cs.Name) {
+			cr.Previous = termInfo(prev, "lastState.terminated")
+			for _, v := range a.exitVerdicts(in, prev, in.base+".lastState.terminated") {
 				v.Summary = "previous instance (lastState.terminated): " + v.Summary
 				vs = append(vs, v)
 			}
 		}
 	} else {
-		vs = append(vs, a.postStart(cs.Name, nil)...)
+		vs = append(vs, a.postStart(in)...)
 		if len(vs) == 0 {
-			vs = append(vs, a.noTermination(cs, base)...)
+			vs = append(vs, a.noTermination(in)...)
 		}
 	}
 	if vs == nil {
 		vs = []Verdict{}
 	}
 	cr.Verdicts = vs
-	cr.Expected = a.expectedness(role, cs, term)
-	cr.Restart = a.restartDecision(role, spec, cs, term, fromLast, base)
+	cr.Expected = a.expectedness(in)
+	cr.Restart = a.restartDecision(in)
 	return cr
+}
+
+// specOnly builds the report for a container that is in the pod spec but has no
+// status yet (not scheduled, or the kubelet has not reported).
+func (a *analysis) specOnly(name, role string) ContainerReport {
+	return ContainerReport{Name: name, Role: role, CurrentState: "no status reported yet",
+		Restart: RestartDecision{Policy: "", Decision: "unknown", Detail: "the pod status has no entry for this container"},
+		Verdicts: []Verdict{{Kind: KindNoTermination, Confidence: NoData,
+			Summary:  "the container is in the pod spec but the pod status has no entry for it yet (pod not scheduled or not started); nothing to explain",
+			Evidence: []Evidence{podEv(a.pod, EvPodSpec, fmt.Sprintf("spec.%s[%s]", specListName(role), name), "present in spec", nil)}}}}
 }
 
 // termEvidence lists the termination facts verbatim.
@@ -115,18 +172,18 @@ func (a *analysis) termEvidence(term *corev1.ContainerStateTerminated, path stri
 	return ev
 }
 
-func (a *analysis) exitVerdicts(spec *corev1.Container, term *corev1.ContainerStateTerminated, path, name string) []Verdict {
+func (a *analysis) exitVerdicts(in *inst, term *corev1.ContainerStateTerminated, path string) []Verdict {
 	ev := a.termEvidence(term, path)
 	code := term.ExitCode
 	switch {
 	case term.Reason == "OOMKilled":
 		limit := "no memory limit set in spec"
-		if spec != nil {
-			if q, ok := spec.Resources.Limits[corev1.ResourceMemory]; ok {
+		if in.spec != nil {
+			if q, ok := in.spec.Resources.Limits[corev1.ResourceMemory]; ok {
 				limit = "spec memory limit " + q.String()
 			}
 		}
-		ev = append(ev, podEv(a.pod, EvPodSpec, "spec.containers["+name+"].resources.limits.memory", limit, nil))
+		ev = append(ev, podEv(a.pod, EvPodSpec, in.specPath+".resources.limits.memory", limit, nil))
 		return []Verdict{{
 			Kind:       KindOOMKill,
 			Confidence: Confirmed,
@@ -137,11 +194,15 @@ func (a *analysis) exitVerdicts(spec *corev1.Container, term *corev1.ContainerSt
 			},
 			Evidence: ev,
 		}}
-	case term.Reason == "ContainerStatusUnknown":
+	case isSynthesized(term):
+		what := "the kubelet could not observe how the container ended and synthesized exitCode=%d"
+		if term.Reason == "RestartingAllContainers" {
+			what = "the kubelet marked the container terminated while restarting all containers of the pod (reason RestartingAllContainers) and synthesized exitCode=%d"
+		}
 		return []Verdict{{
 			Kind:       KindStatusUnknown,
 			Confidence: Confirmed,
-			Summary:    fmt.Sprintf("the kubelet could not observe how the container ended and synthesized exitCode=%d; the exit code carries no information about the cause", code),
+			Summary:    fmt.Sprintf(what+"; the exit code carries no information about the cause", code),
 			Competing:  []string{"any cause: the real exit status was never observed"},
 			Evidence:   ev,
 		}}
@@ -159,7 +220,7 @@ func (a *analysis) exitVerdicts(spec *corev1.Container, term *corev1.ContainerSt
 			Summary:    "the container's main process exited with exitCode=0 (API reported exitCode=0)",
 			Evidence:   ev,
 		}}
-	case code >= 129 && code <= 255:
+	case code >= 129 && code <= 128+64: // Linux signals 1..64
 		sig := int(code) - 128
 		name2 := signalName(sig)
 		conv := podEv(a.pod, EvConvention, "exit code 128+n", fmt.Sprintf("%d = 128+%d = %s (shell/runtime convention, Linux numbering)", code, sig, name2), nil)
@@ -188,6 +249,9 @@ func (a *analysis) exitVerdicts(spec *corev1.Container, term *corev1.ContainerSt
 		case 2:
 			extra = "; by convention 2 often means misuse of a shell builtin, but its meaning is defined by the program"
 		}
+		if code > 128+64 {
+			extra = "; the value is above 192, so it is not a Linux signal exit code and is reported as is"
+		}
 		if extra != "" {
 			ev = append(ev, podEv(a.pod, EvConvention, "exit code", fmt.Sprintf("%d%s", code, extra), nil))
 		}
@@ -200,16 +264,27 @@ func (a *analysis) exitVerdicts(spec *corev1.Container, term *corev1.ContainerSt
 	}
 }
 
-func (a *analysis) probeKill(name string, spec *corev1.Container, term *corev1.ContainerStateTerminated, path string) []Verdict {
+// trigger is a stop that has a known start time and a known grace period.
+type trigger struct {
+	start time.Time
+	grace time.Duration
+	why   string
+}
+
+func (a *analysis) probeKill(in *inst) ([]Verdict, *trigger) {
+	term := in.term
+	if isSynthesized(term) {
+		return nil, nil
+	}
 	var best *corev1.Event
 	var bestKind string
 	bestMatch := matchNone
 	var unhealthy []*corev1.Event
 	for _, e := range a.podEvents {
-		if containerOfEvent(e) != name {
+		if containerOfEvent(e) != in.cs.Name {
 			continue
 		}
-		m := instanceMatch(e, term)
+		m := a.instanceMatch(e, term)
 		if m == matchNone {
 			continue
 		}
@@ -229,27 +304,26 @@ func (a *analysis) probeKill(name string, spec *corev1.Container, term *corev1.C
 		default:
 			continue
 		}
-		// Events are sorted by time: keep the latest, but an exact match beats a spanning one.
+		// Events are sorted by time: keep the latest, but an exact match beats a weak one.
 		if best == nil || m == matchExact || bestMatch != matchExact {
 			best, bestKind, bestMatch = e, kind, m
 		}
 	}
 	if best == nil {
-		return nil
+		return nil, nil
 	}
 	ev := []Evidence{evEvent(best)}
-	ev = append(ev, a.termEvidence(term, path)...)
+	ev = append(ev, a.termEvidence(term, in.path)...)
 	probe := "liveness"
 	var pr *corev1.Probe
-	if spec != nil {
-		pr = spec.LivenessProbe
+	if in.spec != nil {
+		pr = in.spec.LivenessProbe
 		if bestKind == KindStartupKill {
-			probe, pr = "startup", spec.StartupProbe
+			probe, pr = "startup", in.spec.StartupProbe
 		}
 	}
 	if pr != nil {
-		ev = append(ev, podEv(a.pod, EvPodSpec, fmt.Sprintf("spec.containers[%s].%sProbe", name, probe), describeProbe(pr),
-			nil))
+		ev = append(ev, podEv(a.pod, EvPodSpec, fmt.Sprintf("%s.%sProbe", in.specPath, probe), describeProbe(pr), nil))
 		ev[len(ev)-1].Note = "failureThreshold is configured; the API does not report how many consecutive failures happened (event count is not a failure count)"
 	}
 	for i, u := range unhealthy {
@@ -260,18 +334,43 @@ func (a *analysis) probeKill(name string, spec *corev1.Container, term *corev1.C
 	v := Verdict{
 		Kind:       bestKind,
 		Confidence: Confirmed,
-		Summary:    fmt.Sprintf("the kubelet reported stopping the container because it failed its %s probe (Killing event names the probe and this container, and its time lies inside this instance's lifetime)", probe),
+		Summary:    fmt.Sprintf("the kubelet reported stopping the container because it failed its %s probe (Killing event names the probe and this container, and its time lies inside this instance's lifetime and the %s window)", probe, a.o.Window),
 		Evidence:   ev,
 	}
-	if bestMatch == matchSpans {
+	if bestMatch != matchExact {
 		v.Confidence = Likely
-		v.Summary += fmt.Sprintf("; the Killing event is aggregated (repeated %d times) and spans this instance, but none of its known occurrences lies inside the instance's lifetime", eventCount(best))
-		v.Competing = append(v.Competing, "the kill may belong to an earlier or later instance: the times of the middle repetitions are not recorded")
+		v.Summary += "; the event time is not firmly tied to this instance (boundary of its lifetime, unknown start time, or outside the correlation window)"
+		v.Competing = append(v.Competing, "the Killing event belongs to an earlier or later instance of this container")
 	} else if eventCount(best) > 1 {
-		v.Summary += fmt.Sprintf(" (aggregated event, repeated %d times; its first or last occurrence lies inside this instance's lifetime)", eventCount(best))
+		v.Summary += fmt.Sprintf(" (aggregated event, repeated %d times; its first or last occurrence is the match)", eventCount(best))
 	}
 	v.Competing = append(v.Competing, "the internal reason for each probe failure is only in the Unhealthy event text (context lines)")
-	return []Verdict{v}
+
+	var trig *trigger
+	if bestMatch == matchExact {
+		_, last := eventTimes(best)
+		if g, why, ok := a.probeGrace(pr, probe); ok {
+			trig = &trigger{start: last, grace: g, why: why}
+		}
+	}
+	return []Verdict{v}, trig
+}
+
+// probeGrace is the grace period the kubelet uses for a probe kill: the probe's
+// own terminationGracePeriodSeconds when set, else the pod's (when the pod is
+// not already being deleted, in which case deletionGracePeriodSeconds wins and
+// is no longer known).
+func (a *analysis) probeGrace(pr *corev1.Probe, probe string) (time.Duration, string, bool) {
+	if a.pod.DeletionTimestamp != nil {
+		return 0, "", false
+	}
+	if pr != nil && pr.TerminationGracePeriodSeconds != nil {
+		return time.Duration(*pr.TerminationGracePeriodSeconds) * time.Second, probe + " probe terminationGracePeriodSeconds", true
+	}
+	if g := a.pod.Spec.TerminationGracePeriodSeconds; g != nil {
+		return time.Duration(*g) * time.Second, "pod spec terminationGracePeriodSeconds", true
+	}
+	return 0, "", false
 }
 
 func describeProbe(pr *corev1.Probe) string {
@@ -293,81 +392,134 @@ func describeProbe(pr *corev1.Probe) string {
 	return s
 }
 
-func (a *analysis) postStart(name string, term *corev1.ContainerStateTerminated) []Verdict {
-	var hits []*corev1.Event
+// postStart reports a failed postStart hook as a fact (FailedPostStartHook
+// event) and, separately, the kubelet's kill that the hook failure triggered.
+// The event is recorded before the kill is attempted, so the kill is only
+// confirmed when the explained instance's termination is tied to it.
+func (a *analysis) postStart(in *inst) []Verdict {
+	var failed, kills []*corev1.Event
 	for _, e := range a.podEvents {
-		if containerOfEvent(e) != name {
+		if containerOfEvent(e) != in.cs.Name {
 			continue
 		}
-		if e.Reason == "FailedPostStartHook" || (e.Reason == "Killing" && e.Message == "FailedPostStartHook") {
-			hits = append(hits, e)
+		switch {
+		case e.Reason == "FailedPostStartHook":
+			failed = append(failed, e)
+		case e.Reason == "Killing" && e.Message == "FailedPostStartHook":
+			kills = append(kills, e)
 		}
 	}
-	if len(hits) == 0 {
+	// Without a termination there is one instance only if it never restarted.
+	noInstance := in.term == nil
+	if noInstance && in.cs.RestartCount > 0 {
 		return nil
 	}
-	v := Verdict{Kind: KindPostStartFailed, Confidence: Confirmed,
-		Summary: "the kubelet reported a failed postStart lifecycle hook for this container and killed it (FailedPostStartHook events)"}
-	covered := term == nil
-	for _, e := range hits {
-		if term != nil && instanceMatch(e, term) != matchExact {
-			continue
+	var out []Verdict
+	pick := func(es []*corev1.Event) (ev []Evidence, level int) {
+		level = matchNone
+		for _, e := range es {
+			m := matchExact
+			if !noInstance {
+				m = a.instanceMatch(e, in.term)
+			}
+			if m == matchNone {
+				continue
+			}
+			ev = append(ev, evEvent(e))
+			if m == matchExact || level == matchNone {
+				level = m
+			}
 		}
-		covered = true
-		v.Evidence = append(v.Evidence, evEvent(e))
+		return ev, level
 	}
-	if !covered {
-		return nil // the events belong to a different instance than the one explained
+	if ev, lvl := pick(failed); lvl != matchNone {
+		v := Verdict{Kind: KindPostStartFailed, Confidence: Confirmed, Evidence: ev,
+			Summary: "the kubelet reported that the postStart lifecycle hook of this container failed (FailedPostStartHook event)"}
+		if lvl != matchExact {
+			v.Confidence = Likely
+			v.Competing = []string{"the event is not firmly tied to this instance's lifetime"}
+		}
+		out = append(out, v)
 	}
-	return []Verdict{v}
+	if ev, lvl := pick(kills); lvl != matchNone {
+		v := Verdict{Kind: KindPostStartKill, Confidence: Likely, Evidence: ev,
+			Summary:   "the kubelet recorded killing the container because of the failed postStart hook",
+			Competing: []string{"the event is recorded before the kill is attempted, so it does not show that the kill succeeded"}}
+		if !noInstance && lvl == matchExact {
+			v.Confidence = Confirmed
+			v.Summary += "; this instance ended inside the same window"
+			v.Competing = nil
+		}
+		out = append(out, v)
+	}
+	return out
 }
 
-func (a *analysis) nodeOOM(term *corev1.ContainerStateTerminated, path string) []Verdict {
-	if term.Reason != "OOMKilled" && term.ExitCode != 137 {
+func (a *analysis) nodeOOM(in *inst) []Verdict {
+	term := in.term
+	if isSynthesized(term) || (term.Reason != "OOMKilled" && term.ExitCode != 137) {
 		return nil
 	}
 	var ev []Evidence
 	for _, e := range a.nodeEvents {
-		if e.Reason == "SystemOOM" && covers(e, term.FinishedAt.Time, a.o.Window) {
+		if e.Reason == "SystemOOM" && a.occursNear(e, term.FinishedAt.Time) {
 			ev = append(ev, evEvent(e))
 		}
 	}
 	if len(ev) == 0 {
 		return nil
 	}
-	v := Verdict{
+	return []Verdict{{
 		Kind:       KindNodeOOMCandidate,
 		Confidence: Likely,
-		Summary:    "a SystemOOM event on the node falls inside the correlation window; it names a victim process, not this pod or container, so the link is not proven",
+		Summary:    "a SystemOOM event on the node has a known occurrence inside the correlation window; it names a victim process, not this pod or container, so the link is not proven",
 		Competing:  []string{"a container-level (cgroup limit) OOM kill unrelated to the node event", "another SIGKILL source"},
-		Evidence:   append(ev, a.termEvidence(term, path)...),
-	}
-	return []Verdict{v}
+		Evidence:   append(ev, a.termEvidence(term, in.path)...),
+	}}
 }
 
-// terminationStart returns the earliest time at which this pod's termination
-// is known to have started for the container: the DisruptionTarget transition,
-// a "Stopping container" Killing event, an eviction or preemption event, or the
-// deletion deadline minus a non-zero deletionGracePeriodSeconds.
-func (a *analysis) terminationStart(container string) (time.Time, bool) {
+// terminationStart returns the earliest evidence that a teardown of this pod
+// began during the selected instance's lifetime: the DisruptionTarget
+// transition, a "Stopping container" Killing event, an eviction or preemption
+// event, a taint "Marking for deletion" that was not cancelled, or the deletion
+// deadline minus a non-zero deletionGracePeriodSeconds. Anything outside the
+// instance's lifetime belongs to an earlier or later stop episode and is ignored.
+func (a *analysis) terminationStart(in *inst) (time.Time, bool) {
 	p := a.pod
 	var best time.Time
+	inLife := func(t time.Time) bool {
+		if t.IsZero() || in.term == nil || in.term.FinishedAt.IsZero() {
+			return false
+		}
+		start := in.term.StartedAt.Time
+		if start.IsZero() {
+			return false
+		}
+		return !t.Before(start.Add(-time.Second)) && !t.After(in.term.FinishedAt.Add(time.Second))
+	}
 	consider := func(t time.Time) {
-		if !t.IsZero() && (best.IsZero() || t.Before(best)) {
+		if inLife(t) && (best.IsZero() || t.Before(best)) {
 			best = t
 		}
 	}
 	if c := disruptionTarget(p); c != nil && c.Status == corev1.ConditionTrue {
 		consider(c.LastTransitionTime.Time)
 	}
+	var lastCancel time.Time
+	for _, e := range a.podEvents {
+		if e.Reason == "TaintManagerEviction" && strings.HasPrefix(e.Message, "Cancelling deletion") {
+			_, l := eventTimes(e)
+			lastCancel = l
+		}
+	}
 	for _, e := range a.podEvents {
 		_, l := eventTimes(e)
 		switch {
-		case e.Reason == "Killing" && strings.HasPrefix(e.Message, "Stopping container") && containerOfEvent(e) == container:
+		case e.Reason == "Killing" && strings.HasPrefix(e.Message, "Stopping container") && containerOfEvent(e) == in.cs.Name:
 			consider(l)
 		case e.Reason == "Evicted" || e.Reason == "Preempting" || e.Reason == "Preempted":
 			consider(l)
-		case e.Reason == "TaintManagerEviction" && strings.HasPrefix(e.Message, "Marking for deletion"):
+		case e.Reason == "TaintManagerEviction" && strings.HasPrefix(e.Message, "Marking for deletion") && !l.Before(lastCancel):
 			consider(l)
 		}
 	}
@@ -377,51 +529,64 @@ func (a *analysis) terminationStart(container string) (time.Time, bool) {
 	return best, !best.IsZero()
 }
 
-func (a *analysis) effectiveGrace() time.Duration {
-	if g := a.pod.Spec.TerminationGracePeriodSeconds; g != nil {
-		return time.Duration(*g) * time.Second
+// teardownGrace is the grace period of a deletion-driven stop: the known,
+// non-zero deletionGracePeriodSeconds. Once the kubelet has stopped everything
+// it rewrites that field to 0, so the value used at kill time is then unknown
+// and nothing is computed from the pod spec.
+func (a *analysis) teardownGrace() (time.Duration, bool) {
+	g := a.pod.DeletionGracePeriodSeconds
+	if g == nil || *g <= 0 {
+		return 0, false
 	}
-	return 30 * time.Second
+	return time.Duration(*g) * time.Second, true
 }
 
-func (a *analysis) graceVerdict(name string, term *corev1.ContainerStateTerminated, path string) []Verdict {
+func (a *analysis) graceVerdict(in *inst, probe *trigger) []Verdict {
+	term := in.term
+	if isSynthesized(term) || term.ExitCode != 137 || term.Reason == "OOMKilled" || term.FinishedAt.IsZero() {
+		return nil
+	}
 	p := a.pod
-	if term.ExitCode != 137 || term.Reason == "OOMKilled" || term.FinishedAt.IsZero() {
+	var trig *trigger
+	switch {
+	case probe != nil:
+		trig = probe
+	default:
+		start, ok := a.terminationStart(in)
+		g, gok := a.teardownGrace()
+		if !ok || !gok {
+			return nil
+		}
+		trig = &trigger{start: start, grace: g, why: "metadata.deletionGracePeriodSeconds"}
+	}
+	if term.FinishedAt.Sub(trig.start) < trig.grace-2*time.Second {
 		return nil
 	}
-	start, ok := a.terminationStart(name)
-	if !ok {
-		return nil
-	}
-	grace := a.effectiveGrace()
-	if term.FinishedAt.Sub(start) < grace-2*time.Second {
-		return nil
-	}
-	ev := []Evidence{podEv(p, EvPodSpec, "spec.terminationGracePeriodSeconds", fmt.Sprint(int64(grace/time.Second)), nil)}
-	ev[0].Note = "pod-level value; a probe-level override, preStop time or eviction override can change the effective grace"
+	ev := []Evidence{podEv(p, EvConvention, "grace period used", fmt.Sprintf("%ds from %s", int64(trig.grace/time.Second), trig.why), nil)}
 	for _, e := range a.podEvents {
-		if e.Reason == "Killing" && strings.HasPrefix(e.Message, "Stopping container") && containerOfEvent(e) == name {
+		if e.Reason == "Killing" && containerOfEvent(e) == in.cs.Name && a.instanceMatch(e, term) == matchExact {
 			ev = append(ev, evEvent(e))
 		}
 	}
 	if c := disruptionTarget(p); c != nil {
 		ev = append(ev, podEv(p, EvPodCondition, "status.conditions[DisruptionTarget]", fmt.Sprintf("reason=%s", c.Reason), mt(c.LastTransitionTime)))
 	}
-	ev = append(ev, a.termEvidence(term, path)...)
+	ev = append(ev, a.termEvidence(term, in.path)...)
 	return []Verdict{{
 		Kind:       KindKilledAfterGrace,
 		Confidence: Likely,
-		Summary:    fmt.Sprintf("termination began at %s (earliest termination evidence) and the container ended with exitCode=137 %s later, at or after the %s grace period: consistent with a SIGKILL after the grace period", start.UTC().Format(time.RFC3339), term.FinishedAt.Sub(start).Round(time.Second), grace),
+		Summary:    fmt.Sprintf("the stop began at %s and the container ended with exitCode=137 %s later, at or after the %s grace period (%s): consistent with a SIGKILL after the grace period", trig.start.UTC().Format(time.RFC3339), term.FinishedAt.Sub(trig.start).Round(time.Second), trig.grace, trig.why),
 		Competing: []string{
-			"the effective grace period can differ (probe-level override, preStop time, eviction override)",
+			"preStop hook time or an eviction override can change the effective grace",
 			"an OOM kill not labelled OOMKilled, an external SIGKILL, or the application calling exit(137)",
 		},
 		Evidence: ev,
 	}}
 }
 
-func (a *analysis) noTermination(cs *corev1.ContainerStatus, base string) []Verdict {
+func (a *analysis) noTermination(in *inst) []Verdict {
 	p := a.pod
+	cs, base := in.cs, in.base
 	switch {
 	case cs.State.Waiting != nil:
 		w := cs.State.Waiting
@@ -431,7 +596,9 @@ func (a *analysis) noTermination(cs *corev1.ContainerStatus, base string) []Verd
 			if w.Message != "" {
 				ev = append(ev, podEv(p, EvPodStatus, base+".state.waiting.message", w.Message, nil))
 			}
-			ev = append(ev, podEv(p, EvPodSpec, "image", cs.Image, nil))
+			if in.spec != nil {
+				ev = append(ev, podEv(p, EvPodSpec, in.specPath+".image", in.spec.Image, nil))
+			}
 			for _, e := range a.podEvents {
 				if e.Reason == "Failed" || e.Reason == "BackOff" || e.Reason == "Pulling" {
 					if c := containerOfEvent(e); c == "" || c == cs.Name {
@@ -459,7 +626,12 @@ func (a *analysis) noTermination(cs *corev1.ContainerStatus, base string) []Verd
 	case cs.State.Running != nil:
 		ev := []Evidence{podEv(p, EvPodStatus, base+".state.running.startedAt", fmtTime(mt(cs.State.Running.StartedAt)), mt(cs.State.Running.StartedAt))}
 		ev = append(ev, podEv(p, EvPodStatus, base+".restartCount", fmt.Sprint(cs.RestartCount), nil))
-		s := "no termination is recorded for this container: it is running with restartCount=0 and no previous state"
+		s := "no termination is recorded for this container: it is running and the status has no previous state"
+		if cs.RestartCount > 0 {
+			s = fmt.Sprintf("the container is running and the status has no previous state, but restartCount=%d says it restarted; the earlier terminations are not retained by the API (history is not available)", cs.RestartCount)
+		} else {
+			s += " (restartCount=0)"
+		}
 		if p.DeletionTimestamp != nil {
 			s += "; the pod is being deleted but the container has not stopped yet"
 		}
@@ -481,53 +653,76 @@ func (a *analysis) podTerminating() (bool, string) {
 	return false, ""
 }
 
-func (a *analysis) regularFinished() bool {
+// regularDone reports whether every regular container has finished for good:
+// the pod is in a terminal phase, or each regular container is terminated now
+// and its restart decision is "not restarting". The short gap between an exit
+// and the restart of an Always container does not count. It also returns the
+// latest finish time.
+func (a *analysis) regularDone() (bool, time.Time) {
 	p := a.pod
-	if len(p.Status.ContainerStatuses) == 0 {
-		return false
-	}
-	for _, c := range p.Status.ContainerStatuses {
-		if c.State.Terminated == nil {
-			return false
+	var latest time.Time
+	done := true
+	n := 0
+	for _, ref := range collect.AllStatuses(p) {
+		if ref.Kind != "regular" {
+			continue
+		}
+		n++
+		in := a.newInst(ref)
+		if t := ref.Status.State.Terminated; t != nil && t.FinishedAt.After(latest) {
+			latest = t.FinishedAt.Time
+		}
+		if !podTerminal(p) && (ref.Status.State.Terminated == nil || a.restartDecision(in).Decision != "not-restarting") {
+			done = false
 		}
 	}
-	return true
+	return n > 0 && done, latest
 }
 
-func (a *analysis) expectedness(role string, cs *corev1.ContainerStatus, term *corev1.ContainerStateTerminated) *Expectedness {
+func (a *analysis) expectedness(in *inst) *Expectedness {
+	term := in.term
 	if term == nil {
 		return nil
 	}
 	p := a.pod
-	spec, _ := containerSpec(p, cs.Name)
-	policy := effectivePolicy(p, spec, role)
-	terminating, whyTerm := a.podTerminating()
 	e := func(s, why string) *Expectedness { return &Expectedness{State: s, Why: why} }
-	switch role {
+	if isSynthesized(term) {
+		return e(ExpectedUnknown, "the termination was synthesized by the kubelet (reason "+term.Reason+"); nothing shows whether the stop was intended")
+	}
+	terminating, whyTerm := a.podTerminating()
+	start, known := a.terminationStart(in)
+	tied := terminating && known && !term.FinishedAt.Time.Before(start.Add(-time.Second))
+	switch in.role {
 	case "init":
 		if term.ExitCode == 0 {
 			return e(ExpectedYes, "init containers are expected to run to completion; exit code 0 is the normal result")
 		}
 		return e(ExpectedNo, "an init container exited non-zero; init containers must exit 0 for the pod to proceed")
 	case "sidecar":
-		if terminating || podTerminal(p) || a.regularFinished() {
-			return e(ExpectedYes, "a restartable init container (native sidecar) is stopped when the pod ends: all regular containers finished or the pod is terminating; exit codes such as 143 or 137 are normal for that shutdown")
+		if term.Reason == "OOMKilled" {
+			return e(ExpectedNo, "the runtime reported an OOM kill of this sidecar; that is not a normal shutdown")
+		}
+		if tied {
+			return e(ExpectedYes, "a restartable init container (native sidecar) is stopped when the pod is torn down: "+whyTerm+" (this instance ended after the teardown started)")
+		}
+		if done, latest := a.regularDone(); done && !term.FinishedAt.Time.Before(latest.Add(-time.Second)) {
+			return e(ExpectedYes, "a restartable init container (native sidecar) is stopped when the pod's regular containers have finished for good; this instance ended after the last of them (exit codes such as 143 or 137 are normal for that shutdown)")
 		}
 		if term.ExitCode == 0 {
-			return e(ExpectedUnknown, "the sidecar exited 0 while the pod is still running; the API does not say whether that was intended")
+			return e(ExpectedUnknown, "the sidecar exited 0 while the pod's regular containers were not all finished; the API does not say whether that was intended")
 		}
-		return e(ExpectedNo, "the sidecar stopped while the rest of the pod is still running")
+		return e(ExpectedNo, "the sidecar stopped while the rest of the pod was still running or restarting")
 	}
 	if terminating {
-		start, known := a.terminationStart(cs.Name)
 		switch {
 		case !known:
-			return e(ExpectedUnknown, whyTerm+", but no evidence shows when the termination started, so the stop cannot be tied to it")
-		case term.FinishedAt.IsZero() || term.FinishedAt.Time.Before(start.Add(-time.Second)):
-			return e(ExpectedUnknown, fmt.Sprintf("the pod is terminating (%s) but this instance ended at %s, before the termination started at %s; it stopped for another reason", whyTerm, fmtTime(mt(term.FinishedAt)), start.UTC().Format(time.RFC3339)))
+			return e(ExpectedUnknown, whyTerm+", but no evidence ties a teardown start to this instance, so the stop cannot be called part of it")
+		case !tied:
+			return e(ExpectedUnknown, fmt.Sprintf("the pod is terminating (%s) but this instance ended at %s, before the teardown started at %s; it stopped for another reason", whyTerm, fmtTime(mt(term.FinishedAt)), start.UTC().Format(time.RFC3339)))
 		}
-		return e(ExpectedYes, "the stop is part of pod termination: "+whyTerm+" (this instance ended after the termination started)")
+		return e(ExpectedYes, "the stop is part of pod termination: "+whyTerm+" (this instance ended after the teardown started)")
 	}
+	policy := effectivePolicy(p, in.spec, in.role)
 	if term.ExitCode == 0 {
 		if policy == "Always" {
 			return e(ExpectedUnknown, "the container exited 0 but its restart policy is Always, so the kubelet restarts it anyway; the API does not say whether a long-running container was meant to exit")
@@ -537,44 +732,127 @@ func (a *analysis) expectedness(role string, cs *corev1.ContainerStatus, term *c
 	return e(ExpectedNo, "the container stopped with a non-zero exit code while its pod was not being terminated")
 }
 
-func (a *analysis) restartDecision(role string, spec *corev1.Container, cs *corev1.ContainerStatus, term *corev1.ContainerStateTerminated, fromLast bool, base string) RestartDecision {
-	p := a.pod
-	policy := effectivePolicy(p, spec, role)
+// matchRule evaluates restartPolicyRules in order against an exit code. It
+// returns the first matching rule's index and action; unknown is set when a rule
+// uses an operator or action this version does not know, with the rule quoted.
+func matchRule(rules []corev1.ContainerRestartRule, code int32) (idx int, action corev1.ContainerRestartRuleAction, unknown string) {
+	for i, r := range rules {
+		if r.ExitCodes == nil {
+			return -1, "", fmt.Sprintf("rule %d has no exitCodes condition: %+v", i, r)
+		}
+		in := false
+		for _, v := range r.ExitCodes.Values {
+			in = in || v == code
+		}
+		var hit bool
+		switch r.ExitCodes.Operator {
+		case corev1.ContainerRestartRuleOnExitCodesOpIn:
+			hit = in
+		case corev1.ContainerRestartRuleOnExitCodesOpNotIn:
+			hit = !in
+		default:
+			return -1, "", fmt.Sprintf("rule %d uses unknown operator %q", i, r.ExitCodes.Operator)
+		}
+		if !hit {
+			continue
+		}
+		if r.Action != corev1.ContainerRestartRuleActionRestart && r.Action != corev1.ContainerRestartRuleActionRestartAllContainers {
+			return -1, "", fmt.Sprintf("rule %d matched with unknown action %q", i, r.Action)
+		}
+		return i, r.Action, ""
+	}
+	return -1, "", ""
+}
+
+func (a *analysis) restartDecision(in *inst) RestartDecision {
+	p, cs, term := a.pod, in.cs, in.term
+	policy := effectivePolicy(p, in.spec, in.role)
 	d := RestartDecision{Policy: policy, Decision: "unknown"}
-	var notes []string
-	if spec != nil && len(spec.RestartPolicyRules) > 0 {
-		notes = append(notes, fmt.Sprintf("the container has %d restartPolicyRules that are not evaluated by kubectl-whydied", len(spec.RestartPolicyRules)))
+	if in.role == "ephemeral" {
+		d.Policy = "never (ephemeral)"
+		d.Decision = "not-restarting"
+		d.Detail = "ephemeral containers are never restarted"
+		return d
 	}
 	switch {
 	case cs.State.Waiting != nil && cs.State.Waiting.Reason == "CrashLoopBackOff":
 		d.Decision = "back-off"
 		d.Detail = "the kubelet is delaying the next start (CrashLoopBackOff: exponential back-off, documented cap 5 minutes); the API does not report the remaining delay"
-		d.Evidence = append(d.Evidence, podEv(p, EvPodStatus, base+".state.waiting.reason", "CrashLoopBackOff", nil))
+		d.Evidence = append(d.Evidence, podEv(p, EvPodStatus, in.base+".state.waiting.reason", "CrashLoopBackOff", nil))
 	case cs.State.Waiting != nil:
 		d.Detail = "waiting: " + cs.State.Waiting.Reason
 	case cs.State.Running != nil:
 		d.Decision = "running"
 		d.Detail = fmt.Sprintf("running since %s; restartCount=%d as reported now (it can reset when the pod is recreated)", fmtTime(mt(cs.State.Running.StartedAt)), cs.RestartCount)
-	case term != nil && !fromLast:
-		switch {
-		case podTerminal(p):
-			d.Decision = "not-restarting"
-			d.Detail = fmt.Sprintf("the pod is in the terminal phase %s, so the kubelet no longer restarts its containers (restart policy %s)", p.Status.Phase, policy)
-		case policy == "Never" || (policy == "OnFailure" && term.ExitCode == 0):
-			d.Decision = "not-restarting"
-			d.Detail = fmt.Sprintf("restart policy %s does not restart a container that ended with exitCode=%d", policy, term.ExitCode)
-		default:
-			d.Decision = "restarting"
-			d.Detail = fmt.Sprintf("restart policy %s restarts this container (with back-off after repeated failures)", policy)
-		}
+	case term != nil && !in.fromLast:
+		a.stopDecision(in, &d)
 	}
 	for _, e := range a.podEvents {
 		if e.Reason == "BackOff" && containerOfEvent(e) == cs.Name {
 			d.Evidence = append(d.Evidence, evEvent(e))
 		}
 	}
-	if len(notes) > 0 {
-		d.Detail += "; " + strings.Join(notes, "; ")
-	}
 	return d
+}
+
+// stopDecision decides what happens after the current stop (state.terminated).
+func (a *analysis) stopDecision(in *inst, d *RestartDecision) {
+	p, term := a.pod, in.term
+	policy := d.Policy
+	switch {
+	case podTerminal(p):
+		d.Decision = "not-restarting"
+		d.Detail = fmt.Sprintf("the pod is in the terminal phase %s, so the kubelet no longer restarts its containers (restart policy %s)", p.Status.Phase, policy)
+		return
+	case p.DeletionTimestamp != nil:
+		d.Decision = "not-restarting"
+		d.Detail = "the pod is being deleted; the kubelet does not start new containers for it"
+		return
+	case in.role == "init" && term.ExitCode == 0:
+		d.Decision = "done"
+		d.Detail = "the init container completed successfully; it is not restarted"
+		return
+	}
+	if in.spec != nil && len(in.spec.RestartPolicyRules) > 0 && in.role != "init" {
+		rules := in.spec.RestartPolicyRules
+		idx, action, unknown := matchRule(rules, term.ExitCode)
+		switch {
+		case unknown != "":
+			d.Decision = "unknown"
+			d.Detail = "restartPolicyRules cannot be evaluated by this version: " + unknown
+			return
+		case idx >= 0:
+			d.Decision = "restarting"
+			d.Detail = fmt.Sprintf("restartPolicyRules[%d] matched exitCode=%d with action %s", idx, term.ExitCode, action)
+			if action == corev1.ContainerRestartRuleActionRestartAllContainers {
+				d.Detail += " (all containers of the pod are restarted)"
+			}
+			return
+		}
+		d.Detail = fmt.Sprintf("no restartPolicyRules entry matched exitCode=%d; the container restart policy applies: ", term.ExitCode)
+	}
+	prefix := d.Detail
+	switch {
+	case in.role == "init" && p.Spec.RestartPolicy == corev1.RestartPolicyNever:
+		d.Decision = "not-restarting"
+		d.Detail = prefix + "the pod restart policy is Never, so a failed init container fails the pod"
+	case in.role == "init":
+		d.Decision = "restarting"
+		d.Detail = prefix + fmt.Sprintf("the pod restart policy %s retries a failed init container (with back-off)", p.Spec.RestartPolicy)
+	case policy == "Never" || (policy == "OnFailure" && term.ExitCode == 0):
+		d.Decision = "not-restarting"
+		d.Detail = prefix + fmt.Sprintf("restart policy %s does not restart a container that ended with exitCode=%d", policy, term.ExitCode)
+	default:
+		d.Decision = "restarting"
+		d.Detail = prefix + fmt.Sprintf("restart policy %s restarts this container (with back-off after repeated failures)", policy)
+		// The kubelet reports the back-off as a BackOff event; while it lasts the
+		// status often still shows state.terminated instead of CrashLoopBackOff.
+		for _, e := range a.podEvents {
+			_, l := eventTimes(e)
+			if e.Reason == "BackOff" && containerOfEvent(e) == in.cs.Name && !l.Before(term.FinishedAt.Add(-time.Second)) {
+				d.Decision = "back-off"
+				d.Detail = prefix + "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay"
+			}
+		}
+	}
 }

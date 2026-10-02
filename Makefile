@@ -10,7 +10,7 @@ GOTESTFLAGS ?=
 NODE_IMAGE ?= kindest/node:v1.37.0
 E2E_TIMEOUT ?= 60m
 
-.PHONY: build vet lint test e2e e2e-all snapshot fmt tidy clean
+.PHONY: krew-manifest build vet lint test e2e e2e-all snapshot fmt tidy clean
 
 build:
 	go build -trimpath -ldflags '$(LDFLAGS)' -o $(BIN) ./cmd/kubectl-whydied
@@ -45,3 +45,7 @@ snapshot:
 
 clean:
 	rm -rf bin dist
+
+# Fill plugins/whydied.yaml from dist/checksums.txt (after make snapshot or a release build).
+krew-manifest:
+	scripts/krew-manifest.sh $(VERSION) dist/checksums.txt

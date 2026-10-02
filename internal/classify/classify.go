@@ -31,6 +31,7 @@ type analysis struct {
 	nodeEvents  []*corev1.Event
 	otherUIDs   map[string]int // events for the same pod name but another UID
 	nameEvents  []*corev1.Event
+	noUIDEvents []*corev1.Event // context only, never evidence for a verdict
 
 	gaps []collect.Gap
 
@@ -84,6 +85,15 @@ func Analyze(s *collect.Snapshot, o Options) (*Report, error) {
 		for _, ref := range collect.AllStatuses(p) {
 			found = found || ref.Status.Name == o.Container
 		}
+		for _, c := range p.Spec.InitContainers {
+			found = found || c.Name == o.Container
+		}
+		for _, c := range p.Spec.Containers {
+			found = found || c.Name == o.Container
+		}
+		for _, c := range p.Spec.EphemeralContainers {
+			found = found || c.Name == o.Container
+		}
 		if !found {
 			return nil, fmt.Errorf("container %q not found in pod %s/%s", o.Container, p.Namespace, p.Name)
 		}
@@ -98,8 +108,31 @@ func Analyze(s *collect.Snapshot, o Options) (*Report, error) {
 		}
 		r.Containers = append(r.Containers, a.container(ref))
 	}
+	// Containers that are in the spec but have no status yet (pod not started).
+	have := map[string]bool{}
+	for _, ref := range collect.AllStatuses(p) {
+		have[ref.Status.Name] = true
+	}
+	var missing []ContainerReport
+	for _, c := range p.Spec.InitContainers {
+		if !have[c.Name] && (o.Container == "" || o.Container == c.Name) {
+			_, role := containerSpec(p, c.Name)
+			missing = append(missing, a.specOnly(c.Name, role))
+		}
+	}
+	for _, c := range p.Spec.Containers {
+		if !have[c.Name] && (o.Container == "" || o.Container == c.Name) {
+			missing = append(missing, a.specOnly(c.Name, "regular"))
+		}
+	}
+	r.Containers = append(missing[:len(missing):len(missing)], r.Containers...)
 	a.attachLogs(r)
 	r.Context = a.nodeContext()
+	for _, e := range a.noUIDEvents {
+		ev := evEvent(e)
+		ev.Note = "context only: this event has no involvedObject.uid, so it cannot be tied to this pod by identity; matched by name and by time not before the pod was created"
+		r.Context = append(r.Context, ev)
+	}
 	r.Notes = a.notes()
 	a.eventGaps(r)
 	r.Checked = a.checked()
@@ -128,10 +161,11 @@ func (a *analysis) sortEvents() {
 				a.podEvents = append(a.podEvents, e)
 			case uid == "":
 				// Some controllers (for example the taint manager) emit events without
-				// involvedObject.uid. Accept them only when they cannot predate this pod;
-				// evEvent labels them as matched by name and time.
+				// involvedObject.uid. A name and a time bound cannot prove they belong to
+				// this pod (a name can be reused), so they are shown as context only and
+				// never support a verdict.
 				if _, l := eventTimes(e); !l.Before(a.pod.CreationTimestamp.Time) {
-					a.podEvents = append(a.podEvents, e)
+					a.noUIDEvents = append(a.noUIDEvents, e)
 				} else {
 					a.otherUIDs["(no uid, older than this pod)"]++
 				}
@@ -258,12 +292,18 @@ func (a *analysis) eventGaps(r *Report) {
 func (a *analysis) attachLogs(r *Report) {
 	for i := range r.Containers {
 		c := &r.Containers[i]
-		if l, ok := a.s.Logs[c.Name]; ok {
-			c.LogTail = l.Lines
-			c.LogsPrevious = l.Previous
-			if c.Termination != nil && l.ContainerID != c.Termination.ContainerID {
-				a.gaps = append(a.gaps, collect.Gap{Source: "logs/" + c.Name, Reason: "log tail was read for a different containerID than the explained instance"})
-			}
+		l, ok := a.s.Logs[c.Name]
+		if !ok {
+			continue
+		}
+		c.LogTail = l.Lines
+		c.LogsPrevious = l.Previous
+		c.LogNote = "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
+		switch {
+		case a.pod != nil && l.PodUID != "" && l.PodUID != string(a.pod.UID):
+			a.gaps = append(a.gaps, collect.Gap{Source: "logs/" + c.Name, Reason: "logs were read for a different pod UID than this pod; they may belong to another instance"})
+		case c.Termination == nil, l.ContainerID != c.Termination.ContainerID, l.Source != "" && l.Source != c.Termination.Source:
+			a.gaps = append(a.gaps, collect.Gap{Source: "logs/" + c.Name, Reason: "logs were read for a different instance (containerID or source differs from the explained termination); they may belong to another instance"})
 		}
 	}
 }

@@ -1,0 +1,15 @@
+{
+  "description": "waits for a real CrashLoopBackOff (4th restart: the next back-off is 80s, so the state is stable for the checks) and requires the back-off decision, not a restart",
+  "timeoutSeconds": 120,
+  "steps": [
+    {"wait": ["--for=jsonpath={.status.containerStatuses[0].restartCount}=4", "pod/crashloop", "--timeout=300s"]}
+  ],
+  "target": {"selector": "app=crashloop", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "app-exit",
+    "confidence": "confirmed",
+    "restartDecision": "back-off",
+    "expectedness": "unexpected"
+  }
+}

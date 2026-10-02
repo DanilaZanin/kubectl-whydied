@@ -30,3 +30,10 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fill the krew manifest from the release checksums and attach it
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          scripts/krew-manifest.sh "$TAG" dist/checksums.txt > dist/whydied.yaml
+          gh release upload "$TAG" dist/whydied.yaml --clobber

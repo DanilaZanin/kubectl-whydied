@@ -1,15 +1,15 @@
 {
-  "observedAt": "2026-10-02T19:12:35.217626Z",
+  "observedAt": "2026-10-02T21:07:17.516932Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-user-delete",
     "name": "victim",
-    "uid": "03b3a89a-1f35-4212-923d-7300901077e8",
+    "uid": "f951eed2-de10-4dd8-a6da-744620ca8803",
     "exists": true,
     "phase": "Running",
-    "node": "wd-1370-3240-worker",
-    "startTime": "2026-10-02T19:12:34Z",
-    "deletionTimestamp": "2026-10-02T19:14:04Z",
+    "node": "wd-1370-6832-worker",
+    "startTime": "2026-10-02T21:07:00Z",
+    "deletionTimestamp": "2026-10-02T21:08:31Z",
     "restartPolicy": "Always"
   },
   "verdicts": [
@@ -25,15 +25,15 @@
         {
           "kind": "pod-status",
           "object": "Pod wd-user-delete/victim",
-          "uid": "03b3a89a-1f35-4212-923d-7300901077e8",
+          "uid": "f951eed2-de10-4dd8-a6da-744620ca8803",
           "field": "metadata.deletionTimestamp",
-          "value": "2026-10-02T19:14:04Z",
-          "time": "2026-10-02T19:14:04Z"
+          "value": "2026-10-02T21:08:31Z",
+          "time": "2026-10-02T21:08:31Z"
         },
         {
           "kind": "pod-status",
           "object": "Pod wd-user-delete/victim",
-          "uid": "03b3a89a-1f35-4212-923d-7300901077e8",
+          "uid": "f951eed2-de10-4dd8-a6da-744620ca8803",
           "field": "metadata.deletionGracePeriodSeconds",
           "value": "90"
         }
@@ -46,30 +46,30 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 0,
-      "currentState": "running since 2026-10-02T19:12:34Z",
+      "currentState": "running since 2026-10-02T21:07:01Z",
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T19:12:34Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T21:07:01Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
           "kind": "no-termination",
           "confidence": "confirmed",
-          "summary": "no termination is recorded for this container: it is running with restartCount=0 and no previous state; the pod is being deleted but the container has not stopped yet",
+          "summary": "no termination is recorded for this container: it is running and the status has no previous state (restartCount=0); the pod is being deleted but the container has not stopped yet",
           "evidence": [
             {
               "kind": "pod-status",
               "object": "Pod wd-user-delete/victim",
-              "uid": "03b3a89a-1f35-4212-923d-7300901077e8",
+              "uid": "f951eed2-de10-4dd8-a6da-744620ca8803",
               "field": "status.containerStatuses[app].state.running.startedAt",
-              "value": "2026-10-02T19:12:34Z",
-              "time": "2026-10-02T19:12:34Z"
+              "value": "2026-10-02T21:07:01Z",
+              "time": "2026-10-02T21:07:01Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-user-delete/victim",
-              "uid": "03b3a89a-1f35-4212-923d-7300901077e8",
+              "uid": "f951eed2-de10-4dd8-a6da-744620ca8803",
               "field": "status.containerStatuses[app].restartCount",
               "value": "0"
             }
@@ -80,7 +80,7 @@
   ],
   "checked": [
     "pod status and spec",
-    "events by involvedObject.uid for the pod (4 found)",
+    "events by involvedObject.uid for the pod (5 found)",
     "owner chain (pod has no controller)",
     "node conditions, taints, labels and node events (current state only)"
   ]

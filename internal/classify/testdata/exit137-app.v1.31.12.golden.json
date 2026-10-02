@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T19:14:15.56044Z",
+  "observedAt": "2026-10-02T20:47:32.938576Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-exit137-app",
     "name": "exit137-app",
-    "uid": "9425445b-c8e9-4704-bb20-96fba5bf1177",
+    "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4526-worker",
-    "startTime": "2026-10-02T19:14:11Z",
+    "node": "wd-13112-4393-worker",
+    "startTime": "2026-10-02T20:47:13Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -17,15 +17,15 @@
       "name": "app",
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
-      "restartCount": 1,
-      "currentState": "running since 2026-10-02T19:14:13Z",
+      "restartCount": 2,
+      "currentState": "terminated (exitCode=137, reason=Error)",
       "termination": {
-        "source": "lastState.terminated",
-        "containerID": "containerd://18f612853480c31727d90a973f6d808f948b6896384754bc799b635aec6f2de8",
+        "source": "state.terminated",
+        "containerID": "containerd://61de9ffd20103eb38f156918f069318932500aa1afcbbe0adf56cc6f6456ce0f",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T19:14:12Z",
-        "finishedAt": "2026-10-02T19:14:13Z"
+        "startedAt": "2026-10-02T20:47:29Z",
+        "finishedAt": "2026-10-02T20:47:30Z"
       },
       "expected": {
         "state": "unexpected",
@@ -33,8 +33,21 @@
       },
       "restart": {
         "policy": "Always",
-        "decision": "running",
-        "detail": "running since 2026-10-02T19:14:13Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+        "decision": "back-off",
+        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "evidence": [
+          {
+            "kind": "event",
+            "object": "Pod wd-exit137-app/exit137-app",
+            "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
+            "field": "event BackOff",
+            "value": "Back-off restarting failed container app in pod exit137-app_wd-exit137-app(d569d3c6-23b8-4edc-aced-795bc6305e0c)",
+            "time": "2026-10-02T20:47:31Z",
+            "firstTime": "2026-10-02T20:47:16Z",
+            "count": 2,
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:47:16Z, last 2026-10-02T20:47:31Z)"
+          }
+        ]
       },
       "verdicts": [
         {
@@ -49,23 +62,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-exit137-app/exit137-app",
-              "uid": "9425445b-c8e9-4704-bb20-96fba5bf1177",
-              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T19:14:13Z"
+              "time": "2026-10-02T20:47:30Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-exit137-app/exit137-app",
-              "uid": "9425445b-c8e9-4704-bb20-96fba5bf1177",
-              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
+              "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T19:14:13Z"
+              "time": "2026-10-02T20:47:30Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-exit137-app/exit137-app",
-              "uid": "9425445b-c8e9-4704-bb20-96fba5bf1177",
+              "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"
@@ -73,12 +86,12 @@
           ]
         }
       ],
-      "logsPrevious": true
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [
     "pod status and spec",
-    "events by involvedObject.uid for the pod (4 found)",
+    "events by involvedObject.uid for the pod (5 found)",
     "owner chain (pod has no controller)",
     "node conditions, taints, labels and node events (current state only)",
     "previous container logs"

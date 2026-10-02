@@ -47,6 +47,11 @@ func TestGoldenFixtures(t *testing.T) {
 			if err := e2e.Evaluate(sc.Expect, rep, known...); err != nil {
 				t.Errorf("fixture does not satisfy the scenario expectation: %v", err)
 			}
+			if snap.Pod != nil {
+				if err := e2e.Validate(rep, e2e.APIFromSnapshot(snap)); err != nil {
+					t.Errorf("evidence is not backed by the snapshot: %v", err)
+				}
+			}
 			got, _ := json.MarshalIndent(rep, "", "  ")
 			got = append(got, '\n')
 			golden := strings.TrimSuffix(f, ".snapshot.json") + ".golden.json"

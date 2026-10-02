@@ -1,0 +1,87 @@
+{
+  "observedAt": "2026-10-02T20:57:46.52811Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-crashloop-backoff",
+    "name": "crashloop",
+    "uid": "07e6f516-104d-47de-bb59-3e6aec237d03",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-1370-6832-worker",
+    "startTime": "2026-10-02T20:55:53Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": [],
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 4,
+      "currentState": "terminated (exitCode=1, reason=Error)",
+      "termination": {
+        "source": "state.terminated",
+        "containerID": "containerd://db5ca56ab296855f7c4aca13600971a8f38da1e3cf2b986be914fece49f4cceb",
+        "exitCode": 1,
+        "reason": "Error",
+        "startedAt": "2026-10-02T20:57:29Z",
+        "finishedAt": "2026-10-02T20:57:29Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "back-off",
+        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "evidence": [
+          {
+            "kind": "event",
+            "object": "Pod wd-crashloop-backoff/crashloop",
+            "uid": "07e6f516-104d-47de-bb59-3e6aec237d03",
+            "field": "event BackOff",
+            "value": "Back-off restarting failed container app in pod crashloop_wd-crashloop-backoff(07e6f516-104d-47de-bb59-3e6aec237d03)",
+            "time": "2026-10-02T20:57:29Z",
+            "firstTime": "2026-10-02T20:55:55Z",
+            "count": 4,
+            "note": "fieldPath=spec.containers{app}; event repeated 4 times (aggregated; first 2026-10-02T20:55:55Z, last 2026-10-02T20:57:29Z)"
+          }
+        ]
+      },
+      "verdicts": [
+        {
+          "kind": "app-exit",
+          "confidence": "confirmed",
+          "summary": "the container's main process exited with exitCode=1 (API reported exitCode=1)",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-crashloop-backoff/crashloop",
+              "uid": "07e6f516-104d-47de-bb59-3e6aec237d03",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "value": "1",
+              "time": "2026-10-02T20:57:29Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-crashloop-backoff/crashloop",
+              "uid": "07e6f516-104d-47de-bb59-3e6aec237d03",
+              "field": "status.containerStatuses[app].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T20:57:29Z"
+            }
+          ]
+        }
+      ],
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (5 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

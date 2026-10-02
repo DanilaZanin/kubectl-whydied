@@ -228,40 +228,61 @@ func listMode(ctx context.Context, cs kubernetes.Interface, ns string, copts cla
 		fmt.Fprintln(stderr, "error:", err)
 		return exitError
 	}
-	var reports []*classify.Report
+	reports := []*classify.Report{}
+	var failures []listFailure
 	for i := range pods {
 		p := &pods[i]
 		snap, err := collect.Collect(ctx, cs, collect.Options{Namespace: p.Namespace, Pod: p.Name})
-		if err != nil {
-			fmt.Fprintf(stderr, "warning: %s/%s: %v\n", p.Namespace, p.Name, err)
-			continue
+		if err == nil {
+			var rep *classify.Report
+			if rep, err = classify.Analyze(snap, copts); err == nil {
+				reports = append(reports, rep)
+				continue
+			}
 		}
-		rep, err := classify.Analyze(snap, copts)
-		if err != nil {
-			fmt.Fprintf(stderr, "warning: %s/%s: %v\n", p.Namespace, p.Name, err)
-			continue
-		}
-		reports = append(reports, rep)
+		failures = append(failures, listFailure{Pod: p.Namespace + "/" + p.Name, Error: err.Error()})
+	}
+	// Every candidate failing is an error, not an empty result.
+	code := exitOK
+	if len(pods) > 0 && len(reports) == 0 {
+		code = exitError
 	}
 	if c.output == "json" {
-		if reports == nil {
-			reports = []*classify.Report{}
-		}
-		if err := render.JSON(stdout, reports); err != nil {
+		if err := render.JSON(stdout, listResult{ObservedAt: now.UTC(), Candidates: len(pods), Reports: reports, Failures: failures}); err != nil {
 			fmt.Fprintln(stderr, "error:", err)
 			return exitError
 		}
-		return exitOK
+		return code
 	}
-	if len(reports) == 0 {
+	if len(pods) == 0 {
 		fmt.Fprintf(stdout, "no pods with a restart or previous termination in the last %s (only pods currently in the API are visible)\n", since)
 		return exitOK
 	}
 	for _, r := range reports {
 		fmt.Fprintln(stdout, render.Line(r))
 	}
+	for _, f := range failures {
+		fmt.Fprintf(stdout, "%s: diagnosis failed: %s\n", f.Pod, f.Error)
+	}
+	if len(failures) > 0 {
+		fmt.Fprintf(stderr, "error: %d of %d candidate pods could not be diagnosed\n", len(failures), len(pods))
+	}
 	fmt.Fprintln(stdout, "\nRun 'kubectl whydied POD -n NAMESPACE' for evidence. Only pods currently in the API are listed; restartCount may have been reset.")
-	return exitOK
+	return code
+}
+
+type listFailure struct {
+	Pod   string `json:"pod"`
+	Error string `json:"error"`
+}
+
+// listResult is the JSON of list mode. Failures are kept apart from an empty
+// selection: Candidates counts the pods that matched.
+type listResult struct {
+	ObservedAt time.Time          `json:"observedAt"`
+	Candidates int                `json:"candidates"`
+	Reports    []*classify.Report `json:"reports"`
+	Failures   []listFailure      `json:"failures"`
 }
 
 func useColor(c *config, w io.Writer) bool {

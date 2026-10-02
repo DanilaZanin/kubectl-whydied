@@ -59,18 +59,6 @@ func eventCount(e *corev1.Event) int32 {
 	return c
 }
 
-// covers reports whether t lies inside [first-w, last+w] of the event.
-func covers(e *corev1.Event, t time.Time, w time.Duration) bool {
-	if t.IsZero() {
-		return false
-	}
-	f, l := eventTimes(e)
-	if f.IsZero() {
-		return false
-	}
-	return !t.Before(f.Add(-w)) && !t.After(l.Add(w))
-}
-
 func evEvent(e *corev1.Event) Evidence {
 	f, l := eventTimes(e)
 	ev := Evidence{
@@ -84,14 +72,6 @@ func evEvent(e *corev1.Event) Evidence {
 	}
 	if e.InvolvedObject.FieldPath != "" {
 		ev.Note = "fieldPath=" + e.InvolvedObject.FieldPath
-	}
-	if e.InvolvedObject.UID == "" && e.InvolvedObject.Kind == "Pod" {
-		extra := "event has no involvedObject.uid; matched by pod name and by time (not before the pod was created)"
-		if ev.Note != "" {
-			ev.Note += "; " + extra
-		} else {
-			ev.Note = extra
-		}
 	}
 	if eventCount(e) > 1 {
 		ev.FirstTime = tp(f)
@@ -193,41 +173,71 @@ func signalName(n int) string {
 	if s, ok := signalNames[n]; ok {
 		return s
 	}
+	if n >= 32 && n <= 64 {
+		return fmt.Sprintf("real-time signal %d", n)
+	}
 	return fmt.Sprintf("signal %d", n)
 }
 
 // Match levels of an event against one container instance.
 const (
-	matchNone  = iota // the event lies entirely outside the instance's lifetime
-	matchSpans        // an aggregated event spans the instance, but no known occurrence is inside it
-	matchExact        // the first or the last occurrence lies inside the instance's lifetime
+	matchNone  = iota // no known occurrence lies near the instance
+	matchWeak         // near the instance, but not firmly tied to it
+	matchExact        // a known occurrence lies inside the instance's lifetime and the correlation window
 )
 
 // instanceMatch tells how an (aggregated) event relates to the instance that
 // ended with term. Only the first and the last occurrence have known times, and
-// both are real occurrences, so an endpoint inside [start, finish] confirms the
-// link. An event wholly before the start belongs to an earlier instance; wholly
-// after the end, to a later one. Timestamps have one-second resolution, hence the slack.
-func instanceMatch(e *corev1.Event, term *corev1.ContainerStateTerminated) int {
+// both are real occurrences; the span between them is never treated as observed.
+// An occurrence is an exact match when it lies inside [startedAt, finishedAt]
+// and within the correlation window before finishedAt. An unknown startedAt, a
+// one-second boundary slack, or an occurrence outside the window only gives a weak match.
+func (a *analysis) instanceMatch(e *corev1.Event, term *corev1.ContainerStateTerminated) int {
 	if term == nil || term.FinishedAt.IsZero() {
 		return matchNone
 	}
 	first, last := eventTimes(e)
-	if last.IsZero() {
-		return matchNone
-	}
 	slack := time.Second
+	fin := term.FinishedAt.Time
 	start := term.StartedAt.Time
-	if start.IsZero() {
-		start = term.FinishedAt.Add(-time.Minute)
+	level := matchNone
+	for _, t := range []time.Time{first, last} {
+		if t.IsZero() {
+			continue
+		}
+		var l int
+		switch {
+		case start.IsZero():
+			if !t.Before(fin.Add(-a.o.Window)) && !t.After(fin.Add(slack)) {
+				l = matchWeak
+			}
+		case !t.Before(start) && !t.After(fin):
+			l = matchExact
+			if fin.Sub(t) > a.o.Window {
+				l = matchWeak
+			}
+		case !t.Before(start.Add(-slack)) && !t.After(fin.Add(slack)):
+			l = matchWeak
+		}
+		if l > level {
+			level = l
+		}
 	}
-	lo, hi := start.Add(-slack), term.FinishedAt.Add(slack)
-	in := func(t time.Time) bool { return !t.Before(lo) && !t.After(hi) }
-	switch {
-	case in(first) || in(last):
-		return matchExact
-	case first.Before(lo) && last.After(hi) && eventCount(e) > 2:
-		return matchSpans
+	return level
+}
+
+// occursNear reports whether a known occurrence (first or last, not the span
+// between them) of the event lies within the correlation window of t.
+func (a *analysis) occursNear(e *corev1.Event, t time.Time) bool {
+	if t.IsZero() {
+		return false
 	}
-	return matchNone
+	first, last := eventTimes(e)
+	for _, o := range []time.Time{first, last} {
+		d := o.Sub(t)
+		if !o.IsZero() && d >= -a.o.Window && d <= a.o.Window {
+			return true
+		}
+	}
+	return false
 }

@@ -148,6 +148,15 @@ func (s *Snapshot) collectOwners(ctx context.Context, cs kubernetes.Interface) {
 			s.addEvents(ctx, cs, ns, "involvedObject.uid="+string(ref.UID), "events for "+ref.Kind+"/"+ref.Name)
 			return
 		}
+		if next.UID != ref.UID {
+			// The name now belongs to another object (recreated): never mix its
+			// revision or parents into this pod's chain.
+			s.Gaps = append(s.Gaps, Gap{Source: fmt.Sprintf("owner %s/%s", ref.Kind, ref.Name),
+				Reason: fmt.Sprintf("an object with this name exists but its UID %s differs from the pod's ownerReference UID %s (the owner was recreated); its data is not used", next.UID, ref.UID)})
+			s.Owners = append(s.Owners, o)
+			s.addEvents(ctx, cs, ns, "involvedObject.uid="+string(ref.UID), "events for "+ref.Kind+"/"+ref.Name)
+			return
+		}
 		o.Found = true
 		o.Revision = next.Annotations[revisionAnnoKey]
 		o.Deleting = next.DeletionTimestamp
@@ -206,10 +215,6 @@ func (s *Snapshot) collectNode(ctx context.Context, cs kubernetes.Interface) {
 
 func (s *Snapshot) collectLogs(ctx context.Context, cs kubernetes.Interface, o Options) {
 	s.Logs = map[string]Logs{}
-	before := map[string]string{}
-	for _, r := range AllStatuses(s.Pod) {
-		before[r.Status.Name] = r.Status.ContainerID + "/" + fmt.Sprint(r.Status.RestartCount)
-	}
 	for _, r := range AllStatuses(s.Pod) {
 		cs0 := r.Status
 		if o.Container != "" && cs0.Name != o.Container {
@@ -236,19 +241,37 @@ func (s *Snapshot) collectLogs(ctx context.Context, cs kubernetes.Interface, o O
 		if len(lines) == 1 && lines[0] == "" {
 			lines = nil
 		}
-		s.Logs[cs0.Name] = Logs{Previous: fromLast, ContainerID: term.ContainerID, Lines: lines}
+		src := "state.terminated"
+		if fromLast {
+			src = "lastState.terminated"
+		}
+		s.Logs[cs0.Name] = Logs{Previous: fromLast, PodUID: string(s.Pod.UID), Source: src, ContainerID: term.ContainerID, Lines: lines}
 	}
-	// Re-read the pod: if an instance changed while logs were being read, the
-	// log tail may belong to a different instance than the one explained.
+	// Re-read the pod: the selected instance (pod UID, which termination is
+	// selected, and its containerID) must be the one that was selected before the
+	// logs were read, otherwise the tail may belong to another instance.
 	p2, err := cs.CoreV1().Pods(s.Namespace).Get(ctx, s.Name, metav1.GetOptions{})
 	if err != nil {
 		s.gap("logs recheck", err)
 		return
 	}
+	if p2.UID != s.Pod.UID {
+		s.Gaps = append(s.Gaps, Gap{"logs", "the pod was recreated while logs were read (UID changed); the log tails may belong to another pod"})
+		return
+	}
 	for _, r := range AllStatuses(p2) {
-		if b, ok := before[r.Status.Name]; ok && b != r.Status.ContainerID+"/"+fmt.Sprint(r.Status.RestartCount) {
+		l, ok := s.Logs[r.Status.Name]
+		if !ok {
+			continue
+		}
+		term, fromLast := LastTermination(r.Status)
+		src := "state.terminated"
+		if fromLast {
+			src = "lastState.terminated"
+		}
+		if term == nil || term.ContainerID != l.ContainerID || src != l.Source {
 			s.Gaps = append(s.Gaps, Gap{"logs/" + r.Status.Name,
-				"the container instance changed while logs were read (containerID or restartCount differ); the log tail may belong to another instance"})
+				"the container instance changed while logs were read (the selected termination or its containerID differs); the log tail may belong to another instance"})
 		}
 	}
 }

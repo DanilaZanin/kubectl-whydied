@@ -31,6 +31,7 @@ const (
 	KindStartError         = "container-start-error"
 	KindLivenessKill       = "liveness-probe-kill"
 	KindStartupKill        = "startup-probe-kill"
+	KindPostStartKill      = "poststart-hook-kill"
 	KindPostStartFailed    = "poststart-hook-failed"
 	KindImagePull          = "image-pull-failure"
 	KindNoTermination      = "no-termination"
@@ -139,6 +140,7 @@ type ContainerReport struct {
 	Verdicts     []Verdict       `json:"verdicts"`
 	LogTail      []string        `json:"logTail,omitempty"`
 	LogsPrevious bool            `json:"logsPrevious,omitempty"`
+	LogNote      string          `json:"logNote,omitempty"`
 }
 
 // PodInfo is the pod identity block.

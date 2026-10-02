@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T19:15:21.122581Z",
+  "observedAt": "2026-10-02T20:50:29.040821Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-oom",
     "name": "oom",
-    "uid": "5fc0a90f-44f4-4fea-9ccf-1b3425228fcf",
+    "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4526-worker",
-    "startTime": "2026-10-02T19:15:17Z",
+    "node": "wd-13112-4393-worker",
+    "startTime": "2026-10-02T20:50:09Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -17,15 +17,15 @@
       "name": "app",
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
-      "restartCount": 1,
+      "restartCount": 2,
       "currentState": "terminated (exitCode=137, reason=OOMKilled)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://c7e7cd49e4344fabc0b6ddab0f941213448078a1194a3adf4624611396ad8c70",
+        "containerID": "containerd://81a9137f988b5e0e44116bff8184e0a79bf08d9701e5170fe7c7d86dc6885262",
         "exitCode": 137,
         "reason": "OOMKilled",
-        "startedAt": "2026-10-02T19:15:18Z",
-        "finishedAt": "2026-10-02T19:15:18Z"
+        "startedAt": "2026-10-02T20:50:25Z",
+        "finishedAt": "2026-10-02T20:50:25Z"
       },
       "expected": {
         "state": "unexpected",
@@ -33,18 +33,19 @@
       },
       "restart": {
         "policy": "Always",
-        "decision": "restarting",
-        "detail": "restart policy Always restarts this container (with back-off after repeated failures)",
+        "decision": "back-off",
+        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
           {
             "kind": "event",
             "object": "Pod wd-oom/oom",
-            "uid": "5fc0a90f-44f4-4fea-9ccf-1b3425228fcf",
+            "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod oom_wd-oom(5fc0a90f-44f4-4fea-9ccf-1b3425228fcf)",
-            "time": "2026-10-02T19:15:19Z",
-            "count": 1,
-            "note": "fieldPath=spec.containers{app}"
+            "value": "Back-off restarting failed container app in pod oom_wd-oom(3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f)",
+            "time": "2026-10-02T20:50:26Z",
+            "firstTime": "2026-10-02T20:50:11Z",
+            "count": 2,
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:50:11Z, last 2026-10-02T20:50:26Z)"
           }
         ]
       },
@@ -61,23 +62,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-oom/oom",
-              "uid": "5fc0a90f-44f4-4fea-9ccf-1b3425228fcf",
+              "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T19:15:18Z"
+              "time": "2026-10-02T20:50:25Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-oom/oom",
-              "uid": "5fc0a90f-44f4-4fea-9ccf-1b3425228fcf",
+              "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "OOMKilled",
-              "time": "2026-10-02T19:15:18Z"
+              "time": "2026-10-02T20:50:25Z"
             },
             {
               "kind": "pod-spec",
               "object": "Pod wd-oom/oom",
-              "uid": "5fc0a90f-44f4-4fea-9ccf-1b3425228fcf",
+              "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
               "field": "spec.containers[app].resources.limits.memory",
               "value": "spec memory limit 32Mi"
             }
@@ -86,7 +87,8 @@
       ],
       "logTail": [
         "allocating"
-      ]
+      ],
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [

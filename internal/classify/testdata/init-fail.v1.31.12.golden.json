@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T19:14:32.038556Z",
+  "observedAt": "2026-10-02T20:48:50.285798Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-init-fail",
     "name": "init-fail",
-    "uid": "890a71e8-4d77-4181-9544-507df955f632",
+    "uid": "b6586aa5-1a2d-4aa9-aa03-a2ff8db5b623",
     "exists": true,
     "phase": "Pending",
-    "node": "wd-13112-4526-worker",
-    "startTime": "2026-10-02T19:14:28Z",
+    "node": "wd-13112-4393-worker",
+    "startTime": "2026-10-02T20:48:30Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -17,15 +17,15 @@
       "name": "setup",
       "role": "init",
       "image": "docker.io/library/busybox:1.37",
-      "restartCount": 0,
+      "restartCount": 2,
       "currentState": "terminated (exitCode=3, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://4d5bf4ac2add3e05feffaedd140c914e0b667e137f87902b473c3030c7b8fc92",
+        "containerID": "containerd://1dc199727062ebfa5f3ebf3c65438fe22eae4ee51f8ec7d7e98369e16876afdb",
         "exitCode": 3,
         "reason": "Error",
-        "startedAt": "2026-10-02T19:14:29Z",
-        "finishedAt": "2026-10-02T19:14:29Z"
+        "startedAt": "2026-10-02T20:48:42Z",
+        "finishedAt": "2026-10-02T20:48:42Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,17 +34,18 @@
       "restart": {
         "policy": "Always",
         "decision": "restarting",
-        "detail": "restart policy Always restarts this container (with back-off after repeated failures)",
+        "detail": "the pod restart policy Always retries a failed init container (with back-off)",
         "evidence": [
           {
             "kind": "event",
             "object": "Pod wd-init-fail/init-fail",
-            "uid": "890a71e8-4d77-4181-9544-507df955f632",
+            "uid": "b6586aa5-1a2d-4aa9-aa03-a2ff8db5b623",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container setup in pod init-fail_wd-init-fail(890a71e8-4d77-4181-9544-507df955f632)",
-            "time": "2026-10-02T19:14:29Z",
-            "count": 1,
-            "note": "fieldPath=spec.initContainers{setup}"
+            "value": "Back-off restarting failed container setup in pod init-fail_wd-init-fail(b6586aa5-1a2d-4aa9-aa03-a2ff8db5b623)",
+            "time": "2026-10-02T20:48:43Z",
+            "firstTime": "2026-10-02T20:48:32Z",
+            "count": 2,
+            "note": "fieldPath=spec.initContainers{setup}; event repeated 2 times (aggregated; first 2026-10-02T20:48:32Z, last 2026-10-02T20:48:43Z)"
           }
         ]
       },
@@ -57,25 +58,26 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-init-fail/init-fail",
-              "uid": "890a71e8-4d77-4181-9544-507df955f632",
+              "uid": "b6586aa5-1a2d-4aa9-aa03-a2ff8db5b623",
               "field": "status.initContainerStatuses[setup].state.terminated.exitCode",
               "value": "3",
-              "time": "2026-10-02T19:14:29Z"
+              "time": "2026-10-02T20:48:42Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-init-fail/init-fail",
-              "uid": "890a71e8-4d77-4181-9544-507df955f632",
+              "uid": "b6586aa5-1a2d-4aa9-aa03-a2ff8db5b623",
               "field": "status.initContainerStatuses[setup].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T19:14:29Z"
+              "time": "2026-10-02T20:48:42Z"
             }
           ]
         }
       ],
       "logTail": [
         "init failing"
-      ]
+      ],
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [

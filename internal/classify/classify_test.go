@@ -421,6 +421,7 @@ func TestRolesAndExpectedness(t *testing.T) {
 		{"regular never exit 0", mk("regular", 0, func(p *corev1.Pod) { p.Spec.RestartPolicy = corev1.RestartPolicyNever }), "regular", ExpectedYes},
 		{"regular crash", mk("regular", 1, nil), "regular", ExpectedNo},
 		{"regular stopped while deleting", mk("regular", 143, func(p *corev1.Pod) {
+			p.Status.ContainerStatuses[0].State.Terminated.StartedAt = mtime(-time.Hour)
 			p.DeletionTimestamp = ptr(mtime(time.Minute))
 			withCond("EvictionByEvictionAPI", "x")(p) // transition at -1m, instance ended at -1s
 		}), "regular", ExpectedYes},
@@ -439,6 +440,10 @@ func TestRolesAndExpectedness(t *testing.T) {
 	}
 }
 
+func termNow(code int32, finish time.Duration) corev1.ContainerState {
+	return corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{ExitCode: code, Reason: "Error", StartedAt: mtime(finish - time.Minute), FinishedAt: mtime(finish)}}
+}
+
 func TestRestartDecision(t *testing.T) {
 	r := mustAnalyze(t, snap(newPod(withLast(1, "Error"))))
 	if d := r.Containers[0].Restart; d.Decision != "back-off" || d.Policy != "Always" {
@@ -452,14 +457,64 @@ func TestRestartDecision(t *testing.T) {
 	if d := mustAnalyze(t, snap(p)).Containers[0].Restart; d.Decision != "not-restarting" {
 		t.Fatalf("%+v", d)
 	}
-	rules := newPod(withLast(1, "Error"), func(p *corev1.Pod) {
-		a := corev1.ContainerRestartPolicyNever
-		p.Spec.Containers[0].RestartPolicy = &a
-		p.Spec.Containers[0].RestartPolicyRules = []corev1.ContainerRestartRule{{Action: corev1.ContainerRestartRuleActionRestart}}
+}
+
+// restartPolicyRules are evaluated in order; the first match wins (item 3).
+func TestRestartPolicyRules(t *testing.T) {
+	mk := func(code int32, rules []corev1.ContainerRestartRule) RestartDecision {
+		p := newPod(func(p *corev1.Pod) {
+			never := corev1.ContainerRestartPolicyNever
+			p.Spec.Containers[0].RestartPolicy = &never
+			p.Spec.Containers[0].RestartPolicyRules = rules
+			p.Status.ContainerStatuses[0].State = termNow(code, -time.Second)
+		})
+		return mustAnalyze(t, snap(p)).Containers[0].Restart
+	}
+	in42 := corev1.ContainerRestartRule{Action: corev1.ContainerRestartRuleActionRestart, ExitCodes: &corev1.ContainerRestartRuleOnExitCodes{Operator: corev1.ContainerRestartRuleOnExitCodesOpIn, Values: []int32{42}}}
+	if d := mk(42, []corev1.ContainerRestartRule{in42}); d.Decision != "restarting" || !strings.Contains(d.Detail, "restartPolicyRules[0]") {
+		t.Fatalf("Never + rule Restart for 42 and exit 42 must restart: %+v", d)
+	}
+	if d := mk(1, []corev1.ContainerRestartRule{in42}); d.Decision != "not-restarting" || d.Policy != "Never" || !strings.Contains(d.Detail, "no restartPolicyRules entry matched") {
+		t.Fatalf("no rule matches: container policy applies: %+v", d)
+	}
+	all := corev1.ContainerRestartRule{Action: corev1.ContainerRestartRuleActionRestartAllContainers, ExitCodes: &corev1.ContainerRestartRuleOnExitCodes{Operator: corev1.ContainerRestartRuleOnExitCodesOpNotIn, Values: []int32{0}}}
+	if d := mk(3, []corev1.ContainerRestartRule{in42, all}); d.Decision != "restarting" || !strings.Contains(d.Detail, "RestartAllContainers") || !strings.Contains(d.Detail, "[1]") {
+		t.Fatalf("first matching rule incl. RestartAllContainers: %+v", d)
+	}
+	bad := corev1.ContainerRestartRule{Action: corev1.ContainerRestartRuleActionRestart, ExitCodes: &corev1.ContainerRestartRuleOnExitCodes{Operator: "Weird", Values: []int32{1}}}
+	if d := mk(1, []corev1.ContainerRestartRule{bad}); d.Decision != "unknown" || !strings.Contains(d.Detail, "Weird") {
+		t.Fatalf("unknown operator must give unknown with the rule quoted: %+v", d)
+	}
+}
+
+// Role matters before policy (item 2).
+func TestRestartMatrixByRole(t *testing.T) {
+	init0 := newPod(func(p *corev1.Pod) {
+		p.Spec.InitContainers = []corev1.Container{{Name: "setup"}}
+		p.Status.InitContainerStatuses = []corev1.ContainerStatus{{Name: "setup", State: termNow(0, -time.Minute)}}
+		p.Status.InitContainerStatuses[0].State.Terminated.Reason = "Completed"
 	})
-	d := mustAnalyze(t, snap(rules)).Containers[0].Restart
-	if d.Policy != "Never" || !strings.Contains(d.Detail, "restartPolicyRules") {
-		t.Fatalf("container-level policy and rules must be reported: %+v", d)
+	r := mustAnalyze(t, snap(init0))
+	for _, c := range r.Containers {
+		if c.Name == "setup" && c.Restart.Decision != "done" {
+			t.Fatalf("a completed init container is done, not restarting: %+v", c.Restart)
+		}
+	}
+	eph := newPod(func(p *corev1.Pod) {
+		p.Spec.EphemeralContainers = []corev1.EphemeralContainer{{EphemeralContainerCommon: corev1.EphemeralContainerCommon{Name: "dbg"}}}
+		p.Status.EphemeralContainerStatuses = []corev1.ContainerStatus{{Name: "dbg", State: termNow(1, -time.Minute)}}
+	})
+	for _, c := range mustAnalyze(t, snap(eph)).Containers {
+		if c.Name == "dbg" && (c.Restart.Decision != "not-restarting" || !strings.Contains(c.Restart.Detail, "never restarted")) {
+			t.Fatalf("ephemeral containers are never restarted: %+v", c.Restart)
+		}
+	}
+	del := newPod(func(p *corev1.Pod) {
+		p.DeletionTimestamp = ptr(mtime(time.Minute))
+		p.Status.ContainerStatuses[0].State = termNow(1, -time.Second)
+	})
+	if d := mustAnalyze(t, snap(del)).Containers[0].Restart; d.Decision != "not-restarting" {
+		t.Fatalf("a terminating pod in a non-terminal phase does not restart containers: %+v", d)
 	}
 }
 
@@ -504,22 +559,23 @@ func TestSystemOOMIsOnlyACandidate(t *testing.T) {
 }
 
 func TestKilledAfterGrace(t *testing.T) {
-	p := newPod(func(p *corev1.Pod) {
-		p.DeletionTimestamp = ptr(mtime(-time.Second))
-		p.DeletionGracePeriodSeconds = ptr(int64(30))
-		p.Status.ContainerStatuses[0].State = corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{ExitCode: 137, Reason: "Error", FinishedAt: mtime(0)}}
-	})
-	v := find(mustAnalyze(t, snap(p)), KindKilledAfterGrace)
-	if v == nil || v.Confidence != Likely || len(v.Competing) == 0 {
+	mk := func(grace int64, finishAfterStart time.Duration) *Report {
+		p := newPod(func(p *corev1.Pod) {
+			p.DeletionTimestamp = ptr(mtime(time.Duration(grace) * time.Second))
+			p.DeletionGracePeriodSeconds = ptr(grace)
+			p.Status.ContainerStatuses[0].State = corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{ExitCode: 137, Reason: "Error", StartedAt: mtime(-time.Hour), FinishedAt: mtime(finishAfterStart)}}
+		})
+		return mustAnalyze(t, snap(p, event("Killing", "Stopping container app", "spec.containers{app}", 0, 0, 1)))
+	}
+	if v := find(mk(30, 31*time.Second), KindKilledAfterGrace); v == nil || v.Confidence != Likely || len(v.Competing) == 0 {
 		t.Fatalf("got %+v", v)
 	}
-	early := newPod(func(p *corev1.Pod) {
-		p.DeletionTimestamp = ptr(mtime(time.Hour))
-		p.DeletionGracePeriodSeconds = ptr(int64(30))
-		p.Status.ContainerStatuses[0].State = corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{ExitCode: 137, Reason: "Error", FinishedAt: mtime(0)}}
-	})
-	if find(mustAnalyze(t, snap(early)), KindKilledAfterGrace) != nil {
-		t.Fatal("a kill long before the deadline is not 'after grace'")
+	// deletionGracePeriodSeconds=90 is known: a stop 35s after the start is within it (item 6).
+	if find(mk(90, 35*time.Second), KindKilledAfterGrace) != nil {
+		t.Fatal("35s of a 90s grace period is not after the grace period")
+	}
+	if find(mk(90, 91*time.Second), KindKilledAfterGrace) == nil {
+		t.Fatal("91s of a 90s grace period is after it")
 	}
 }
 
@@ -579,21 +635,35 @@ func TestExpiredEventsGap(t *testing.T) {
 }
 
 func TestStaleDeletionGraceIsNotUsed(t *testing.T) {
-	// deletionGracePeriodSeconds is 0 once the kubelet has stopped everything; it
-	// must not be read as the grace period of the kill.
+	// deletionGracePeriodSeconds is 0 once the kubelet has stopped everything. The
+	// grace used at kill time is then unknown; it must not be guessed from the spec.
 	p := newPod(func(p *corev1.Pod) {
 		p.DeletionTimestamp = ptr(mtime(0))
 		p.DeletionGracePeriodSeconds = ptr(int64(0))
 		p.Spec.TerminationGracePeriodSeconds = ptr(int64(30))
 		p.Status.ContainerStatuses[0].State = corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{ExitCode: 137, Reason: "Error", StartedAt: mtime(-time.Minute), FinishedAt: mtime(0)}}
 	})
-	stopping := event("Killing", "Stopping container app", "spec.containers{app}", -3*time.Second, -3*time.Second, 1)
-	if find(mustAnalyze(t, snap(p, stopping)), KindKilledAfterGrace) != nil {
-		t.Fatal("3s after Stopping is not after a 30s grace period")
-	}
 	late := event("Killing", "Stopping container app", "spec.containers{app}", -31*time.Second, -31*time.Second, 1)
-	if find(mustAnalyze(t, snap(p, late)), KindKilledAfterGrace) == nil {
-		t.Fatal("31s after Stopping with a 30s grace period is after the grace period")
+	if find(mustAnalyze(t, snap(p, late)), KindKilledAfterGrace) != nil {
+		t.Fatal("grace is unknown after deletionGracePeriodSeconds was zeroed: no verdict")
+	}
+}
+
+// Probe kills use the probe-level grace, not the pod's (item 6).
+func TestProbeKillGrace(t *testing.T) {
+	mk := func(probeGrace *int64, finish time.Duration) *Report {
+		p := newPod(func(p *corev1.Pod) {
+			p.Spec.TerminationGracePeriodSeconds = ptr(int64(30))
+			p.Spec.Containers[0].LivenessProbe = &corev1.Probe{TerminationGracePeriodSeconds: probeGrace}
+			p.Status.ContainerStatuses[0].State = corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{ExitCode: 137, Reason: "Error", StartedAt: mtime(-time.Hour), FinishedAt: mtime(finish)}}
+		})
+		return mustAnalyze(t, snap(p, event("Killing", "Container app failed liveness probe, will be restarted", "spec.containers{app}", 0, 0, 1)))
+	}
+	if find(mk(ptr(int64(90)), 35*time.Second), KindKilledAfterGrace) != nil {
+		t.Fatal("probe grace 90s: 35s is within it")
+	}
+	if find(mk(nil, 35*time.Second), KindKilledAfterGrace) == nil {
+		t.Fatal("pod grace 30s applies when the probe has none")
 	}
 }
 
@@ -682,6 +752,8 @@ func TestEventTimes(t *testing.T) {
 
 // The taint manager emits events without involvedObject.uid. They are used only
 // when they cannot predate the pod, and the evidence says how they were matched.
+// Events without involvedObject.uid are context only (item 8): identity cannot
+// be proven by a name and a time bound.
 func TestEventWithoutUID(t *testing.T) {
 	noUID := func(msg string, at time.Duration) corev1.Event {
 		e := event("TaintManagerEviction", msg, "", at, at, 1)
@@ -690,15 +762,20 @@ func TestEventWithoutUID(t *testing.T) {
 	}
 	cond := withCond("DeletionByTaintManager", "taint")
 	r := mustAnalyze(t, snap(newPod(cond), noUID("Marking for deletion Pod ns/web", -time.Minute)))
-	var matched bool
 	for _, e := range r.Verdicts[0].Evidence {
-		matched = matched || (e.Kind == EvEvent && strings.Contains(e.Note, "no involvedObject.uid"))
+		if e.Kind == EvEvent {
+			t.Fatalf("an event without uid must not be evidence of a verdict: %+v", e)
+		}
 	}
-	if !matched {
-		t.Fatalf("event without uid should be used and labelled: %+v", r.Verdicts[0].Evidence)
+	ctx := false
+	for _, e := range r.Context {
+		ctx = ctx || (e.Kind == EvEvent && strings.Contains(e.Note, "context only"))
+	}
+	if !ctx {
+		t.Fatalf("it must appear as a context line: %+v", r.Context)
 	}
 	r = mustAnalyze(t, snap(newPod(cond), noUID("Marking for deletion Pod ns/web", -2*time.Hour)))
-	for _, e := range r.Verdicts[0].Evidence {
+	for _, e := range r.Context {
 		if e.Kind == EvEvent {
 			t.Fatalf("an event older than the pod must be ignored: %+v", e)
 		}
@@ -706,21 +783,50 @@ func TestEventWithoutUID(t *testing.T) {
 	if len(r.Notes) != 1 || !strings.Contains(r.Notes[0], "older than this pod") {
 		t.Fatalf("ignored event must be reported: %v", r.Notes)
 	}
+	// A late event of a previous pod with the same name must not become a cancellation.
+	r = mustAnalyze(t, snap(newPod(), noUID("Cancelling deletion of Pod ns/web", -time.Minute)))
+	if find(r, KindTaintCancelled) != nil {
+		t.Fatal("no verdict from an event without uid")
+	}
 }
 
 func TestNoTerminationNotShownNextToACause(t *testing.T) {
 	p := newPod(func(p *corev1.Pod) {
+		p.Status.ContainerStatuses[0].RestartCount = 0
 		p.Status.ContainerStatuses[0].State = corev1.ContainerState{Waiting: &corev1.ContainerStateWaiting{Reason: "ContainerCreating"}}
 	})
 	r := mustAnalyze(t, snap(p, event("FailedPostStartHook", "Exec lifecycle hook failed", "spec.containers{app}", -time.Minute, -time.Minute, 1)))
 	if find(r, KindPostStartFailed) == nil || find(r, KindNoTermination) != nil {
 		t.Fatalf("%+v", r.AllVerdicts())
 	}
+	// With restarts and no recorded instance the hook events cannot be tied to anything.
+	p.Status.ContainerStatuses[0].RestartCount = 2
+	if find(mustAnalyze(t, snap(p, event("FailedPostStartHook", "x", "spec.containers{app}", -time.Hour, -time.Hour, 1))), KindPostStartFailed) != nil {
+		t.Fatal("old hook events must not be accepted for an unidentified instance")
+	}
 }
 
-// The kubelet aggregates repeated Killing events: only the first and the last
-// occurrence have times. A later instance's kill moves "last" past this instance
-// (found by the e2e stability check), so the first occurrence must count too.
+// The hook failure is a fact; the kill is a separate, weaker claim (item 11).
+func TestPostStartHookAndKillAreSeparate(t *testing.T) {
+	p := newPod(func(p *corev1.Pod) {
+		p.Status.ContainerStatuses[0].RestartCount = 0
+		p.Status.ContainerStatuses[0].State = corev1.ContainerState{Waiting: &corev1.ContainerStateWaiting{Reason: "ContainerCreating"}}
+	})
+	r := mustAnalyze(t, snap(p,
+		event("FailedPostStartHook", "hook failed", "spec.containers{app}", -time.Minute, -time.Minute, 1),
+		event("Killing", "FailedPostStartHook", "spec.containers{app}", -time.Minute, -time.Minute, 1)))
+	h, k := find(r, KindPostStartFailed), find(r, KindPostStartKill)
+	if h == nil || h.Confidence != Confirmed || k == nil || k.Confidence != Likely {
+		t.Fatalf("hook=%+v kill=%+v", h, k)
+	}
+	// With a terminated instance that the Killing event is tied to, the kill is confirmed.
+	r = mustAnalyze(t, snap(newPod(withLast(137, "Error")),
+		event("Killing", "FailedPostStartHook", "spec.containers{app}", -90*time.Second, -90*time.Second, 1)))
+	if k := find(r, KindPostStartKill); k == nil || k.Confidence != Confirmed {
+		t.Fatalf("%+v", k)
+	}
+}
+
 func TestAggregatedKillingEvent(t *testing.T) {
 	kill := "Container app failed liveness probe, will be restarted"
 	mk := func(first, last time.Duration, count int32) *Report {
@@ -730,14 +836,35 @@ func TestAggregatedKillingEvent(t *testing.T) {
 	if v := find(mk(-2*time.Minute, 5*time.Minute, 2), KindLivenessKill); v == nil || v.Confidence != Confirmed {
 		t.Fatalf("first occurrence inside the instance: %+v", v)
 	}
-	if v := find(mk(-30*time.Minute, -5*time.Minute, 2), KindLivenessKill); v == nil || v.Confidence != Confirmed {
+	if v := find(mk(-30*time.Minute, -90*time.Second, 2), KindLivenessKill); v == nil || v.Confidence != Confirmed {
 		t.Fatalf("last occurrence inside the instance: %+v", v)
 	}
-	v := find(mk(-30*time.Minute, 5*time.Minute, 5), KindLivenessKill)
-	if v == nil || v.Confidence != Likely || !strings.Contains(strings.Join(v.Competing, "|"), "middle repetitions") {
-		t.Fatalf("spanning event must be likely and name the ambiguity: %+v", v)
+	// The span between the first and the last occurrence is never treated as observed.
+	if find(mk(-30*time.Minute, 5*time.Minute, 5), KindLivenessKill) != nil {
+		t.Fatal("an aggregated event that only spans the instance must not match")
+	}
+	// An occurrence outside the correlation window is only a weak match (item 9).
+	if v := find(mk(-5*time.Minute, -4*time.Minute, 2), KindLivenessKill); v == nil || v.Confidence != Likely {
+		t.Fatalf("outside --window: likely at most: %+v", v)
 	}
 	if find(mk(-30*time.Minute, 5*time.Minute, 2), KindLivenessKill) != nil {
 		t.Fatal("two occurrences, neither inside the instance: no verdict")
+	}
+}
+
+// While a restart is delayed the status often still shows state.terminated; the
+// BackOff event recorded after the stop is the evidence for the back-off.
+func TestBackOffFromEventWhileStateIsTerminated(t *testing.T) {
+	p := newPod(func(p *corev1.Pod) { p.Status.ContainerStatuses[0].State = termNow(1, -10*time.Second) })
+	if d := mustAnalyze(t, snap(p)).Containers[0].Restart; d.Decision != "restarting" {
+		t.Fatalf("no BackOff event yet: %+v", d)
+	}
+	r := mustAnalyze(t, snap(p, event("BackOff", "Back-off restarting failed container app", "spec.containers{app}", -5*time.Second, -5*time.Second, 1)))
+	if d := r.Containers[0].Restart; d.Decision != "back-off" || len(d.Evidence) == 0 {
+		t.Fatalf("%+v", d)
+	}
+	old := event("BackOff", "Back-off restarting failed container app", "spec.containers{app}", -time.Hour, -time.Hour, 1)
+	if d := mustAnalyze(t, snap(p, old)).Containers[0].Restart; d.Decision != "restarting" {
+		t.Fatalf("a BackOff event from before this stop does not apply: %+v", d)
 	}
 }

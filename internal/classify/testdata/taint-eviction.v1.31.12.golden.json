@@ -1,22 +1,22 @@
 {
-  "observedAt": "2026-10-02T19:17:01.276572Z",
+  "observedAt": "2026-10-02T20:54:48.787851Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-taint-eviction",
     "name": "tainted",
-    "uid": "4eb76938-3727-42f6-a48c-4c7f2e74ca53",
+    "uid": "77b11551-bbc0-4018-954d-288c6629a380",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4526-worker",
-    "startTime": "2026-10-02T19:16:59Z",
-    "deletionTimestamp": "2026-10-02T19:18:30Z",
+    "node": "wd-13112-4393-worker",
+    "startTime": "2026-10-02T20:54:31Z",
+    "deletionTimestamp": "2026-10-02T20:56:02Z",
     "restartPolicy": "Always"
   },
   "verdicts": [
     {
       "kind": "taint-eviction",
       "confidence": "confirmed",
-      "summary": "the taint manager deleted this pod because of a NoExecute taint it does not tolerate",
+      "summary": "the taint manager marked this pod for deletion because of a NoExecute taint it does not tolerate (DisruptionTarget reason DeletionByTaintManager); outcome at observation time: the pod is being deleted (metadata.deletionTimestamp 2026-10-02T20:56:02Z)",
       "competing": [
         "the DisruptionTarget condition shows a disruption was initiated; it does not by itself guarantee the disruption completed"
       ],
@@ -24,19 +24,10 @@
         {
           "kind": "pod-condition",
           "object": "Pod wd-taint-eviction/tainted",
-          "uid": "4eb76938-3727-42f6-a48c-4c7f2e74ca53",
+          "uid": "77b11551-bbc0-4018-954d-288c6629a380",
           "field": "status.conditions[DisruptionTarget]",
           "value": "status=True reason=DeletionByTaintManager message=\"Taint manager: deleting due to NoExecute taint\"",
-          "time": "2026-10-02T19:17:00Z"
-        },
-        {
-          "kind": "event",
-          "object": "Pod wd-taint-eviction/tainted",
-          "field": "event TaintManagerEviction",
-          "value": "Marking for deletion Pod wd-taint-eviction/tainted",
-          "time": "2026-10-02T19:17:00Z",
-          "count": 1,
-          "note": "event has no involvedObject.uid; matched by pod name and by time (not before the pod was created)"
+          "time": "2026-10-02T20:54:32Z"
         }
       ]
     }
@@ -47,30 +38,30 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 0,
-      "currentState": "running since 2026-10-02T19:16:59Z",
+      "currentState": "running since 2026-10-02T20:54:32Z",
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T19:16:59Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T20:54:32Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
           "kind": "no-termination",
           "confidence": "confirmed",
-          "summary": "no termination is recorded for this container: it is running with restartCount=0 and no previous state; the pod is being deleted but the container has not stopped yet",
+          "summary": "no termination is recorded for this container: it is running and the status has no previous state (restartCount=0); the pod is being deleted but the container has not stopped yet",
           "evidence": [
             {
               "kind": "pod-status",
               "object": "Pod wd-taint-eviction/tainted",
-              "uid": "4eb76938-3727-42f6-a48c-4c7f2e74ca53",
+              "uid": "77b11551-bbc0-4018-954d-288c6629a380",
               "field": "status.containerStatuses[app].state.running.startedAt",
-              "value": "2026-10-02T19:16:59Z",
-              "time": "2026-10-02T19:16:59Z"
+              "value": "2026-10-02T20:54:32Z",
+              "time": "2026-10-02T20:54:32Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-taint-eviction/tainted",
-              "uid": "4eb76938-3727-42f6-a48c-4c7f2e74ca53",
+              "uid": "77b11551-bbc0-4018-954d-288c6629a380",
               "field": "status.containerStatuses[app].restartCount",
               "value": "0"
             }
@@ -82,11 +73,20 @@
   "context": [
     {
       "kind": "node-meta",
-      "object": "Node wd-13112-4526-worker",
-      "uid": "525486ba-225f-4c29-84cd-598308f1503b",
+      "object": "Node wd-13112-4393-worker",
+      "uid": "7d90104e-2b9a-48e2-85db-1e716e01990a",
       "field": "spec.taints",
       "value": "wd-e2e=1:NoExecute",
       "note": "context only; current state, no history"
+    },
+    {
+      "kind": "event",
+      "object": "Pod wd-taint-eviction/tainted",
+      "field": "event TaintManagerEviction",
+      "value": "Marking for deletion Pod wd-taint-eviction/tainted",
+      "time": "2026-10-02T20:54:32Z",
+      "count": 1,
+      "note": "context only: this event has no involvedObject.uid, so it cannot be tied to this pod by identity; matched by name and by time not before the pod was created"
     }
   ],
   "checked": [

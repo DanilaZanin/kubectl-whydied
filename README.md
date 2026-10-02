@@ -60,7 +60,9 @@ go install github.com/DanilaZanin/kubectl-whydied/cmd/kubectl-whydied@latest
 # Release binary: download the archive for your platform from the GitHub releases page,
 # unpack it, and put kubectl-whydied on your PATH. kubectl finds it as `kubectl whydied`.
 
-# Krew: the manifest is plugins/whydied.yaml. It is not in the krew index yet.
+# Krew: plugins/whydied.yaml is a template with sha256 placeholders. The release workflow
+# fills it from the release checksums (scripts/krew-manifest.sh) and attaches whydied.yaml
+# to the GitHub release. It is not in the krew index yet; install from the attached file.
 ```
 
 ## Usage
@@ -69,7 +71,7 @@ go install github.com/DanilaZanin/kubectl-whydied/cmd/kubectl-whydied@latest
 kubectl whydied POD                       # explain every container of a pod
 kubectl whydied POD -n prod -c app        # one container
 kubectl whydied POD --previous-logs 20    # add the last 20 log lines of the explained instance
-kubectl whydied -A --restarted-since 30m  # one line per recently restarted pod
+kubectl whydied -A --restarted-since 30m  # one line per recently restarted pod; -o json gives {candidates, reports, failures}
 kubectl whydied POD -o json               # machine-readable report
 kubectl whydied POD --window 5m           # correlation window between a termination and events (default 2m)
 kubectl whydied POD --dump-snapshot s.json   # save everything that was read (for bug reports)
@@ -79,9 +81,13 @@ kubectl whydied --from-snapshot s.json       # explain from a saved snapshot, of
 Exit codes: `0` a diagnosis was printed, `1` error, `2` no data at all (for example the pod is gone and no
 events reference it). Color is used only on a TTY (`NO_COLOR` and `--no-color` turn it off).
 
-Needed permissions: `get` on pods and nodes, `list` on events, `get` on ReplicaSets, Deployments, StatefulSets,
-DaemonSets, Jobs and CronJobs, `list` on HorizontalPodAutoscalers, `get pods/log` for `--previous-logs`.
-A denied read becomes a line under **Gaps** and is never treated as evidence.
+Permissions. Required: `get` on pods in the target namespace (a denial ends the command with exit 1);
+`list` on pods for `-A` and `--restarted-since` (if every candidate pod fails, the command exits 1 and
+prints each failure; an empty selection is reported as such and exits 0).
+Optional sources, each reported under **Gaps** when it cannot be read and never treated as evidence:
+`list` on events in the pod's namespace, `get` on the pod's node, cluster-wide `list` on events (node events
+such as `SystemOOM`), `get` on ReplicaSets, Deployments, StatefulSets, DaemonSets, Jobs and CronJobs,
+`list` on HorizontalPodAutoscalers, and `get pods/log` for `--previous-logs`.
 
 ## What the labels mean
 
@@ -101,20 +107,21 @@ A denied read becomes a line under **Gaps** and is never treated as evidence.
 | Kubelet could not observe the exit | `terminated.reason == ContainerStatusUnknown` (the 137 is synthesized) | `confirmed` fact, cause `no data` |
 | Container could not start | `StartError`, `ContainerCannotRun`, `CreateContainerError` reason and message, quoted verbatim | `confirmed` |
 | Liveness or startup probe kill | `Killing` event whose message names the probe, with `fieldPath` of this container, and whose time lies within the instance's lifetime (its start to its finish); events from another instance are ignored | `confirmed`, otherwise no verdict |
-| postStart hook failed | `FailedPostStartHook` events for this container within the instance's lifetime | `confirmed`, or no verdict when the events belong to another instance |
+| postStart hook failed | `FailedPostStartHook` event for this container within the instance's lifetime | `confirmed`; events of another instance are ignored |
+| Kill caused by the failed hook | `Killing` event with message `FailedPostStartHook`; recorded before the kill is attempted | `likely`; `confirmed` only when this instance ended inside the window |
 | Image cannot be pulled | waiting reason `ErrImagePull`, `ImagePullBackOff`, `InvalidImageName`, with the runtime message | `confirmed` |
-| Scheduler preemption | `DisruptionTarget` condition `PreemptionByScheduler` (or a `Preempted` event) | `confirmed` |
+| Scheduler preemption initiated | `DisruptionTarget` condition `PreemptionByScheduler` (or a `Preempted` event). The outcome (deleting, terminal phase, or not deleted) is stated as a separate fact | `confirmed` as initiated |
 | Kubelet admission preemption | `status.reason == Preempting` | `confirmed` |
-| Taint eviction | `DisruptionTarget` reason `DeletionByTaintManager`; a later `Cancelling deletion` event is reported as not a death | `confirmed` |
-| Eviction API (kubectl drain) | `DisruptionTarget` reason `EvictionByEvictionAPI`; the caller is not recorded | `confirmed` |
+| Taint eviction initiated | `DisruptionTarget` reason `DeletionByTaintManager`; a later `Cancelling deletion` event is reported as not a death. Taint manager events carry no pod UID, so they are context only | `confirmed` as initiated |
+| Eviction API (kubectl drain) initiated | `DisruptionTarget` reason `EvictionByEvictionAPI`; the caller is not recorded | `confirmed` as initiated |
 | Node-pressure eviction | `status.reason == Evicted` with `The node was low on resource` message; node pressure conditions shown as current state | `confirmed` |
 | Local storage limit eviction | `Evicted` with an emptyDir or ephemeral-storage limit message; no DiskPressure needed | `confirmed` |
-| Pod garbage collection | `DisruptionTarget` reason `DeletionByPodGC` | `confirmed` |
+| Pod garbage collection initiated | `DisruptionTarget` reason `DeletionByPodGC` | `confirmed` as initiated |
 | Controller deleted the pod | `SuccessfulDelete` event on an owner (ReplicaSet, StatefulSet, Job) that names the pod and is not older than the pod | `confirmed` |
 | Why the controller scaled down: rollout | pod's ReplicaSet revision is lower than the Deployment revision | `likely` |
 | Why the controller scaled down: HPA | `SuccessfulRescale` event of an HPA that targets the Deployment, inside the window | `likely` |
 | Direct delete | `deletionTimestamp` set and no other attribution; deleter is not in the API | `likely`, deleter unknown |
-| Killed after the grace period | deleting pod, exit 137 at or after the deletion deadline | `likely`, OOM, external SIGKILL and `exit(137)` named as competing |
+| Killed after the grace period | exit 137 at or after the grace period of the trigger: `deletionGracePeriodSeconds` (when still non-zero) for deletions, the probe's own or the pod's `terminationGracePeriodSeconds` for probe kills; unknown grace gives no verdict | `likely`, OOM, external SIGKILL and `exit(137)` named as competing |
 | Node not ready | node `Ready` condition not `True` (current state only) | `confirmed` as node state; says nothing about the container |
 | Sandbox changed | `SandboxChanged` event | `confirmed` as a restart trigger |
 | Node OOM candidate | `SystemOOM` node event inside the window; it names a process, not a pod | `likely` candidate only |
@@ -143,6 +150,7 @@ Pod, event and node JSON captured from those runs are the golden fixtures of the
 
 | Scenario | What happens | Verdict kind | Confidence | v1.31.12 | v1.37.0 |
 | --- | --- | --- | --- | --- | --- |
+| `crashloop-backoff` | waits for a real CrashLoopBackOff (4th restart) and requires the back-off decision | `app-exit` | `confirmed` | pass | pass |
 | `drain` | kubectl drain evicts the pod through the Eviction API; the pod ignores SIGTERM so it stays visible while terminating | `eviction-api` | `confirmed` | pass | pass |
 | `evict-storage` | the pod writes more than the emptyDir sizeLimit; the kubelet evicts it (no DiskPressure needed) | `eviction-storage-limit` | `confirmed` | pass | pass |
 | `exit0` | restartPolicy Never, exit code 0: a normal completion | `app-exit` | `confirmed` | pass | pass |

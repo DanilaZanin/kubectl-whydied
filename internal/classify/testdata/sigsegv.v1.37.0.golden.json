@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T19:11:52.928133Z",
+  "observedAt": "2026-10-02T21:05:30.120122Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-sigsegv",
     "name": "sigsegv",
-    "uid": "c38c31c9-774e-48df-8992-86d61df7ca43",
+    "uid": "c6b115a2-e392-4f4e-a0bc-b300666d6f6b",
     "exists": true,
     "phase": "Running",
-    "node": "wd-1370-3240-worker",
-    "startTime": "2026-10-02T19:11:49Z",
+    "node": "wd-1370-6832-worker",
+    "startTime": "2026-10-02T21:05:10Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -17,15 +17,15 @@
       "name": "app",
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
-      "restartCount": 1,
-      "currentState": "running since 2026-10-02T19:11:50Z",
+      "restartCount": 2,
+      "currentState": "terminated (exitCode=139, reason=Error)",
       "termination": {
-        "source": "lastState.terminated",
-        "containerID": "containerd://26c9bbd7b17f236f0d6ec1ef0ab48668922a85c27c5a47999d5fa2cf56e160e2",
+        "source": "state.terminated",
+        "containerID": "containerd://635fdba3b1cc2f42bf85a46bfc4ee7bcf2b79d672ea9a662505bf9aa3eafc401",
         "exitCode": 139,
         "reason": "Error",
-        "startedAt": "2026-10-02T19:11:49Z",
-        "finishedAt": "2026-10-02T19:11:50Z"
+        "startedAt": "2026-10-02T21:05:28Z",
+        "finishedAt": "2026-10-02T21:05:29Z"
       },
       "expected": {
         "state": "unexpected",
@@ -33,8 +33,21 @@
       },
       "restart": {
         "policy": "Always",
-        "decision": "running",
-        "detail": "running since 2026-10-02T19:11:50Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+        "decision": "back-off",
+        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "evidence": [
+          {
+            "kind": "event",
+            "object": "Pod wd-sigsegv/sigsegv",
+            "uid": "c6b115a2-e392-4f4e-a0bc-b300666d6f6b",
+            "field": "event BackOff",
+            "value": "Back-off restarting failed container app in pod sigsegv_wd-sigsegv(c6b115a2-e392-4f4e-a0bc-b300666d6f6b)",
+            "time": "2026-10-02T21:05:29Z",
+            "firstTime": "2026-10-02T21:05:14Z",
+            "count": 2,
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T21:05:14Z, last 2026-10-02T21:05:29Z)"
+          }
+        ]
       },
       "verdicts": [
         {
@@ -48,23 +61,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-sigsegv/sigsegv",
-              "uid": "c38c31c9-774e-48df-8992-86d61df7ca43",
-              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "uid": "c6b115a2-e392-4f4e-a0bc-b300666d6f6b",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "139",
-              "time": "2026-10-02T19:11:50Z"
+              "time": "2026-10-02T21:05:29Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-sigsegv/sigsegv",
-              "uid": "c38c31c9-774e-48df-8992-86d61df7ca43",
-              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "uid": "c6b115a2-e392-4f4e-a0bc-b300666d6f6b",
+              "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T19:11:50Z"
+              "time": "2026-10-02T21:05:29Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-sigsegv/sigsegv",
-              "uid": "c38c31c9-774e-48df-8992-86d61df7ca43",
+              "uid": "c6b115a2-e392-4f4e-a0bc-b300666d6f6b",
               "field": "exit code 128+n",
               "value": "139 = 128+11 = SIGSEGV (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"
@@ -75,12 +88,12 @@
       "logTail": [
         "Segmentation fault (core dumped)"
       ],
-      "logsPrevious": true
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [
     "pod status and spec",
-    "events by involvedObject.uid for the pod (4 found)",
+    "events by involvedObject.uid for the pod (5 found)",
     "owner chain (pod has no controller)",
     "node conditions, taints, labels and node events (current state only)",
     "previous container logs"

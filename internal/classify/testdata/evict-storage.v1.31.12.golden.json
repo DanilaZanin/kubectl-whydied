@@ -1,45 +1,45 @@
 {
-  "observedAt": "2026-10-02T19:14:05.500271Z",
+  "observedAt": "2026-10-02T20:46:34.855195Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-evict-storage",
     "name": "evict-storage",
-    "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+    "uid": "f6b62cfa-1312-46c9-9131-d14cded89b36",
     "exists": true,
     "phase": "Failed",
     "reason": "Evicted",
     "message": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
-    "node": "wd-13112-4526-worker",
-    "startTime": "2026-10-02T19:13:33Z",
+    "node": "wd-13112-4393-worker",
+    "startTime": "2026-10-02T20:45:52Z",
     "restartPolicy": "Never"
   },
   "verdicts": [
     {
       "kind": "eviction-storage-limit",
       "confidence": "confirmed",
-      "summary": "the kubelet evicted the pod because it exceeded a local storage limit (message quoted verbatim); this does not require node DiskPressure",
+      "summary": "the kubelet evicted the pod because it exceeded a local storage limit (message quoted verbatim); this does not require node DiskPressure; outcome at observation time: the pod is in the terminal phase Failed",
       "evidence": [
         {
           "kind": "pod-status",
           "object": "Pod wd-evict-storage/evict-storage",
-          "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+          "uid": "f6b62cfa-1312-46c9-9131-d14cded89b36",
           "field": "status.reason",
           "value": "Evicted"
         },
         {
           "kind": "pod-status",
           "object": "Pod wd-evict-storage/evict-storage",
-          "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+          "uid": "f6b62cfa-1312-46c9-9131-d14cded89b36",
           "field": "status.message",
           "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". "
         },
         {
           "kind": "event",
           "object": "Pod wd-evict-storage/evict-storage",
-          "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+          "uid": "f6b62cfa-1312-46c9-9131-d14cded89b36",
           "field": "event Evicted",
           "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
-          "time": "2026-10-02T19:14:02Z",
+          "time": "2026-10-02T20:46:16Z",
           "count": 1
         }
       ]
@@ -54,15 +54,15 @@
       "currentState": "terminated (exitCode=137, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://2468cd7b3bded614a0cc74f1bfd135c8ed92da69f34cf6eac6fcb279dab31884",
+        "containerID": "containerd://0f943a4f12bba98d72c7fd72767e12832ab56377b93e615921f22aa9365b01b8",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T19:13:34Z",
-        "finishedAt": "2026-10-02T19:14:04Z"
+        "startedAt": "2026-10-02T20:45:52Z",
+        "finishedAt": "2026-10-02T20:46:18Z"
       },
       "expected": {
         "state": "expected",
-        "why": "the stop is part of pod termination: the pod status reason is Evicted (this instance ended after the termination started)"
+        "why": "the stop is part of pod termination: the pod status reason is Evicted (this instance ended after the teardown started)"
       },
       "restart": {
         "policy": "Never",
@@ -82,23 +82,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+              "uid": "f6b62cfa-1312-46c9-9131-d14cded89b36",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T19:14:04Z"
+              "time": "2026-10-02T20:46:18Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+              "uid": "f6b62cfa-1312-46c9-9131-d14cded89b36",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T19:14:04Z"
+              "time": "2026-10-02T20:46:18Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+              "uid": "f6b62cfa-1312-46c9-9131-d14cded89b36",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"
@@ -107,8 +107,9 @@
         }
       ],
       "logTail": [
-        "unable to retrieve container logs for containerd://2468cd7b3bded614a0cc74f1bfd135c8ed92da69f34cf6eac6fcb279dab31884"
-      ]
+        "unable to retrieve container logs for containerd://0f943a4f12bba98d72c7fd72767e12832ab56377b93e615921f22aa9365b01b8"
+      ],
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [

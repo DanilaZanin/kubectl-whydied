@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T19:14:22.012463Z",
+  "observedAt": "2026-10-02T20:47:52.2781Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-exit2",
     "name": "exit2",
-    "uid": "c7e6b4a9-705b-4ab5-89c3-428599717abc",
+    "uid": "56466f00-e360-42f3-879a-b22315b12260",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4526-worker",
-    "startTime": "2026-10-02T19:14:15Z",
+    "node": "wd-13112-4393-worker",
+    "startTime": "2026-10-02T20:47:32Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -21,11 +21,11 @@
       "currentState": "terminated (exitCode=2, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://102d67fb2ad78cc469de5a365bc7551c6acd427adf9cb0c6e161bff9ddfd0e17",
+        "containerID": "containerd://41b5983d5c78257549b4d5637ac108263cee820264454e351ee30344447ae9e2",
         "exitCode": 2,
         "reason": "Error",
-        "startedAt": "2026-10-02T19:14:16Z",
-        "finishedAt": "2026-10-02T19:14:17Z"
+        "startedAt": "2026-10-02T20:47:34Z",
+        "finishedAt": "2026-10-02T20:47:35Z"
       },
       "expected": {
         "state": "unexpected",
@@ -33,16 +33,16 @@
       },
       "restart": {
         "policy": "Always",
-        "decision": "restarting",
-        "detail": "restart policy Always restarts this container (with back-off after repeated failures)",
+        "decision": "back-off",
+        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
           {
             "kind": "event",
             "object": "Pod wd-exit2/exit2",
-            "uid": "c7e6b4a9-705b-4ab5-89c3-428599717abc",
+            "uid": "56466f00-e360-42f3-879a-b22315b12260",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod exit2_wd-exit2(c7e6b4a9-705b-4ab5-89c3-428599717abc)",
-            "time": "2026-10-02T19:14:18Z",
+            "value": "Back-off restarting failed container app in pod exit2_wd-exit2(56466f00-e360-42f3-879a-b22315b12260)",
+            "time": "2026-10-02T20:47:36Z",
             "count": 1,
             "note": "fieldPath=spec.containers{app}"
           }
@@ -57,23 +57,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-exit2/exit2",
-              "uid": "c7e6b4a9-705b-4ab5-89c3-428599717abc",
+              "uid": "56466f00-e360-42f3-879a-b22315b12260",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "2",
-              "time": "2026-10-02T19:14:17Z"
+              "time": "2026-10-02T20:47:35Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-exit2/exit2",
-              "uid": "c7e6b4a9-705b-4ab5-89c3-428599717abc",
+              "uid": "56466f00-e360-42f3-879a-b22315b12260",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T19:14:17Z"
+              "time": "2026-10-02T20:47:35Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-exit2/exit2",
-              "uid": "c7e6b4a9-705b-4ab5-89c3-428599717abc",
+              "uid": "56466f00-e360-42f3-879a-b22315b12260",
               "field": "exit code",
               "value": "2; by convention 2 often means misuse of a shell builtin, but its meaning is defined by the program"
             }
@@ -82,7 +82,8 @@
       ],
       "logTail": [
         "failing"
-      ]
+      ],
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [

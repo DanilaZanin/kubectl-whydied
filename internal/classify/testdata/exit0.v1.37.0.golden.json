@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T19:09:44.987641Z",
+  "observedAt": "2026-10-02T20:59:16.321762Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-exit0",
     "name": "exit0",
-    "uid": "fa82a523-01f7-47ad-aea5-2ca4495ed10c",
+    "uid": "4ed0677f-2de7-429f-b430-e416af0d82ee",
     "exists": true,
     "phase": "Succeeded",
-    "node": "wd-1370-3240-worker",
-    "startTime": "2026-10-02T19:09:41Z",
+    "node": "wd-1370-6832-worker",
+    "startTime": "2026-10-02T20:58:56Z",
     "restartPolicy": "Never"
   },
   "verdicts": [],
@@ -21,11 +21,11 @@
       "currentState": "terminated (exitCode=0, reason=Completed)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://e52fbef3a71c15d033adab58637bdc1e4ed39d836a65c0fb275ddc7055bcb76e",
+        "containerID": "containerd://34dcce16cac70fe42ca908cb2a22b24f0713b69199dd1052ddb952174d367bc8",
         "exitCode": 0,
         "reason": "Completed",
-        "startedAt": "2026-10-02T19:09:41Z",
-        "finishedAt": "2026-10-02T19:09:41Z"
+        "startedAt": "2026-10-02T20:58:56Z",
+        "finishedAt": "2026-10-02T20:58:56Z"
       },
       "expected": {
         "state": "expected",
@@ -45,25 +45,26 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-exit0/exit0",
-              "uid": "fa82a523-01f7-47ad-aea5-2ca4495ed10c",
+              "uid": "4ed0677f-2de7-429f-b430-e416af0d82ee",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "0",
-              "time": "2026-10-02T19:09:41Z"
+              "time": "2026-10-02T20:58:56Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-exit0/exit0",
-              "uid": "fa82a523-01f7-47ad-aea5-2ca4495ed10c",
+              "uid": "4ed0677f-2de7-429f-b430-e416af0d82ee",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Completed",
-              "time": "2026-10-02T19:09:41Z"
+              "time": "2026-10-02T20:58:56Z"
             }
           ]
         }
       ],
       "logTail": [
         "finished"
-      ]
+      ],
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [

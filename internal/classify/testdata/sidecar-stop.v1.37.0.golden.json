@@ -1,21 +1,21 @@
 {
-  "observedAt": "2026-10-02T19:11:49.571871Z",
+  "observedAt": "2026-10-02T21:05:10.773526Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-sidecar-stop",
-    "name": "sidecar-job-9pj9k",
-    "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
+    "name": "sidecar-job-4nqqp",
+    "uid": "743c4451-bc60-4553-a897-3abd874242d4",
     "exists": true,
     "phase": "Succeeded",
-    "node": "wd-1370-3240-worker",
-    "startTime": "2026-10-02T19:11:11Z",
+    "node": "wd-1370-6832-worker",
+    "startTime": "2026-10-02T21:04:18Z",
     "restartPolicy": "Never"
   },
   "owners": [
     {
       "kind": "Job",
       "name": "sidecar-job",
-      "uid": "0640caba-62cc-4643-bbd3-d521671e6d4a",
+      "uid": "70ae9e27-7322-466c-8550-facafb68cc45",
       "found": true
     }
   ],
@@ -29,15 +29,15 @@
       "currentState": "terminated (exitCode=137, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://55b5643db925daae64b35caa10b371cd4b481b22158f94f280f0857ec039cdc8",
+        "containerID": "containerd://540a3282ada9cdd4493ef226e0887cf2daeadd9a7de057bb85e6f75cf078d238",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T19:11:11Z",
-        "finishedAt": "2026-10-02T19:11:47Z"
+        "startedAt": "2026-10-02T21:04:19Z",
+        "finishedAt": "2026-10-02T21:04:54Z"
       },
       "expected": {
         "state": "expected",
-        "why": "a restartable init container (native sidecar) is stopped when the pod ends: all regular containers finished or the pod is terminating; exit codes such as 143 or 137 are normal for that shutdown"
+        "why": "a restartable init container (native sidecar) is stopped when the pod's regular containers have finished for good; this instance ended after the last of them (exit codes such as 143 or 137 are normal for that shutdown)"
       },
       "restart": {
         "policy": "Always",
@@ -56,76 +56,32 @@
           "evidence": [
             {
               "kind": "pod-status",
-              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
-              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
+              "object": "Pod wd-sidecar-stop/sidecar-job-4nqqp",
+              "uid": "743c4451-bc60-4553-a897-3abd874242d4",
               "field": "status.initContainerStatuses[side].state.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T19:11:47Z"
+              "time": "2026-10-02T21:04:54Z"
             },
             {
               "kind": "pod-status",
-              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
-              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
+              "object": "Pod wd-sidecar-stop/sidecar-job-4nqqp",
+              "uid": "743c4451-bc60-4553-a897-3abd874242d4",
               "field": "status.initContainerStatuses[side].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T19:11:47Z"
+              "time": "2026-10-02T21:04:54Z"
             },
             {
               "kind": "convention",
-              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
-              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
+              "object": "Pod wd-sidecar-stop/sidecar-job-4nqqp",
+              "uid": "743c4451-bc60-4553-a897-3abd874242d4",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"
             }
           ]
-        },
-        {
-          "kind": "killed-after-grace",
-          "confidence": "likely",
-          "summary": "termination began at 2026-10-02T19:11:17Z (earliest termination evidence) and the container ended with exitCode=137 30s later, at or after the 30s grace period: consistent with a SIGKILL after the grace period",
-          "competing": [
-            "the effective grace period can differ (probe-level override, preStop time, eviction override)",
-            "an OOM kill not labelled OOMKilled, an external SIGKILL, or the application calling exit(137)"
-          ],
-          "evidence": [
-            {
-              "kind": "pod-spec",
-              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
-              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
-              "field": "spec.terminationGracePeriodSeconds",
-              "value": "30",
-              "note": "pod-level value; a probe-level override, preStop time or eviction override can change the effective grace"
-            },
-            {
-              "kind": "event",
-              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
-              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
-              "field": "event Killing",
-              "value": "Stopping container side",
-              "time": "2026-10-02T19:11:17Z",
-              "count": 1,
-              "note": "fieldPath=spec.initContainers{side}"
-            },
-            {
-              "kind": "pod-status",
-              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
-              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
-              "field": "status.initContainerStatuses[side].state.terminated.exitCode",
-              "value": "137",
-              "time": "2026-10-02T19:11:47Z"
-            },
-            {
-              "kind": "pod-status",
-              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
-              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
-              "field": "status.initContainerStatuses[side].state.terminated.reason",
-              "value": "Error",
-              "time": "2026-10-02T19:11:47Z"
-            }
-          ]
         }
-      ]
+      ],
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [

@@ -325,9 +325,14 @@ func runScenario(t *testing.T, dir string) {
 	for {
 		pod := e.resolveTarget(ctx)
 		if pod != "" {
+			before, _ := e.fetchAPI(ctx, pod)
 			rep, raw, err := runTool(ctx, e, pod)
 			if err == nil {
-				if err = Evaluate(sc.Expect, rep, e.knownUIDs(ctx, rep)...); err == nil {
+				err = Evaluate(sc.Expect, rep, e.knownUIDs(ctx, rep)...)
+				if err == nil && before != nil {
+					err = e.validateEvidence(ctx, pod, rep, before)
+				}
+				if err == nil {
 					requireStable(ctx, t, e)
 					t.Logf("PASS on k8s %s: pod %s\n%s", k8sLabel, pod, raw)
 					saveFixture(ctx, t, e, e.resolveTarget(ctx))
@@ -361,14 +366,90 @@ func requireStable(ctx context.Context, t *testing.T, e *env) {
 		if pod == "" {
 			t.Fatalf("stability check %d/3: target pod disappeared", i)
 		}
+		before, _ := e.fetchAPI(ctx, pod)
 		rep, raw, err := runTool(ctx, e, pod)
 		if err == nil {
 			err = Evaluate(e.sc.Expect, rep, e.knownUIDs(ctx, rep)...)
+		}
+		if err == nil && before != nil {
+			err = e.validateEvidence(ctx, pod, rep, before)
 		}
 		if err != nil {
 			t.Fatalf("stability check %d/3 failed for pod %s: %v\n%s", i, pod, err, raw)
 		}
 	}
+}
+
+// fetchAPI reads the pod, all events, the node and the owners with kubectl,
+// independently of the tool's own collector.
+func (e *env) fetchAPI(ctx context.Context, pod string) (*API, error) {
+	get := func(args ...string) (map[string]any, error) {
+		out, err := e.kubectl(ctx, false, args...)
+		if err != nil {
+			return nil, fmt.Errorf("kubectl %v: %w\n%s", args, err, out)
+		}
+		m := map[string]any{}
+		if err := json.Unmarshal([]byte(out), &m); err != nil {
+			return nil, err
+		}
+		return m, nil
+	}
+	api := &API{OwnerUIDs: map[string]bool{}}
+	var err error
+	if api.Pod, err = get("get", "pod", pod, "-o", "json"); err != nil {
+		return nil, err
+	}
+	evs, err := sh(ctx, "kubectl", "get", "events", "-A", "-o", "json")
+	if err != nil {
+		return nil, fmt.Errorf("get events: %w\n%s", err, evs)
+	}
+	var el struct {
+		Items []map[string]any `json:"items"`
+	}
+	if err := json.Unmarshal([]byte(evs), &el); err != nil {
+		return nil, err
+	}
+	api.Events = el.Items
+	if node := str(nested(api.Pod, "spec"), "nodeName"); node != "" {
+		out, err := sh(ctx, "kubectl", "get", "node", node, "-o", "json")
+		if err != nil {
+			return nil, fmt.Errorf("get node: %w\n%s", err, out)
+		}
+		_ = json.Unmarshal([]byte(out), &api.Node)
+	}
+	if api.Node == nil {
+		api.Node = map[string]any{}
+	}
+	own, err := e.kubectl(ctx, false, "get", "replicasets,deployments,statefulsets,daemonsets,jobs,cronjobs", "-o", "json")
+	if err == nil {
+		var ol struct {
+			Items []map[string]any `json:"items"`
+		}
+		if json.Unmarshal([]byte(own), &ol) == nil {
+			for _, it := range ol.Items {
+				api.OwnerUIDs[str(nested(it, "metadata"), "uid")] = true
+			}
+		}
+	}
+	return api, nil
+}
+
+// validateEvidence runs the tool's report through Validate against an API view
+// fetched before and after the run; either one backing the report is enough,
+// since a crash-looping pod can change between the two reads.
+func (e *env) validateEvidence(ctx context.Context, pod string, rep *classify.Report, before *API) error {
+	err := Validate(rep, before)
+	if err == nil {
+		return nil
+	}
+	after, aerr := e.fetchAPI(ctx, pod)
+	if aerr != nil {
+		return aerr
+	}
+	if err2 := Validate(rep, after); err2 != nil {
+		return fmt.Errorf("evidence not backed by the API (before: %w; after: %w)", err, err2)
+	}
+	return nil
 }
 
 func (e *env) knownUIDs(ctx context.Context, rep *classify.Report) []string {

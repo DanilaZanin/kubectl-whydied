@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T19:15:31.128024Z",
+  "observedAt": "2026-10-02T20:51:08.688674Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-poststart-fail",
     "name": "poststart-fail",
-    "uid": "b1f9cf5f-693a-416e-8e7c-a540fc1a2f72",
+    "uid": "a28d3ac9-6c64-4b2e-92b9-10dbe02767c9",
     "exists": true,
     "phase": "Pending",
-    "node": "wd-13112-4526-worker",
-    "startTime": "2026-10-02T19:15:27Z",
+    "node": "wd-13112-4393-worker",
+    "startTime": "2026-10-02T20:50:48Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -28,25 +28,35 @@
         {
           "kind": "poststart-hook-failed",
           "confidence": "confirmed",
-          "summary": "the kubelet reported a failed postStart lifecycle hook for this container and killed it (FailedPostStartHook events)",
+          "summary": "the kubelet reported that the postStart lifecycle hook of this container failed (FailedPostStartHook event)",
           "evidence": [
             {
               "kind": "event",
               "object": "Pod wd-poststart-fail/poststart-fail",
-              "uid": "b1f9cf5f-693a-416e-8e7c-a540fc1a2f72",
+              "uid": "a28d3ac9-6c64-4b2e-92b9-10dbe02767c9",
               "field": "event FailedPostStartHook",
               "value": "PostStartHook failed",
-              "time": "2026-10-02T19:15:27Z",
+              "time": "2026-10-02T20:50:50Z",
               "count": 1,
               "note": "fieldPath=spec.containers{app}"
-            },
+            }
+          ]
+        },
+        {
+          "kind": "poststart-hook-kill",
+          "confidence": "likely",
+          "summary": "the kubelet recorded killing the container because of the failed postStart hook",
+          "competing": [
+            "the event is recorded before the kill is attempted, so it does not show that the kill succeeded"
+          ],
+          "evidence": [
             {
               "kind": "event",
               "object": "Pod wd-poststart-fail/poststart-fail",
-              "uid": "b1f9cf5f-693a-416e-8e7c-a540fc1a2f72",
+              "uid": "a28d3ac9-6c64-4b2e-92b9-10dbe02767c9",
               "field": "event Killing",
               "value": "FailedPostStartHook",
-              "time": "2026-10-02T19:15:27Z",
+              "time": "2026-10-02T20:50:50Z",
               "count": 1,
               "note": "fieldPath=spec.containers{app}"
             }

@@ -11,7 +11,12 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/kubernetes/fake"
+	k8stesting "k8s.io/client-go/testing"
 
 	"github.com/DanilaZanin/kubectl-whydied/internal/classify"
 	"github.com/DanilaZanin/kubectl-whydied/internal/collect"
@@ -111,5 +116,46 @@ func TestVersion(t *testing.T) {
 	var out bytes.Buffer
 	if code := run(context.Background(), []string{"--version"}, &out, io.Discard); code != exitOK || !strings.Contains(out.String(), "kubectl-whydied") {
 		t.Fatalf("%d %q", code, out.String())
+	}
+}
+
+func restartedPod(name string) *corev1.Pod {
+	return &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: "ns", UID: "u"},
+		Status: corev1.PodStatus{ContainerStatuses: []corev1.ContainerStatus{{Name: "app", RestartCount: 2,
+			LastTerminationState: corev1.ContainerState{Terminated: &corev1.ContainerStateTerminated{ExitCode: 1, FinishedAt: metav1.Now()}}}}}}
+}
+
+// Item 15: "list works, get is denied" must not look like "nothing restarted".
+func TestListModeFailuresAreVisible(t *testing.T) {
+	cs := fake.NewClientset(restartedPod("a"), restartedPod("b"))
+	cs.PrependReactor("get", "pods", func(k8stesting.Action) (bool, runtime.Object, error) {
+		return true, nil, apierrors.NewForbidden(schema.GroupResource{Resource: "pods"}, "a", nil)
+	})
+	var out, errb bytes.Buffer
+	c := &config{output: "json", restartedSince: time.Hour}
+	code := listMode(context.Background(), cs, "ns", classify.Options{}, c, &out, &errb)
+	if code != exitError {
+		t.Fatalf("every candidate failed: exit %d", code)
+	}
+	var res struct {
+		Candidates int
+		Failures   []struct{ Pod, Error string }
+	}
+	if err := json.Unmarshal(out.Bytes(), &res); err != nil || res.Candidates != 2 || len(res.Failures) != 2 {
+		t.Fatalf("%v %s", err, out.String())
+	}
+	out.Reset()
+	c.output = "text"
+	if code := listMode(context.Background(), cs, "ns", classify.Options{}, c, &out, &errb); code != exitError || !strings.Contains(out.String(), "diagnosis failed") || strings.Contains(out.String(), "no pods with a restart") {
+		t.Fatalf("%d %s", code, out.String())
+	}
+}
+
+func TestListModeEmptySelectionIsNotAnError(t *testing.T) {
+	cs := fake.NewClientset()
+	var out bytes.Buffer
+	c := &config{output: "text", restartedSince: time.Hour}
+	if code := listMode(context.Background(), cs, "ns", classify.Options{}, c, &out, io.Discard); code != exitOK || !strings.Contains(out.String(), "no pods with a restart") {
+		t.Fatalf("%d %s", code, out.String())
 	}
 }

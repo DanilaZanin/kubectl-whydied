@@ -1,45 +1,45 @@
 {
-  "observedAt": "2026-10-02T19:09:41.647235Z",
+  "observedAt": "2026-10-02T20:58:56.974776Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-evict-storage",
     "name": "evict-storage",
-    "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+    "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
     "exists": true,
     "phase": "Failed",
     "reason": "Evicted",
     "message": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
-    "node": "wd-1370-3240-worker",
-    "startTime": "2026-10-02T19:09:12Z",
+    "node": "wd-1370-6832-worker",
+    "startTime": "2026-10-02T20:58:17Z",
     "restartPolicy": "Never"
   },
   "verdicts": [
     {
       "kind": "eviction-storage-limit",
       "confidence": "confirmed",
-      "summary": "the kubelet evicted the pod because it exceeded a local storage limit (message quoted verbatim); this does not require node DiskPressure",
+      "summary": "the kubelet evicted the pod because it exceeded a local storage limit (message quoted verbatim); this does not require node DiskPressure; outcome at observation time: the pod is in the terminal phase Failed",
       "evidence": [
         {
           "kind": "pod-status",
           "object": "Pod wd-evict-storage/evict-storage",
-          "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+          "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
           "field": "status.reason",
           "value": "Evicted"
         },
         {
           "kind": "pod-status",
           "object": "Pod wd-evict-storage/evict-storage",
-          "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+          "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
           "field": "status.message",
           "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". "
         },
         {
           "kind": "event",
           "object": "Pod wd-evict-storage/evict-storage",
-          "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+          "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
           "field": "event Evicted",
           "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
-          "time": "2026-10-02T19:09:38Z",
+          "time": "2026-10-02T20:58:38Z",
           "count": 1
         }
       ]
@@ -49,106 +49,74 @@
     {
       "name": "app",
       "role": "regular",
-      "image": "busybox:1.37",
-      "restartCount": 1,
-      "currentState": "waiting: ContainerCreating",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 0,
+      "currentState": "terminated (exitCode=137, reason=Error)",
       "termination": {
-        "source": "lastState.terminated",
+        "source": "state.terminated",
+        "containerID": "containerd://a88a80bfb9c166def05a80bd2379257dc095aec5beb47761a7272907280b4c57",
         "exitCode": 137,
-        "reason": "ContainerStatusUnknown",
-        "message": "The container could not be located when the pod was deleted.  The container used to be Running"
-      },
-      "previousTermination": {
-        "source": "lastState.terminated",
-        "exitCode": 137,
-        "reason": "ContainerStatusUnknown",
-        "message": "The container could not be located when the pod was deleted.  The container used to be Running"
+        "reason": "Error",
+        "startedAt": "2026-10-02T20:58:18Z",
+        "finishedAt": "2026-10-02T20:58:40Z"
       },
       "expected": {
-        "state": "unknown",
-        "why": "the pod is terminating (the pod status reason is Evicted) but this instance ended at unknown time, before the termination started at 2026-10-02T19:09:38Z; it stopped for another reason"
+        "state": "expected",
+        "why": "the stop is part of pod termination: the pod status reason is Evicted (this instance ended after the teardown started)"
       },
       "restart": {
         "policy": "Never",
-        "decision": "unknown",
-        "detail": "waiting: ContainerCreating"
+        "decision": "not-restarting",
+        "detail": "the pod is in the terminal phase Failed, so the kubelet no longer restarts its containers (restart policy Never)"
       },
       "verdicts": [
         {
-          "kind": "status-unknown-synthesized",
-          "confidence": "confirmed",
-          "summary": "the kubelet could not observe how the container ended and synthesized exitCode=137; the exit code carries no information about the cause",
+          "kind": "exit-signal-convention",
+          "confidence": "likely",
+          "summary": "API reported exitCode=137; by convention that is SIGKILL (128+9), but the API does not say what sent it",
           "competing": [
-            "any cause: the real exit status was never observed"
+            "the application called exit(137) itself; the API cannot distinguish that from death by SIGKILL",
+            "an OOM kill that the runtime did not label OOMKilled"
           ],
           "evidence": [
             {
               "kind": "pod-status",
               "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
-              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
-              "value": "137"
+              "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T20:58:40Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
-              "field": "status.containerStatuses[app].lastState.terminated.reason",
-              "value": "ContainerStatusUnknown"
+              "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+              "field": "status.containerStatuses[app].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T20:58:40Z"
             },
             {
-              "kind": "pod-status",
+              "kind": "convention",
               "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
-              "field": "status.containerStatuses[app].lastState.terminated.message",
-              "value": "The container could not be located when the pod was deleted.  The container used to be Running"
-            }
-          ]
-        },
-        {
-          "kind": "status-unknown-synthesized",
-          "confidence": "confirmed",
-          "summary": "previous instance (lastState.terminated): the kubelet could not observe how the container ended and synthesized exitCode=137; the exit code carries no information about the cause",
-          "competing": [
-            "any cause: the real exit status was never observed"
-          ],
-          "evidence": [
-            {
-              "kind": "pod-status",
-              "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
-              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
-              "value": "137"
-            },
-            {
-              "kind": "pod-status",
-              "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
-              "field": "status.containerStatuses[app].lastState.terminated.reason",
-              "value": "ContainerStatusUnknown"
-            },
-            {
-              "kind": "pod-status",
-              "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
-              "field": "status.containerStatuses[app].lastState.terminated.message",
-              "value": "The container could not be located when the pod was deleted.  The container used to be Running"
+              "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+              "field": "exit code 128+n",
+              "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
+              "note": "convention only: the API signal field is shown only when the API set it"
             }
           ]
         }
-      ]
+      ],
+      "logTail": [
+        "unable to retrieve container logs for containerd://a88a80bfb9c166def05a80bd2379257dc095aec5beb47761a7272907280b4c57"
+      ],
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [
     "pod status and spec",
     "events by involvedObject.uid for the pod (6 found)",
     "owner chain (pod has no controller)",
-    "node conditions, taints, labels and node events (current state only)"
-  ],
-  "gaps": [
-    {
-      "source": "logs/app",
-      "reason": "previous terminated container \"app\" in pod \"evict-storage\" not found"
-    }
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
   ]
 }

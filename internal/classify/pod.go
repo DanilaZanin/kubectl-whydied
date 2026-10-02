@@ -96,23 +96,26 @@ func (a *analysis) disruption() (Verdict, bool) {
 	switch {
 	case condReason == "PreemptionByScheduler" || (cond == nil && len(preempted) > 0):
 		v.Kind = KindPreemptScheduler
-		v.Summary = "the scheduler preempted this pod to make room for a higher-priority pod"
+		v.Summary = "the scheduler initiated preemption of this pod to make room for a higher-priority pod"
+		if cond == nil {
+			v.Summary = "the scheduler recorded a Preempted event for this pod"
+		}
 		for _, e := range preempted {
 			ev = append(ev, evEvent(e))
 		}
 	case condReason == "DeletionByTaintManager":
 		v.Kind = KindTaintEviction
-		v.Summary = "the taint manager deleted this pod because of a NoExecute taint it does not tolerate"
+		v.Summary = "the taint manager marked this pod for deletion because of a NoExecute taint it does not tolerate (DisruptionTarget reason DeletionByTaintManager)"
 		for _, e := range a.podEventsWithReason("TaintManagerEviction") {
 			ev = append(ev, evEvent(e))
 		}
 	case condReason == "EvictionByEvictionAPI":
 		v.Kind = KindEvictionAPI
-		v.Summary = "the pod was evicted through the Eviction API (this is what kubectl drain uses; the caller is not recorded)"
+		v.Summary = "an eviction of this pod was initiated through the Eviction API (this is what kubectl drain uses; the caller is not recorded)"
 		v.Competing = []string{"any client can call the Eviction API: kubectl drain, a cluster autoscaler, an operator; the API does not name the caller"}
 	case condReason == "DeletionByPodGC":
 		v.Kind = KindPodGC
-		v.Summary = "pod garbage collection deleted this pod (for example because its node no longer exists)"
+		v.Summary = "pod garbage collection marked this pod for deletion (for example because its node no longer exists)"
 	case statusReason == "Evicted":
 		switch {
 		case strings.Contains(msg, "EmptyDir volume") && strings.Contains(msg, "exceeds the limit"),
@@ -149,6 +152,9 @@ func (a *analysis) disruption() (Verdict, bool) {
 	default:
 		return Verdict{}, false
 	}
+	// The condition and the outcome are separate facts: a disruption can be
+	// initiated and then cancelled, so the actual state is stated on its own.
+	v.Summary += "; outcome at observation time: " + a.outcome()
 	if cond != nil && v.Kind != KindKubeletTermination {
 		v.Competing = append(v.Competing, note)
 	}
@@ -245,7 +251,7 @@ func (a *analysis) scaleReason(cd Verdict) []Verdict {
 	if len(out) == 0 && len(cd.Evidence) > 0 && cd.Evidence[0].Time != nil {
 		var hits []Evidence
 		for _, e := range a.hpaEvents {
-			if e.Reason == "SuccessfulRescale" && covers(e, *cd.Evidence[0].Time, a.o.Window) {
+			if e.Reason == "SuccessfulRescale" && a.occursNear(e, *cd.Evidence[0].Time) {
 				hits = append(hits, evEvent(e))
 			}
 		}
@@ -295,4 +301,16 @@ func (a *analysis) nodeNotReady() (Verdict, bool) {
 		}
 	}
 	return Verdict{}, false
+}
+
+// outcome states what the pod looks like now, independent of any disruption condition.
+func (a *analysis) outcome() string {
+	p := a.pod
+	switch {
+	case p.DeletionTimestamp != nil:
+		return "the pod is being deleted (metadata.deletionTimestamp " + fmtTime(mt(*p.DeletionTimestamp)) + ")"
+	case podTerminal(p):
+		return "the pod is in the terminal phase " + string(p.Status.Phase)
+	}
+	return "the pod is not marked for deletion and not in a terminal phase, so the disruption has not (yet) ended it"
 }

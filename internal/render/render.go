@@ -118,7 +118,7 @@ func Text(w io.Writer, r *classify.Report, color bool) {
 			if c.LogsPrevious {
 				which = "previous logs"
 			}
-			pr("  %s (last %d lines):", which, len(c.LogTail))
+			pr("  %s (last %d lines; %s):", which, len(c.LogTail), esc(c.LogNote))
 			for _, l := range c.LogTail {
 				pr("    | %s", esc(l))
 			}

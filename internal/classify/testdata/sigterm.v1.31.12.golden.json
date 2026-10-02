@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T19:16:22.160549Z",
+  "observedAt": "2026-10-02T20:53:37.026459Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-sigterm",
     "name": "sigterm",
-    "uid": "bdac9765-5eab-4b75-9910-cdf33cacc81b",
+    "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4526-worker",
-    "startTime": "2026-10-02T19:16:18Z",
+    "node": "wd-13112-4393-worker",
+    "startTime": "2026-10-02T20:53:17Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -17,15 +17,15 @@
       "name": "app",
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
-      "restartCount": 1,
-      "currentState": "running since 2026-10-02T19:16:20Z",
+      "restartCount": 2,
+      "currentState": "terminated (exitCode=143, reason=Error)",
       "termination": {
-        "source": "lastState.terminated",
-        "containerID": "containerd://413914c9c9e276f5379417977c1d56924e18b0d7c3abb192f6755cbff53f9077",
+        "source": "state.terminated",
+        "containerID": "containerd://02c38a95c4cc2e662ea6e35c6359c89ae657b6fafa9aeedfc6f856b0a66a4545",
         "exitCode": 143,
         "reason": "Error",
-        "startedAt": "2026-10-02T19:16:18Z",
-        "finishedAt": "2026-10-02T19:16:19Z"
+        "startedAt": "2026-10-02T20:53:33Z",
+        "finishedAt": "2026-10-02T20:53:34Z"
       },
       "expected": {
         "state": "unexpected",
@@ -33,8 +33,21 @@
       },
       "restart": {
         "policy": "Always",
-        "decision": "running",
-        "detail": "running since 2026-10-02T19:16:20Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+        "decision": "back-off",
+        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "evidence": [
+          {
+            "kind": "event",
+            "object": "Pod wd-sigterm/sigterm",
+            "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
+            "field": "event BackOff",
+            "value": "Back-off restarting failed container app in pod sigterm_wd-sigterm(8476bd90-1b93-4ece-b5fc-8747da862a6b)",
+            "time": "2026-10-02T20:53:35Z",
+            "firstTime": "2026-10-02T20:53:21Z",
+            "count": 2,
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:53:21Z, last 2026-10-02T20:53:35Z)"
+          }
+        ]
       },
       "verdicts": [
         {
@@ -48,23 +61,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-sigterm/sigterm",
-              "uid": "bdac9765-5eab-4b75-9910-cdf33cacc81b",
-              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "143",
-              "time": "2026-10-02T19:16:19Z"
+              "time": "2026-10-02T20:53:34Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-sigterm/sigterm",
-              "uid": "bdac9765-5eab-4b75-9910-cdf33cacc81b",
-              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
+              "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T19:16:19Z"
+              "time": "2026-10-02T20:53:34Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-sigterm/sigterm",
-              "uid": "bdac9765-5eab-4b75-9910-cdf33cacc81b",
+              "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
               "field": "exit code 128+n",
               "value": "143 = 128+15 = SIGTERM (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"
@@ -75,12 +88,12 @@
       "logTail": [
         "Terminated"
       ],
-      "logsPrevious": true
+      "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],
   "checked": [
     "pod status and spec",
-    "events by involvedObject.uid for the pod (4 found)",
+    "events by involvedObject.uid for the pod (5 found)",
     "owner chain (pod has no controller)",
     "node conditions, taints, labels and node events (current state only)",
     "previous container logs"

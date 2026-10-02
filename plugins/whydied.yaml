@@ -18,34 +18,36 @@ spec:
     guessed around. Node OOM and cloud provider interruptions are not classified
     in v0.1.
   platforms:
-    # sha256 values are filled in from checksums.txt of the release.
+    # TEMPLATE: the sha256 placeholders are filled from the release checksums by
+    # scripts/krew-manifest.sh in the release workflow, which attaches the filled
+    # manifest to the GitHub release. Do not install from this file as committed.
     - selector:
         matchLabels: {os: linux, arch: amd64}
       uri: https://github.com/DanilaZanin/kubectl-whydied/releases/download/v0.1.0/kubectl-whydied_v0.1.0_linux_amd64.tar.gz
-      sha256: REPLACE_WITH_SHA256_FROM_checksums.txt
+      sha256: REPLACE_SHA256_linux_amd64
       bin: kubectl-whydied
     - selector:
         matchLabels: {os: linux, arch: arm64}
       uri: https://github.com/DanilaZanin/kubectl-whydied/releases/download/v0.1.0/kubectl-whydied_v0.1.0_linux_arm64.tar.gz
-      sha256: REPLACE_WITH_SHA256_FROM_checksums.txt
+      sha256: REPLACE_SHA256_linux_arm64
       bin: kubectl-whydied
     - selector:
         matchLabels: {os: darwin, arch: amd64}
       uri: https://github.com/DanilaZanin/kubectl-whydied/releases/download/v0.1.0/kubectl-whydied_v0.1.0_darwin_amd64.tar.gz
-      sha256: REPLACE_WITH_SHA256_FROM_checksums.txt
+      sha256: REPLACE_SHA256_darwin_amd64
       bin: kubectl-whydied
     - selector:
         matchLabels: {os: darwin, arch: arm64}
       uri: https://github.com/DanilaZanin/kubectl-whydied/releases/download/v0.1.0/kubectl-whydied_v0.1.0_darwin_arm64.tar.gz
-      sha256: REPLACE_WITH_SHA256_FROM_checksums.txt
+      sha256: REPLACE_SHA256_darwin_arm64
       bin: kubectl-whydied
     - selector:
         matchLabels: {os: windows, arch: amd64}
       uri: https://github.com/DanilaZanin/kubectl-whydied/releases/download/v0.1.0/kubectl-whydied_v0.1.0_windows_amd64.zip
-      sha256: REPLACE_WITH_SHA256_FROM_checksums.txt
+      sha256: REPLACE_SHA256_windows_amd64
       bin: kubectl-whydied.exe
     - selector:
         matchLabels: {os: windows, arch: arm64}
       uri: https://github.com/DanilaZanin/kubectl-whydied/releases/download/v0.1.0/kubectl-whydied_v0.1.0_windows_arm64.zip
-      sha256: REPLACE_WITH_SHA256_FROM_checksums.txt
+      sha256: REPLACE_SHA256_windows_arm64
       bin: kubectl-whydied.exe

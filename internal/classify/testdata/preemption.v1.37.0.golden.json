@@ -1,22 +1,22 @@
 {
-  "observedAt": "2026-10-02T19:11:07.365135Z",
+  "observedAt": "2026-10-02T21:03:42.351629Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-preemption",
     "name": "low",
-    "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+    "uid": "7eaddf40-c927-42a5-be44-49444d5062a1",
     "exists": true,
     "phase": "Running",
-    "node": "wd-1370-3240-worker",
-    "startTime": "2026-10-02T19:11:06Z",
-    "deletionTimestamp": "2026-10-02T19:12:36Z",
+    "node": "wd-1370-6832-worker",
+    "startTime": "2026-10-02T21:03:25Z",
+    "deletionTimestamp": "2026-10-02T21:04:56Z",
     "restartPolicy": "Always"
   },
   "verdicts": [
     {
       "kind": "preemption-scheduler",
       "confidence": "confirmed",
-      "summary": "the scheduler preempted this pod to make room for a higher-priority pod",
+      "summary": "the scheduler initiated preemption of this pod to make room for a higher-priority pod; outcome at observation time: the pod is being deleted (metadata.deletionTimestamp 2026-10-02T21:04:56Z)",
       "competing": [
         "the DisruptionTarget condition shows a disruption was initiated; it does not by itself guarantee the disruption completed"
       ],
@@ -24,18 +24,18 @@
         {
           "kind": "pod-condition",
           "object": "Pod wd-preemption/low",
-          "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+          "uid": "7eaddf40-c927-42a5-be44-49444d5062a1",
           "field": "status.conditions[DisruptionTarget]",
           "value": "status=True reason=PreemptionByScheduler message=\"default-scheduler: preempting to accommodate a higher priority pod\"",
-          "time": "2026-10-02T19:11:06Z"
+          "time": "2026-10-02T21:03:26Z"
         },
         {
           "kind": "event",
           "object": "Pod wd-preemption/low",
-          "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+          "uid": "7eaddf40-c927-42a5-be44-49444d5062a1",
           "field": "event Preempted",
-          "value": "Preempted by pod 891191dc-c066-47ec-a30f-75eb6d17d4e1 on node wd-1370-3240-worker",
-          "time": "2026-10-02T19:11:06Z",
+          "value": "Preempted by pod d6663d50-148e-44f7-866b-54c4f64196a4 on node wd-1370-6832-worker",
+          "time": "2026-10-02T21:03:26Z",
           "count": 1
         }
       ]
@@ -47,30 +47,30 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 0,
-      "currentState": "running since 2026-10-02T19:11:06Z",
+      "currentState": "running since 2026-10-02T21:03:25Z",
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T19:11:06Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T21:03:25Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
           "kind": "no-termination",
           "confidence": "confirmed",
-          "summary": "no termination is recorded for this container: it is running with restartCount=0 and no previous state; the pod is being deleted but the container has not stopped yet",
+          "summary": "no termination is recorded for this container: it is running and the status has no previous state (restartCount=0); the pod is being deleted but the container has not stopped yet",
           "evidence": [
             {
               "kind": "pod-status",
               "object": "Pod wd-preemption/low",
-              "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+              "uid": "7eaddf40-c927-42a5-be44-49444d5062a1",
               "field": "status.containerStatuses[app].state.running.startedAt",
-              "value": "2026-10-02T19:11:06Z",
-              "time": "2026-10-02T19:11:06Z"
+              "value": "2026-10-02T21:03:25Z",
+              "time": "2026-10-02T21:03:25Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-preemption/low",
-              "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+              "uid": "7eaddf40-c927-42a5-be44-49444d5062a1",
               "field": "status.containerStatuses[app].restartCount",
               "value": "0"
             }
