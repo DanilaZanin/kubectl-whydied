@@ -146,8 +146,12 @@ func (a *analysis) container(ref collect.StatusRef) ContainerReport {
 // specOnly builds the report for a container that is in the pod spec but has no
 // status yet (not scheduled, or the kubelet has not reported).
 func (a *analysis) specOnly(name, role string) ContainerReport {
+	rd := RestartDecision{Decision: "unknown", Detail: "the pod status has no entry for this container"}
+	if role == "ephemeral" {
+		rd = RestartDecision{Policy: "never (ephemeral)", Decision: "not-restarting", Detail: "ephemeral containers are never restarted"}
+	}
 	return ContainerReport{Name: name, Role: role, CurrentState: "no status reported yet",
-		Restart: RestartDecision{Policy: "", Decision: "unknown", Detail: "the pod status has no entry for this container"},
+		Restart: rd,
 		Verdicts: []Verdict{{Kind: KindNoTermination, Confidence: NoData,
 			Summary:  "the container is in the pod spec but the pod status has no entry for it yet (pod not scheduled or not started); nothing to explain",
 			Evidence: []Evidence{podEv(a.pod, EvPodSpec, fmt.Sprintf("spec.%s[%s]", specListName(role), name), "present in spec", nil)}}}}
@@ -286,6 +290,12 @@ func (a *analysis) probeKill(in *inst) ([]Verdict, *trigger) {
 		}
 		m := a.instanceMatch(e, term)
 		if m == matchNone {
+			continue
+		}
+		if m == matchOutside {
+			if e.Reason == "Killing" && (strings.Contains(e.Message, "failed liveness probe") || strings.Contains(e.Message, "failed startup probe")) {
+				a.outsideWindow = append(a.outsideWindow, e)
+			}
 			continue
 		}
 		if e.Reason == "Unhealthy" && strings.Contains(strings.ToLower(e.Message), "probe") {
@@ -440,7 +450,10 @@ func (a *analysis) postStart(in *inst) []Verdict {
 			if !noInstance {
 				m = a.instanceMatch(e, in.term)
 			}
-			if m == matchNone {
+			if m == matchOutside {
+				a.outsideWindow = append(a.outsideWindow, e)
+			}
+			if m == matchNone || m == matchOutside {
 				continue
 			}
 			ev = append(ev, evEvent(e))
@@ -743,6 +756,9 @@ func (a *analysis) expectedness(in *inst) *Expectedness {
 	if terminating {
 		switch {
 		case !known:
+			if ps, ok := a.provenTeardownStart(); ok && !term.FinishedAt.IsZero() && term.FinishedAt.Time.Before(ps.Add(-time.Second)) {
+				return e(ExpectedNo, fmt.Sprintf("the instance ended at %s, strictly before the teardown that the API proves began at %s (DisruptionTarget time or deletion deadline minus deletionGracePeriodSeconds), so it stopped for another reason; which one is not in the API (crash, probe kill, OOM and external kill are all possible)", fmtTime(mt(term.FinishedAt)), ps.UTC().Format(time.RFC3339)))
+			}
 			return e(ExpectedUnknown, whyTerm+", but no evidence ties a teardown start to this instance, so the stop cannot be called part of it")
 		case !tied:
 			return e(ExpectedUnknown, fmt.Sprintf("the pod is terminating (%s) but this instance ended at %s, before the teardown started at %s; it stopped for another reason", whyTerm, fmtTime(mt(term.FinishedAt)), start.UTC().Format(time.RFC3339)))
@@ -823,10 +839,10 @@ func (a *analysis) restartDecision(in *inst) RestartDecision {
 		a.stopDecision(in, &d)
 	}
 	// RestartAllContainers on another container restarts this one too.
-	if !deleting && !podTerminal(p) && d.Decision != "not-restarting" {
+	if !deleting && !podTerminal(p) {
 		if name, idx, ok := a.restartAllTrigger(cs.Name); ok {
 			d.Decision = "restarting"
-			d.Detail = fmt.Sprintf("container %s matched restartPolicyRules[%d] with action RestartAllContainers, so all containers of the pod restart", name, idx)
+			d.Detail = fmt.Sprintf("container %s matched restartPolicyRules[%d] with action RestartAllContainers, so all containers of the pod restart, including one that already exited under its own restart policy", name, idx)
 		}
 	}
 	for _, e := range a.podEvents {
@@ -918,14 +934,35 @@ func (a *analysis) stopDecision(in *inst, d *RestartDecision) {
 	}
 	switch {
 	case last.IsZero():
-	case a.s.CollectedAt.IsZero() || a.s.CollectedAt.Sub(last) <= 2*backoffCap:
+	case a.s.CollectedAt.IsZero() || a.s.CollectedAt.Sub(last) <= backoffCap+backoffSlack:
 		d.Decision = "back-off"
 		d.Detail = prefix + "; a recent BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay"
 	default:
 		d.Decision = "unknown"
-		d.Detail = prefix + fmt.Sprintf("; the last BackOff event (%s) is historical relative to the observation, so whether a back-off is still running is unknown", fmtTime(tp(last)))
+		d.Detail = prefix + fmt.Sprintf("; the last BackOff event (%s) is older than the 5 minute maximum back-off (plus slack) relative to the observation, so whether a back-off is still running is unknown", fmtTime(tp(last)))
 	}
 }
 
 // backoffCap is the documented maximum CrashLoopBackOff delay.
-const backoffCap = 5 * time.Minute
+const (
+	backoffCap   = 5 * time.Minute
+	backoffSlack = 30 * time.Second
+)
+
+// provenTeardownStart is the teardown start the API itself states, with no
+// event involved: the DisruptionTarget transition or the deletion deadline minus
+// a non-zero deletionGracePeriodSeconds.
+func (a *analysis) provenTeardownStart() (time.Time, bool) {
+	p := a.pod
+	var best time.Time
+	if c := disruptionTarget(p); c != nil && c.Status == corev1.ConditionTrue && !c.LastTransitionTime.IsZero() {
+		best = c.LastTransitionTime.Time
+	}
+	if p.DeletionTimestamp != nil && p.DeletionGracePeriodSeconds != nil && *p.DeletionGracePeriodSeconds > 0 {
+		t := p.DeletionTimestamp.Add(-time.Duration(*p.DeletionGracePeriodSeconds) * time.Second)
+		if best.IsZero() || t.Before(best) {
+			best = t
+		}
+	}
+	return best, !best.IsZero()
+}

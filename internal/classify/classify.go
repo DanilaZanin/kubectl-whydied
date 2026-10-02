@@ -25,13 +25,14 @@ type analysis struct {
 	o   Options
 	pod *corev1.Pod
 
-	podEvents   []*corev1.Event // involvedObject.uid == pod UID
-	ownerEvents []*corev1.Event
-	hpaEvents   []*corev1.Event
-	nodeEvents  []*corev1.Event
-	otherUIDs   map[string]int // events for the same pod name but another UID
-	nameEvents  []*corev1.Event
-	noUIDEvents []*corev1.Event // context only, never evidence for a verdict
+	podEvents     []*corev1.Event // involvedObject.uid == pod UID
+	ownerEvents   []*corev1.Event
+	hpaEvents     []*corev1.Event
+	nodeEvents    []*corev1.Event
+	otherUIDs     map[string]int // events for the same pod name but another UID
+	nameEvents    []*corev1.Event
+	outsideWindow []*corev1.Event // inside an instance lifetime but outside --window: context only
+	noUIDEvents   []*corev1.Event // context only, never evidence for a verdict
 
 	gaps []collect.Gap
 
@@ -133,6 +134,11 @@ func Analyze(s *collect.Snapshot, o Options) (*Report, error) {
 	r.Containers = append(missing[:len(missing):len(missing)], r.Containers...)
 	a.attachLogs(r)
 	r.Context = a.nodeContext()
+	for _, e := range a.outsideWindow {
+		ev := evEvent(e)
+		ev.Note += "; context only: event outside correlation window (" + o.Window.String() + "), not used for a verdict"
+		r.Context = append(r.Context, ev)
+	}
 	for _, e := range a.noUIDEvents {
 		ev := evEvent(e)
 		ev.Note = "context only: this event has no involvedObject.uid, so it cannot be tied to this pod by identity; matched by name and by time not before the pod was created"

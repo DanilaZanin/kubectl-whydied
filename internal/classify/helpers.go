@@ -181,17 +181,19 @@ func signalName(n int) string {
 
 // Match levels of an event against one container instance.
 const (
-	matchNone  = iota // no known occurrence lies near the instance
-	matchWeak         // near the instance, but not firmly tied to it
-	matchExact        // a known occurrence lies inside the instance's lifetime and the correlation window
+	matchNone    = iota // no known occurrence lies near the instance
+	matchOutside        // inside the lifetime but outside the correlation window: context only, never causal
+	matchWeak           // near the instance (boundary slack or unknown start), but not firmly tied to it
+	matchExact          // a known occurrence lies inside the instance's lifetime and the correlation window
 )
 
 // instanceMatch tells how an (aggregated) event relates to the instance that
 // ended with term. Only the first and the last occurrence have known times, and
 // both are real occurrences; the span between them is never treated as observed.
 // An occurrence is an exact match when it lies inside [startedAt, finishedAt]
-// and within the correlation window before finishedAt. An unknown startedAt, a
-// one-second boundary slack, or an occurrence outside the window only gives a weak match.
+// and within the correlation window before finishedAt. An unknown startedAt or a
+// one-second boundary slack only gives a weak match; an occurrence outside the
+// window gives matchOutside, which callers show as context and never as a cause.
 func (a *analysis) instanceMatch(e *corev1.Event, term *corev1.ContainerStateTerminated) int {
 	if term == nil || term.FinishedAt.IsZero() {
 		return matchNone
@@ -214,7 +216,7 @@ func (a *analysis) instanceMatch(e *corev1.Event, term *corev1.ContainerStateTer
 		case !t.Before(start) && !t.After(fin):
 			l = matchExact
 			if fin.Sub(t) > a.o.Window {
-				l = matchWeak
+				l = matchOutside
 			}
 		case !t.Before(start.Add(-slack)) && !t.After(fin.Add(slack)):
 			l = matchWeak

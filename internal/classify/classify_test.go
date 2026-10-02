@@ -428,7 +428,7 @@ func TestRolesAndExpectedness(t *testing.T) {
 		{"crashed before the deletion started", mk("regular", 1, func(p *corev1.Pod) {
 			p.DeletionTimestamp = ptr(mtime(time.Minute))
 			p.Status.Conditions = []corev1.PodCondition{{Type: corev1.DisruptionTarget, Status: corev1.ConditionTrue, Reason: "EvictionByEvictionAPI", LastTransitionTime: mtime(time.Second)}}
-		}), "regular", ExpectedUnknown},
+		}), "regular", ExpectedNo},
 		{"deleting without any start evidence", mk("regular", 1, func(p *corev1.Pod) { p.DeletionTimestamp = ptr(mtime(time.Minute)) }), "regular", ExpectedUnknown},
 	}
 	for _, c := range cases {
@@ -843,9 +843,9 @@ func TestAggregatedKillingEvent(t *testing.T) {
 	if find(mk(-30*time.Minute, 5*time.Minute, 5), KindLivenessKill) != nil {
 		t.Fatal("an aggregated event that only spans the instance must not match")
 	}
-	// An occurrence outside the correlation window is only a weak match (item 9).
-	if v := find(mk(-5*time.Minute, -4*time.Minute, 2), KindLivenessKill); v == nil || v.Confidence != Likely {
-		t.Fatalf("outside --window: likely at most: %+v", v)
+	// An occurrence outside the correlation window is context only, never causal.
+	if find(mk(-5*time.Minute, -4*time.Minute, 2), KindLivenessKill) != nil {
+		t.Fatal("outside --window: no probe-kill verdict")
 	}
 	if find(mk(-30*time.Minute, 5*time.Minute, 2), KindLivenessKill) != nil {
 		t.Fatal("two occurrences, neither inside the instance: no verdict")

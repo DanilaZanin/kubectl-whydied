@@ -147,3 +147,53 @@ func TestInstanceKey(t *testing.T) {
 		t.Fatal("no pod: gone")
 	}
 }
+
+// N4: existence is decided by the API view, not by the report under test.
+func TestValidateRejectsForgedPodGone(t *testing.T) {
+	r, api := load(t, "oom.v1.37.0")
+	forged := &classify.Report{ObservedAt: r.ObservedAt, Window: r.Window,
+		Pod:        classify.PodInfo{Namespace: r.Pod.Namespace, Name: r.Pod.Name, Exists: false},
+		Verdicts:   []classify.Verdict{{Kind: classify.KindPodGone, Confidence: classify.NoData, Summary: "pod not found; its status history is not available from the API"}},
+		Containers: []classify.ContainerReport{}}
+	if err := Validate(forged, api); err == nil {
+		t.Fatal("a pod-gone report for a pod that exists in the API passed")
+	}
+	// The reverse: the API has no pod but the report claims one.
+	if err := Validate(r, &API{Pod: map[string]any{}, Node: map[string]any{}, Owners: map[string]map[string]any{}}); err == nil {
+		t.Fatal("a report with a live pod passed against an API without that pod")
+	}
+	// The honest pod-gone report against an events-only view passes.
+	g, gapi := load(t, "pod-gone.v1.37.0")
+	if err := Validate(g, gapi); err != nil {
+		t.Fatal(err)
+	}
+	// A pod that exists but whose report explains no container.
+	r2, api2 := load(t, "oom.v1.37.0")
+	r2.Containers = nil
+	if err := Validate(r2, api2); err == nil {
+		t.Fatal("a live pod with no explained container passed")
+	}
+}
+
+// S14: ownerReferences evidence values are verified (kind, name, uid).
+func TestValidateChecksOwnerReferenceValues(t *testing.T) {
+	r, api := load(t, "rollout.v1.37.0")
+	n := 0
+	for i := range r.Verdicts {
+		for j := range r.Verdicts[i].Evidence {
+			if e := &r.Verdicts[i].Evidence[j]; e.Field == "metadata.ownerReferences" {
+				if err := Validate(r, api); err != nil {
+					t.Fatalf("the genuine value must pass: %v", err)
+				}
+				e.Value = strings.Replace(e.Value, "ReplicaSet/", "ReplicaSet/forged-", 1)
+				n++
+			}
+		}
+	}
+	if n == 0 {
+		t.Fatal("no ownerReferences evidence in the rollout fixture")
+	}
+	if err := Validate(r, api); err == nil {
+		t.Fatal("a forged ownerReferences value passed")
+	}
+}

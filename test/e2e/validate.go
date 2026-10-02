@@ -149,9 +149,32 @@ var containerSel = regexp.MustCompile(`^(?:status\.(?:initContainerStatuses|cont
 func Validate(rep *classify.Report, api *API) error {
 	podMeta := nested(api.Pod, "metadata")
 	podUID := str(podMeta, "uid")
-	if rep.Pod.Exists {
+	// Existence comes from the API view, never from the report under test.
+	if apiHasPod := podUID != ""; apiHasPod {
+		if !rep.Pod.Exists {
+			return fmt.Errorf("the pod exists in the API (uid %s) but the report says it does not", podUID)
+		}
 		if rep.Pod.UID != podUID || rep.Pod.Name != str(podMeta, "name") || rep.Pod.Namespace != str(podMeta, "namespace") {
 			return fmt.Errorf("report pod identity %s/%s uid=%s differs from the API (%s/%s uid=%s)", rep.Pod.Namespace, rep.Pod.Name, rep.Pod.UID, str(podMeta, "namespace"), str(podMeta, "name"), podUID)
+		}
+		if specs, _ := nested(api.Pod, "spec")["containers"].([]any); len(specs) > 0 && len(rep.Containers) == 0 {
+			return fmt.Errorf("the pod exists with containers in the API but the report explains none")
+		}
+		for _, v := range rep.Verdicts {
+			if v.Kind == classify.KindPodGone {
+				return fmt.Errorf("a pod-gone verdict for a pod that exists in the API")
+			}
+		}
+	} else {
+		if rep.Pod.Exists {
+			return fmt.Errorf("the report says the pod exists but the API has no such pod")
+		}
+		gone := false
+		for _, v := range rep.Verdicts {
+			gone = gone || v.Kind == classify.KindPodGone
+		}
+		if !gone {
+			return fmt.Errorf("the pod is absent from the API but the report has no pod-gone verdict")
 		}
 	}
 	nodeUID, nodeName := str(nested(api.Node, "metadata"), "uid"), str(nested(api.Node, "metadata"), "name")
@@ -186,10 +209,7 @@ func Validate(rep *classify.Report, api *API) error {
 				if ev.UID != podUID {
 					return fmt.Errorf("%s: uid %q is not the pod's", ctx, ev.UID)
 				}
-				if _, ok := resolve(api.Pod, ev.Field); !ok {
-					return fmt.Errorf("%s: not present on the pod", ctx)
-				}
-				return nil
+				return checkOwnerRef(ctx, api.Pod, ev.Value)
 			}
 			obj, ok := api.Owners[ev.UID]
 			if !ok {
@@ -424,4 +444,23 @@ func instanceKey(api *API) string {
 		}
 	}
 	return strings.Join(parts, ";")
+}
+
+var ownerRefValue = regexp.MustCompile(`^(\S+)/(\S+) uid=(\S+) controller=true$`)
+
+// checkOwnerRef verifies an ownerReferences evidence value ("Kind/name uid=X
+// controller=true") against the pod's ownerReferences.
+func checkOwnerRef(ctx string, pod map[string]any, value string) error {
+	m := ownerRefValue.FindStringSubmatch(value)
+	if m == nil {
+		return fmt.Errorf("%s: unparsable ownerReferences value %q", ctx, value)
+	}
+	refs, _ := nested(pod, "metadata")["ownerReferences"].([]any)
+	for _, it := range refs {
+		r, _ := it.(map[string]any)
+		if str(r, "kind") == m[1] && str(r, "name") == m[2] && str(r, "uid") == m[3] && r["controller"] == true {
+			return nil
+		}
+	}
+	return fmt.Errorf("%s: no controller ownerReference %s/%s uid=%s on the pod", ctx, m[1], m[2], m[3])
 }

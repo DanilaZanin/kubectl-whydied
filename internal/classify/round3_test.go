@@ -96,16 +96,23 @@ func TestStoppingEventBeforeStartIsNotTeardown(t *testing.T) {
 	}
 }
 
-// S9: outside --window a probe kill is at most likely.
-func TestProbeKillOutsideWindowIsAtMostLikely(t *testing.T) {
+// S9: outside --window an event is context only, never a causal verdict.
+func TestProbeKillOutsideWindowIsContextOnly(t *testing.T) {
 	p := newPod(func(p *corev1.Pod) { p.Status.ContainerStatuses[0].State = termNow(137, 0) })
 	ev := event("Killing", "Container app failed liveness probe, will be restarted", "spec.containers{app}", -30*time.Second, -30*time.Second, 1)
 	r, err := Analyze(snap(p, ev), Options{Window: time.Second})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if v := find(r, KindLivenessKill); v == nil || v.Confidence != Likely {
-		t.Fatalf("30s before finish with --window 1s: %+v", v)
+	if find(r, KindLivenessKill) != nil {
+		t.Fatal("30s before finish with --window 1s must not produce a probe-kill verdict")
+	}
+	ctx := false
+	for _, e := range r.Context {
+		ctx = ctx || (e.Kind == EvEvent && strings.Contains(e.Note, "event outside correlation window"))
+	}
+	if !ctx {
+		t.Fatalf("the event must stay visible as context: %+v", r.Context)
 	}
 	if v := find(mustAnalyze(t, snap(p, ev)), KindLivenessKill); v == nil || v.Confidence != Confirmed {
 		t.Fatalf("inside the default window: %+v", v)
@@ -160,7 +167,7 @@ func TestHistoricalBackOffIsNotCurrent(t *testing.T) {
 	p := newPod(func(p *corev1.Pod) { p.Status.ContainerStatuses[0].State = termNow(1, -20*time.Minute) })
 	old := event("BackOff", "Back-off restarting failed container app", "spec.containers{app}", -20*time.Minute, -20*time.Minute, 1)
 	d := mustAnalyze(t, snap(p, old)).Containers[0].Restart
-	if d.Decision != "unknown" || !strings.Contains(d.Detail, "historical") {
+	if d.Decision != "unknown" || !strings.Contains(d.Detail, "older than the 5 minute") {
 		t.Fatalf("%+v", d)
 	}
 }
@@ -202,5 +209,45 @@ func TestEphemeralExpectednessText(t *testing.T) {
 	c := r.Containers[0]
 	if c.Expected.State == ExpectedNo || !strings.Contains(c.Expected.Why, "never restarted") || c.Restart.Decision != "not-restarting" {
 		t.Fatalf("%+v %+v", c.Expected, c.Restart)
+	}
+}
+
+// N2: a BackOff is current only within the 5 minute maximum plus 30s slack.
+func TestBackOffBoundary(t *testing.T) {
+	p := newPod(func(p *corev1.Pod) { p.Status.ContainerStatuses[0].State = termNow(1, -20*time.Minute) })
+	at := func(age time.Duration) string {
+		e := event("BackOff", "Back-off restarting failed container app", "spec.containers{app}", -age, -age, 1)
+		return mustAnalyze(t, snap(p, e)).Containers[0].Restart.Decision
+	}
+	for age, want := range map[time.Duration]string{5 * time.Minute: "back-off", 5*time.Minute + 30*time.Second: "back-off", 5*time.Minute + 31*time.Second: "unknown", 9 * time.Minute: "unknown"} {
+		if got := at(age); got != want {
+			t.Errorf("BackOff %s old: %s, want %s", age, got, want)
+		}
+	}
+}
+
+// S3: RestartAllContainers restarts every container, also one that exited under its own Never.
+func TestRestartAllIncludesNeighbourThatExitedUnderNever(t *testing.T) {
+	never := corev1.ContainerRestartPolicyNever
+	p := newPod(func(p *corev1.Pod) {
+		p.Spec.Containers = []corev1.Container{
+			{Name: "a", RestartPolicy: &never, RestartPolicyRules: []corev1.ContainerRestartRule{inRule(corev1.ContainerRestartRuleActionRestartAllContainers, 42)}},
+			{Name: "b", RestartPolicy: &never},
+		}
+		p.Status.ContainerStatuses = []corev1.ContainerStatus{{Name: "a", State: termNow(42, -time.Second)}, {Name: "b", State: termNow(0, -time.Minute)}}
+	})
+	r := mustAnalyze(t, snap(p))
+	if d := decisionOf(t, r, "b"); d.Decision != "restarting" || !strings.Contains(d.Detail, "already exited") {
+		t.Fatalf("b exited 0 under Never but RestartAllContainers restarts it: %+v", d)
+	}
+}
+
+func TestSpecOnlyEphemeralRestartText(t *testing.T) {
+	p := newPod(func(p *corev1.Pod) {
+		p.Spec.EphemeralContainers = []corev1.EphemeralContainer{{EphemeralContainerCommon: corev1.EphemeralContainerCommon{Name: "dbg"}}}
+	})
+	r, _ := Analyze(snap(p), Options{Container: "dbg"})
+	if d := r.Containers[0].Restart; d.Policy != "never (ephemeral)" || d.Decision != "not-restarting" {
+		t.Fatalf("%+v", d)
 	}
 }
