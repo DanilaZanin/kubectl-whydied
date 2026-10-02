@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:47:32.938576Z",
+  "observedAt": "2026-10-02T22:22:13.608014Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-exit137-app",
     "name": "exit137-app",
-    "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
+    "uid": "fe7f2950-0e3b-4f1d-9ee1-7f399450920d",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:47:13Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:21:53Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -17,15 +17,15 @@
       "name": "app",
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
-      "restartCount": 2,
-      "currentState": "terminated (exitCode=137, reason=Error)",
+      "restartCount": 1,
+      "currentState": "waiting: CrashLoopBackOff (back-off 10s restarting failed container=app pod=exit137-app_wd-exit137-app(fe7f2950-0e3b-4f1d-9ee1-7f399450920d))",
       "termination": {
-        "source": "state.terminated",
-        "containerID": "containerd://61de9ffd20103eb38f156918f069318932500aa1afcbbe0adf56cc6f6456ce0f",
+        "source": "lastState.terminated",
+        "containerID": "containerd://43eaef5ab1602bc5dae2cd83a67cf1ec6dcc02d6e8a7db1bc38991d5219a9c92",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:47:29Z",
-        "finishedAt": "2026-10-02T20:47:30Z"
+        "startedAt": "2026-10-02T22:21:55Z",
+        "finishedAt": "2026-10-02T22:21:56Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,18 +34,24 @@
       "restart": {
         "policy": "Always",
         "decision": "back-off",
-        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "detail": "the kubelet is delaying the next start (CrashLoopBackOff: exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
+          {
+            "kind": "pod-status",
+            "object": "Pod wd-exit137-app/exit137-app",
+            "uid": "fe7f2950-0e3b-4f1d-9ee1-7f399450920d",
+            "field": "status.containerStatuses[app].state.waiting.reason",
+            "value": "CrashLoopBackOff"
+          },
           {
             "kind": "event",
             "object": "Pod wd-exit137-app/exit137-app",
-            "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
+            "uid": "fe7f2950-0e3b-4f1d-9ee1-7f399450920d",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod exit137-app_wd-exit137-app(d569d3c6-23b8-4edc-aced-795bc6305e0c)",
-            "time": "2026-10-02T20:47:31Z",
-            "firstTime": "2026-10-02T20:47:16Z",
-            "count": 2,
-            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:47:16Z, last 2026-10-02T20:47:31Z)"
+            "value": "Back-off restarting failed container app in pod exit137-app_wd-exit137-app(fe7f2950-0e3b-4f1d-9ee1-7f399450920d)",
+            "time": "2026-10-02T22:21:57Z",
+            "count": 1,
+            "note": "fieldPath=spec.containers{app}"
           }
         ]
       },
@@ -62,23 +68,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-exit137-app/exit137-app",
-              "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
-              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "uid": "fe7f2950-0e3b-4f1d-9ee1-7f399450920d",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T20:47:30Z"
+              "time": "2026-10-02T22:21:56Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-exit137-app/exit137-app",
-              "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
-              "field": "status.containerStatuses[app].state.terminated.reason",
+              "uid": "fe7f2950-0e3b-4f1d-9ee1-7f399450920d",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:47:30Z"
+              "time": "2026-10-02T22:21:56Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-exit137-app/exit137-app",
-              "uid": "d569d3c6-23b8-4edc-aced-795bc6305e0c",
+              "uid": "fe7f2950-0e3b-4f1d-9ee1-7f399450920d",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"
@@ -86,6 +92,7 @@
           ]
         }
       ],
+      "logsPrevious": true,
       "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],

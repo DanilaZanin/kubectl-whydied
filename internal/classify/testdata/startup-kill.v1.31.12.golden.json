@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:54:32.071225Z",
+  "observedAt": "2026-10-02T22:29:20.337563Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-startup-kill",
     "name": "startup-kill",
-    "uid": "fb9c0f7e-993b-492e-aa6e-415194df34ef",
+    "uid": "ef14fb2b-f965-49e1-ad5c-eb46ffeeae75",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:53:36Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:28:26Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -18,14 +18,14 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 1,
-      "currentState": "running since 2026-10-02T20:54:13Z",
+      "currentState": "running since 2026-10-02T22:29:02Z",
       "termination": {
         "source": "lastState.terminated",
-        "containerID": "containerd://0526dca2242dc506d26c8694cc7cacad9ff719fd76228a53d65a5d614c85f1be",
+        "containerID": "containerd://1d9ce2d3c12191756c34dc1f7f20306601d01e78b3f8fb54fd54ef2ff04af04e",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:53:37Z",
-        "finishedAt": "2026-10-02T20:54:12Z"
+        "startedAt": "2026-10-02T22:28:26Z",
+        "finishedAt": "2026-10-02T22:29:02Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,7 +34,7 @@
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T20:54:13Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T22:29:02Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
@@ -48,34 +48,34 @@
             {
               "kind": "event",
               "object": "Pod wd-startup-kill/startup-kill",
-              "uid": "fb9c0f7e-993b-492e-aa6e-415194df34ef",
+              "uid": "ef14fb2b-f965-49e1-ad5c-eb46ffeeae75",
               "field": "event Killing",
               "value": "Container app failed startup probe, will be restarted",
-              "time": "2026-10-02T20:54:18Z",
-              "firstTime": "2026-10-02T20:53:42Z",
+              "time": "2026-10-02T22:29:09Z",
+              "firstTime": "2026-10-02T22:28:32Z",
               "count": 2,
-              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:53:42Z, last 2026-10-02T20:54:18Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:28:32Z, last 2026-10-02T22:29:09Z)"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-startup-kill/startup-kill",
-              "uid": "fb9c0f7e-993b-492e-aa6e-415194df34ef",
+              "uid": "ef14fb2b-f965-49e1-ad5c-eb46ffeeae75",
               "field": "status.containerStatuses[app].lastState.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T20:54:12Z"
+              "time": "2026-10-02T22:29:02Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-startup-kill/startup-kill",
-              "uid": "fb9c0f7e-993b-492e-aa6e-415194df34ef",
+              "uid": "ef14fb2b-f965-49e1-ad5c-eb46ffeeae75",
               "field": "status.containerStatuses[app].lastState.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:54:12Z"
+              "time": "2026-10-02T22:29:02Z"
             },
             {
               "kind": "pod-spec",
               "object": "Pod wd-startup-kill/startup-kill",
-              "uid": "fb9c0f7e-993b-492e-aa6e-415194df34ef",
+              "uid": "ef14fb2b-f965-49e1-ad5c-eb46ffeeae75",
               "field": "spec.containers[app].startupProbe",
               "value": "exec [cat /tmp/never-created] periodSeconds=2 failureThreshold=3 timeoutSeconds=1",
               "note": "failureThreshold is configured; the API does not report how many consecutive failures happened (event count is not a failure count)"
@@ -83,13 +83,13 @@
             {
               "kind": "event",
               "object": "Pod wd-startup-kill/startup-kill",
-              "uid": "fb9c0f7e-993b-492e-aa6e-415194df34ef",
+              "uid": "ef14fb2b-f965-49e1-ad5c-eb46ffeeae75",
               "field": "event Unhealthy",
               "value": "Startup probe failed: cat: can't open '/tmp/never-created': No such file or directory\n",
-              "time": "2026-10-02T20:54:18Z",
-              "firstTime": "2026-10-02T20:53:38Z",
+              "time": "2026-10-02T22:29:09Z",
+              "firstTime": "2026-10-02T22:28:29Z",
               "count": 6,
-              "note": "fieldPath=spec.containers{app}; event repeated 6 times (aggregated; first 2026-10-02T20:53:38Z, last 2026-10-02T20:54:18Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 6 times (aggregated; first 2026-10-02T22:28:29Z, last 2026-10-02T22:29:09Z)"
             }
           ]
         },
@@ -105,23 +105,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-startup-kill/startup-kill",
-              "uid": "fb9c0f7e-993b-492e-aa6e-415194df34ef",
+              "uid": "ef14fb2b-f965-49e1-ad5c-eb46ffeeae75",
               "field": "status.containerStatuses[app].lastState.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T20:54:12Z"
+              "time": "2026-10-02T22:29:02Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-startup-kill/startup-kill",
-              "uid": "fb9c0f7e-993b-492e-aa6e-415194df34ef",
+              "uid": "ef14fb2b-f965-49e1-ad5c-eb46ffeeae75",
               "field": "status.containerStatuses[app].lastState.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:54:12Z"
+              "time": "2026-10-02T22:29:02Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-startup-kill/startup-kill",
-              "uid": "fb9c0f7e-993b-492e-aa6e-415194df34ef",
+              "uid": "ef14fb2b-f965-49e1-ad5c-eb46ffeeae75",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"

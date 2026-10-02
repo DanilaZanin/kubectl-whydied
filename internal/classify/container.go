@@ -414,6 +414,24 @@ func (a *analysis) postStart(in *inst) []Verdict {
 	if noInstance && in.cs.RestartCount > 0 {
 		return nil
 	}
+	if noInstance && in.cs.State.Running != nil {
+		// Bind to the running instance: events before its start belong to nothing we can name.
+		start := in.cs.State.Running.StartedAt.Time
+		var keep []*corev1.Event
+		for _, e := range failed {
+			if _, l := eventTimes(e); !l.Before(start) {
+				keep = append(keep, e)
+			}
+		}
+		failed = keep
+		keep = nil
+		for _, e := range kills {
+			if _, l := eventTimes(e); !l.Before(start) {
+				keep = append(keep, e)
+			}
+		}
+		kills = keep
+	}
 	var out []Verdict
 	pick := func(es []*corev1.Event) (ev []Evidence, level int) {
 		level = matchNone
@@ -495,7 +513,8 @@ func (a *analysis) terminationStart(in *inst) (time.Time, bool) {
 		if start.IsZero() {
 			return false
 		}
-		return !t.Before(start.Add(-time.Second)) && !t.After(in.term.FinishedAt.Add(time.Second))
+		// An event before startedAt belongs to an earlier instance or episode.
+		return !t.Before(start) && !t.After(in.term.FinishedAt.Add(time.Second))
 	}
 	consider := func(t time.Time) {
 		if inLife(t) && (best.IsZero() || t.Before(best)) {
@@ -672,7 +691,9 @@ func (a *analysis) regularDone() (bool, time.Time) {
 		if t := ref.Status.State.Terminated; t != nil && t.FinishedAt.After(latest) {
 			latest = t.FinishedAt.Time
 		}
-		if !podTerminal(p) && (ref.Status.State.Terminated == nil || a.restartDecision(in).Decision != "not-restarting") {
+		// The app must really have terminated (a pod failing in init never ran it),
+		// and unless the pod is terminal it must not be about to restart.
+		if ref.Status.State.Terminated == nil || (!podTerminal(p) && a.restartDecision(in).Decision != "not-restarting") {
 			done = false
 		}
 	}
@@ -688,6 +709,12 @@ func (a *analysis) expectedness(in *inst) *Expectedness {
 	e := func(s, why string) *Expectedness { return &Expectedness{State: s, Why: why} }
 	if isSynthesized(term) {
 		return e(ExpectedUnknown, "the termination was synthesized by the kubelet (reason "+term.Reason+"); nothing shows whether the stop was intended")
+	}
+	if in.role == "ephemeral" {
+		if term.ExitCode == 0 {
+			return e(ExpectedYes, "an ephemeral container is never restarted, so exiting is its normal end; exit code 0")
+		}
+		return e(ExpectedUnknown, "an ephemeral (debug) container ended non-zero; the API does not say whether that was intended, and it is never restarted")
 	}
 	terminating, whyTerm := a.podTerminating()
 	start, known := a.terminationStart(in)
@@ -774,18 +801,33 @@ func (a *analysis) restartDecision(in *inst) RestartDecision {
 		d.Detail = "ephemeral containers are never restarted"
 		return d
 	}
+	deleting := p.DeletionTimestamp != nil
 	switch {
+	case cs.State.Running != nil:
+		d.Decision = "running"
+		d.Detail = fmt.Sprintf("running since %s; restartCount=%d as reported now (it can reset when the pod is recreated)", fmtTime(mt(cs.State.Running.StartedAt)), cs.RestartCount)
+	case podTerminal(p):
+		d.Decision = "not-restarting"
+		d.Detail = fmt.Sprintf("the pod is in the terminal phase %s, so the kubelet no longer restarts its containers (restart policy %s)", p.Status.Phase, policy)
+	case deleting:
+		// A deleting pod never restarts containers, whatever the container state says.
+		d.Decision = "not-restarting"
+		d.Detail = "the pod is being deleted; the kubelet does not start new containers for it"
 	case cs.State.Waiting != nil && cs.State.Waiting.Reason == "CrashLoopBackOff":
 		d.Decision = "back-off"
 		d.Detail = "the kubelet is delaying the next start (CrashLoopBackOff: exponential back-off, documented cap 5 minutes); the API does not report the remaining delay"
 		d.Evidence = append(d.Evidence, podEv(p, EvPodStatus, in.base+".state.waiting.reason", "CrashLoopBackOff", nil))
 	case cs.State.Waiting != nil:
 		d.Detail = "waiting: " + cs.State.Waiting.Reason
-	case cs.State.Running != nil:
-		d.Decision = "running"
-		d.Detail = fmt.Sprintf("running since %s; restartCount=%d as reported now (it can reset when the pod is recreated)", fmtTime(mt(cs.State.Running.StartedAt)), cs.RestartCount)
 	case term != nil && !in.fromLast:
 		a.stopDecision(in, &d)
+	}
+	// RestartAllContainers on another container restarts this one too.
+	if !deleting && !podTerminal(p) && d.Decision != "not-restarting" {
+		if name, idx, ok := a.restartAllTrigger(cs.Name); ok {
+			d.Decision = "restarting"
+			d.Detail = fmt.Sprintf("container %s matched restartPolicyRules[%d] with action RestartAllContainers, so all containers of the pod restart", name, idx)
+		}
 	}
 	for _, e := range a.podEvents {
 		if e.Reason == "BackOff" && containerOfEvent(e) == cs.Name {
@@ -795,64 +837,95 @@ func (a *analysis) restartDecision(in *inst) RestartDecision {
 	return d
 }
 
+// restartAllTrigger finds another container whose current termination matched a
+// RestartAllContainers rule.
+func (a *analysis) restartAllTrigger(except string) (name string, idx int, ok bool) {
+	for _, ref := range collect.AllStatuses(a.pod) {
+		t := ref.Status.State.Terminated
+		if ref.Status.Name == except || t == nil {
+			continue
+		}
+		spec, _ := containerSpec(a.pod, ref.Status.Name)
+		if spec == nil || len(spec.RestartPolicyRules) == 0 {
+			continue
+		}
+		if i, action, unknown := matchRule(spec.RestartPolicyRules, t.ExitCode); unknown == "" && i >= 0 && action == corev1.ContainerRestartRuleActionRestartAllContainers {
+			return ref.Status.Name, i, true
+		}
+	}
+	return "", 0, false
+}
+
 // stopDecision decides what happens after the current stop (state.terminated).
+// It is only called for a pod that is neither deleting nor in a terminal phase.
 func (a *analysis) stopDecision(in *inst, d *RestartDecision) {
-	p, term := a.pod, in.term
+	term := in.term
 	policy := d.Policy
-	switch {
-	case podTerminal(p):
-		d.Decision = "not-restarting"
-		d.Detail = fmt.Sprintf("the pod is in the terminal phase %s, so the kubelet no longer restarts its containers (restart policy %s)", p.Status.Phase, policy)
-		return
-	case p.DeletionTimestamp != nil:
-		d.Decision = "not-restarting"
-		d.Detail = "the pod is being deleted; the kubelet does not start new containers for it"
-		return
-	case in.role == "init" && term.ExitCode == 0:
+	if in.role == "init" && term.ExitCode == 0 {
 		d.Decision = "done"
 		d.Detail = "the init container completed successfully; it is not restarted"
 		return
 	}
-	if in.spec != nil && len(in.spec.RestartPolicyRules) > 0 && in.role != "init" {
-		rules := in.spec.RestartPolicyRules
-		idx, action, unknown := matchRule(rules, term.ExitCode)
+	restart, prefix := false, ""
+	if in.spec != nil && len(in.spec.RestartPolicyRules) > 0 {
+		idx, action, unknown := matchRule(in.spec.RestartPolicyRules, term.ExitCode)
 		switch {
 		case unknown != "":
 			d.Decision = "unknown"
 			d.Detail = "restartPolicyRules cannot be evaluated by this version: " + unknown
 			return
 		case idx >= 0:
-			d.Decision = "restarting"
-			d.Detail = fmt.Sprintf("restartPolicyRules[%d] matched exitCode=%d with action %s", idx, term.ExitCode, action)
+			restart = true
+			prefix = fmt.Sprintf("restartPolicyRules[%d] matched exitCode=%d with action %s", idx, term.ExitCode, action)
 			if action == corev1.ContainerRestartRuleActionRestartAllContainers {
-				d.Detail += " (all containers of the pod are restarted)"
+				prefix += " (all containers of the pod are restarted)"
 			}
-			return
+		default:
+			prefix = fmt.Sprintf("no restartPolicyRules entry matched exitCode=%d; the container restart policy applies: ", term.ExitCode)
 		}
-		d.Detail = fmt.Sprintf("no restartPolicyRules entry matched exitCode=%d; the container restart policy applies: ", term.ExitCode)
 	}
-	prefix := d.Detail
-	switch {
-	case in.role == "init" && p.Spec.RestartPolicy == corev1.RestartPolicyNever:
-		d.Decision = "not-restarting"
-		d.Detail = prefix + "the pod restart policy is Never, so a failed init container fails the pod"
-	case in.role == "init":
-		d.Decision = "restarting"
-		d.Detail = prefix + fmt.Sprintf("the pod restart policy %s retries a failed init container (with back-off)", p.Spec.RestartPolicy)
-	case policy == "Never" || (policy == "OnFailure" && term.ExitCode == 0):
-		d.Decision = "not-restarting"
-		d.Detail = prefix + fmt.Sprintf("restart policy %s does not restart a container that ended with exitCode=%d", policy, term.ExitCode)
-	default:
-		d.Decision = "restarting"
-		d.Detail = prefix + fmt.Sprintf("restart policy %s restarts this container (with back-off after repeated failures)", policy)
-		// The kubelet reports the back-off as a BackOff event; while it lasts the
-		// status often still shows state.terminated instead of CrashLoopBackOff.
-		for _, e := range a.podEvents {
-			_, l := eventTimes(e)
-			if e.Reason == "BackOff" && containerOfEvent(e) == in.cs.Name && !l.Before(term.FinishedAt.Add(-time.Second)) {
-				d.Decision = "back-off"
-				d.Detail = prefix + "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay"
+	if !restart {
+		switch {
+		case in.role == "init":
+			restart = policy != "Never"
+			if restart {
+				prefix += fmt.Sprintf("restart policy %s retries a failed init container (with back-off)", policy)
+			} else {
+				prefix += "restart policy Never: a failed init container is not retried and fails the pod"
 			}
+		case policy == "Never" || (policy == "OnFailure" && term.ExitCode == 0):
+			prefix += fmt.Sprintf("restart policy %s does not restart a container that ended with exitCode=%d", policy, term.ExitCode)
+		default:
+			restart = true
+			prefix += fmt.Sprintf("restart policy %s restarts this container (with back-off after repeated failures)", policy)
 		}
+	}
+	if !restart {
+		d.Decision = "not-restarting"
+		d.Detail = prefix
+		return
+	}
+	d.Decision, d.Detail = "restarting", prefix
+	// The kubelet reports a delayed restart as a BackOff event. While it lasts the
+	// status often still shows state.terminated instead of CrashLoopBackOff. Only
+	// a recent event is a current back-off; an old one is history.
+	var last time.Time
+	for _, e := range a.podEvents {
+		_, l := eventTimes(e)
+		if e.Reason == "BackOff" && containerOfEvent(e) == in.cs.Name && !l.Before(term.FinishedAt.Add(-time.Second)) && l.After(last) {
+			last = l
+		}
+	}
+	switch {
+	case last.IsZero():
+	case a.s.CollectedAt.IsZero() || a.s.CollectedAt.Sub(last) <= 2*backoffCap:
+		d.Decision = "back-off"
+		d.Detail = prefix + "; a recent BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay"
+	default:
+		d.Decision = "unknown"
+		d.Detail = prefix + fmt.Sprintf("; the last BackOff event (%s) is historical relative to the observation, so whether a back-off is still running is unknown", fmtTime(tp(last)))
 	}
 }
+
+// backoffCap is the documented maximum CrashLoopBackOff delay.
+const backoffCap = 5 * time.Minute

@@ -202,21 +202,43 @@ func (r *Report) HasData() bool {
 	return false
 }
 
-// Headline returns the most specific verdict for one-line output.
+// Headline returns the verdict that best describes the pod for one-line output:
+// a pod-level verdict first, else the container with the most serious
+// termination. A completed init container never outranks a crashed app container.
 func (r *Report) Headline() (container string, v Verdict, ok bool) {
 	if len(r.Verdicts) > 0 {
 		return "", r.Verdicts[0], true
 	}
+	best, bestScore := -1, -1
 	for i := range r.Containers {
 		c := &r.Containers[i]
-		if c.Termination != nil && len(c.Verdicts) > 0 {
-			return c.Name, c.Verdicts[0], true
+		if len(c.Verdicts) == 0 {
+			continue
+		}
+		score := 0
+		if c.Termination != nil {
+			score++
+			if c.Termination.ExitCode != 0 || c.Termination.Reason == "OOMKilled" {
+				score += 4
+			}
+		}
+		if c.Expected != nil && c.Expected.State == ExpectedNo {
+			score += 2
+		}
+		switch c.Verdicts[0].Kind {
+		case KindNoTermination, KindAppExit:
+		default:
+			score += 2 // a specific cause (OOM, probe kill, image pull, ...)
+		}
+		if c.Role == "regular" || c.Role == "sidecar" {
+			score++
+		}
+		if score > bestScore {
+			best, bestScore = i, score
 		}
 	}
-	for i := range r.Containers {
-		if len(r.Containers[i].Verdicts) > 0 {
-			return r.Containers[i].Name, r.Containers[i].Verdicts[0], true
-		}
+	if best < 0 {
+		return "", Verdict{}, false
 	}
-	return "", Verdict{}, false
+	return r.Containers[best].Name, r.Containers[best].Verdicts[0], true
 }

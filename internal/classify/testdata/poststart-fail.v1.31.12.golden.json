@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:51:08.688674Z",
+  "observedAt": "2026-10-02T22:25:52.647211Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-poststart-fail",
     "name": "poststart-fail",
-    "uid": "a28d3ac9-6c64-4b2e-92b9-10dbe02767c9",
+    "uid": "5e6fd589-3a60-43e2-897f-d0224918f850",
     "exists": true,
     "phase": "Pending",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:50:48Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:25:32Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -33,10 +33,10 @@
             {
               "kind": "event",
               "object": "Pod wd-poststart-fail/poststart-fail",
-              "uid": "a28d3ac9-6c64-4b2e-92b9-10dbe02767c9",
+              "uid": "5e6fd589-3a60-43e2-897f-d0224918f850",
               "field": "event FailedPostStartHook",
               "value": "PostStartHook failed",
-              "time": "2026-10-02T20:50:50Z",
+              "time": "2026-10-02T22:25:32Z",
               "count": 1,
               "note": "fieldPath=spec.containers{app}"
             }
@@ -53,10 +53,10 @@
             {
               "kind": "event",
               "object": "Pod wd-poststart-fail/poststart-fail",
-              "uid": "a28d3ac9-6c64-4b2e-92b9-10dbe02767c9",
+              "uid": "5e6fd589-3a60-43e2-897f-d0224918f850",
               "field": "event Killing",
               "value": "FailedPostStartHook",
-              "time": "2026-10-02T20:50:50Z",
+              "time": "2026-10-02T22:25:32Z",
               "count": 1,
               "note": "fieldPath=spec.containers{app}"
             }

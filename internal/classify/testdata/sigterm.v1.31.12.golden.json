@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:53:37.026459Z",
+  "observedAt": "2026-10-02T22:28:26.75955Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-sigterm",
     "name": "sigterm",
-    "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
+    "uid": "783d6b63-62e0-464d-9167-833cc7c87781",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:53:17Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:28:06Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -21,11 +21,11 @@
       "currentState": "terminated (exitCode=143, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://02c38a95c4cc2e662ea6e35c6359c89ae657b6fafa9aeedfc6f856b0a66a4545",
+        "containerID": "containerd://bf550528d98dde095dd03ff7ea0eec88b58dce3333b5618594d15e3ef9eb6ad2",
         "exitCode": 143,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:53:33Z",
-        "finishedAt": "2026-10-02T20:53:34Z"
+        "startedAt": "2026-10-02T22:28:22Z",
+        "finishedAt": "2026-10-02T22:28:23Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,18 +34,18 @@
       "restart": {
         "policy": "Always",
         "decision": "back-off",
-        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures); a recent BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
           {
             "kind": "event",
             "object": "Pod wd-sigterm/sigterm",
-            "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
+            "uid": "783d6b63-62e0-464d-9167-833cc7c87781",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod sigterm_wd-sigterm(8476bd90-1b93-4ece-b5fc-8747da862a6b)",
-            "time": "2026-10-02T20:53:35Z",
-            "firstTime": "2026-10-02T20:53:21Z",
+            "value": "Back-off restarting failed container app in pod sigterm_wd-sigterm(783d6b63-62e0-464d-9167-833cc7c87781)",
+            "time": "2026-10-02T22:28:23Z",
+            "firstTime": "2026-10-02T22:28:10Z",
             "count": 2,
-            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:53:21Z, last 2026-10-02T20:53:35Z)"
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:28:10Z, last 2026-10-02T22:28:23Z)"
           }
         ]
       },
@@ -61,23 +61,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-sigterm/sigterm",
-              "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
+              "uid": "783d6b63-62e0-464d-9167-833cc7c87781",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "143",
-              "time": "2026-10-02T20:53:34Z"
+              "time": "2026-10-02T22:28:23Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-sigterm/sigterm",
-              "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
+              "uid": "783d6b63-62e0-464d-9167-833cc7c87781",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:53:34Z"
+              "time": "2026-10-02T22:28:23Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-sigterm/sigterm",
-              "uid": "8476bd90-1b93-4ece-b5fc-8747da862a6b",
+              "uid": "783d6b63-62e0-464d-9167-833cc7c87781",
               "field": "exit code 128+n",
               "value": "143 = 128+15 = SIGTERM (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"

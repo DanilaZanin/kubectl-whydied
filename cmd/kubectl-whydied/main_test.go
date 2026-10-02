@@ -159,3 +159,14 @@ func TestListModeEmptySelectionIsNotAnError(t *testing.T) {
 		t.Fatalf("%d %s", code, out.String())
 	}
 }
+
+func TestListModeFailuresNeverNull(t *testing.T) {
+	var out bytes.Buffer
+	c := &config{output: "json", restartedSince: time.Hour}
+	if code := listMode(context.Background(), fake.NewClientset(restartedPod("a")), "ns", classify.Options{}, c, &out, io.Discard); code != exitOK {
+		t.Fatalf("exit %d", code)
+	}
+	if !strings.Contains(out.String(), `"failures": []`) || strings.Contains(out.String(), "null") {
+		t.Fatalf("lists must be [], never null:\n%s", out.String())
+	}
+}

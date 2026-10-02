@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:48:30.958432Z",
+  "observedAt": "2026-10-02T22:23:13.457888Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-image-pull",
     "name": "image-pull",
-    "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+    "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
     "exists": true,
     "phase": "Pending",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:48:11Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:22:53Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -27,10 +27,10 @@
           {
             "kind": "event",
             "object": "Pod wd-image-pull/image-pull",
-            "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+            "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
             "field": "event BackOff",
             "value": "Back-off pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\"",
-            "time": "2026-10-02T20:48:11Z",
+            "time": "2026-10-02T22:22:53Z",
             "count": 1,
             "note": "fieldPath=spec.containers{app}"
           }
@@ -45,76 +45,76 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+              "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
               "field": "status.containerStatuses[app].state.waiting.reason",
               "value": "ImagePullBackOff"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+              "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
               "field": "status.containerStatuses[app].state.waiting.message",
               "value": "Back-off pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\""
             },
             {
               "kind": "pod-spec",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+              "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
               "field": "spec.containers[app].image",
               "value": "registry.invalid/wd-e2e/does-not-exist:1.0"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+              "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
               "field": "event BackOff",
               "value": "Back-off pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\"",
-              "time": "2026-10-02T20:48:11Z",
+              "time": "2026-10-02T22:22:53Z",
               "count": 1,
               "note": "fieldPath=spec.containers{app}"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+              "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
               "field": "event Failed",
               "value": "Error: ImagePullBackOff",
-              "time": "2026-10-02T20:48:11Z",
+              "time": "2026-10-02T22:22:53Z",
               "count": 1,
               "note": "fieldPath=spec.containers{app}"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+              "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
               "field": "event Pulling",
               "value": "Pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\"",
-              "time": "2026-10-02T20:48:26Z",
-              "firstTime": "2026-10-02T20:48:11Z",
+              "time": "2026-10-02T22:23:06Z",
+              "firstTime": "2026-10-02T22:22:53Z",
               "count": 2,
-              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:48:11Z, last 2026-10-02T20:48:26Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:22:53Z, last 2026-10-02T22:23:06Z)"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+              "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
               "field": "event Failed",
               "value": "Failed to pull image \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to pull and unpack image \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to resolve reference \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to do request: Head \"https://registry.invalid/v2/wd-e2e/does-not-exist/manifests/1.0\": dial tcp: lookup registry.invalid on 192.168.5.2:53: no such host",
-              "time": "2026-10-02T20:48:26Z",
-              "firstTime": "2026-10-02T20:48:11Z",
+              "time": "2026-10-02T22:23:06Z",
+              "firstTime": "2026-10-02T22:22:53Z",
               "count": 2,
-              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:48:11Z, last 2026-10-02T20:48:26Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:22:53Z, last 2026-10-02T22:23:06Z)"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "ad40fe12-292f-4075-8681-061eab483e0d",
+              "uid": "9667ca94-8438-4f1d-87fb-1b35cb91c362",
               "field": "event Failed",
               "value": "Error: ErrImagePull",
-              "time": "2026-10-02T20:48:26Z",
-              "firstTime": "2026-10-02T20:48:11Z",
+              "time": "2026-10-02T22:23:06Z",
+              "firstTime": "2026-10-02T22:22:53Z",
               "count": 2,
-              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:48:11Z, last 2026-10-02T20:48:26Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:22:53Z, last 2026-10-02T22:23:06Z)"
             }
           ]
         }

@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:59:55.021262Z",
+  "observedAt": "2026-10-02T22:09:56.366357Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-exit137-app",
     "name": "exit137-app",
-    "uid": "85ee4cc1-b457-4b4f-b920-5fd7305c93d8",
+    "uid": "6378ee94-2181-43e9-8260-a8f63614acb6",
     "exists": true,
     "phase": "Running",
-    "node": "wd-1370-6832-worker",
-    "startTime": "2026-10-02T20:59:35Z",
+    "node": "wd-1370-3307-worker",
+    "startTime": "2026-10-02T22:09:34Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -21,11 +21,11 @@
       "currentState": "terminated (exitCode=137, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://c006d8dbd7699d5108d52b47f5de9e0d46b41dd97fa0cbac096716f0d6955066",
+        "containerID": "containerd://d411a7818bdd3b227c930ae56fb1a6d739d4282952633aa7d85c6275bd6f7269",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:59:51Z",
-        "finishedAt": "2026-10-02T20:59:52Z"
+        "startedAt": "2026-10-02T22:09:49Z",
+        "finishedAt": "2026-10-02T22:09:50Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,18 +34,18 @@
       "restart": {
         "policy": "Always",
         "decision": "back-off",
-        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures); a recent BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
           {
             "kind": "event",
             "object": "Pod wd-exit137-app/exit137-app",
-            "uid": "85ee4cc1-b457-4b4f-b920-5fd7305c93d8",
+            "uid": "6378ee94-2181-43e9-8260-a8f63614acb6",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod exit137-app_wd-exit137-app(85ee4cc1-b457-4b4f-b920-5fd7305c93d8)",
-            "time": "2026-10-02T20:59:53Z",
-            "firstTime": "2026-10-02T20:59:38Z",
+            "value": "Back-off restarting failed container app in pod exit137-app_wd-exit137-app(6378ee94-2181-43e9-8260-a8f63614acb6)",
+            "time": "2026-10-02T22:09:50Z",
+            "firstTime": "2026-10-02T22:09:38Z",
             "count": 2,
-            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:59:38Z, last 2026-10-02T20:59:53Z)"
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:09:38Z, last 2026-10-02T22:09:50Z)"
           }
         ]
       },
@@ -62,23 +62,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-exit137-app/exit137-app",
-              "uid": "85ee4cc1-b457-4b4f-b920-5fd7305c93d8",
+              "uid": "6378ee94-2181-43e9-8260-a8f63614acb6",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T20:59:52Z"
+              "time": "2026-10-02T22:09:50Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-exit137-app/exit137-app",
-              "uid": "85ee4cc1-b457-4b4f-b920-5fd7305c93d8",
+              "uid": "6378ee94-2181-43e9-8260-a8f63614acb6",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:59:52Z"
+              "time": "2026-10-02T22:09:50Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-exit137-app/exit137-app",
-              "uid": "85ee4cc1-b457-4b4f-b920-5fd7305c93d8",
+              "uid": "6378ee94-2181-43e9-8260-a8f63614acb6",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"

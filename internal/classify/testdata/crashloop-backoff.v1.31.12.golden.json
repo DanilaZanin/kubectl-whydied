@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:45:20.602512Z",
+  "observedAt": "2026-10-02T22:20:03.798146Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-crashloop-backoff",
     "name": "crashloop",
-    "uid": "e1bb829e-ab04-443c-a292-bad379878158",
+    "uid": "6d576bcf-5d6f-439c-9ae8-186601e09a53",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:43:33Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:18:10Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -18,14 +18,14 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 4,
-      "currentState": "waiting: CrashLoopBackOff (back-off 1m20s restarting failed container=app pod=crashloop_wd-crashloop-backoff(e1bb829e-ab04-443c-a292-bad379878158))",
+      "currentState": "waiting: CrashLoopBackOff (back-off 1m20s restarting failed container=app pod=crashloop_wd-crashloop-backoff(6d576bcf-5d6f-439c-9ae8-186601e09a53))",
       "termination": {
         "source": "lastState.terminated",
-        "containerID": "containerd://23ffd3f04008bf18f9a768e09bac21583634738bcbcb049cd9158db8326ebd81",
+        "containerID": "containerd://9037226a09dff0c1b8d45b7376e739458a59e3ed1a6930ff5fa4d86ab6774a87",
         "exitCode": 1,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:45:02Z",
-        "finishedAt": "2026-10-02T20:45:02Z"
+        "startedAt": "2026-10-02T22:19:45Z",
+        "finishedAt": "2026-10-02T22:19:45Z"
       },
       "expected": {
         "state": "unexpected",
@@ -39,20 +39,20 @@
           {
             "kind": "pod-status",
             "object": "Pod wd-crashloop-backoff/crashloop",
-            "uid": "e1bb829e-ab04-443c-a292-bad379878158",
+            "uid": "6d576bcf-5d6f-439c-9ae8-186601e09a53",
             "field": "status.containerStatuses[app].state.waiting.reason",
             "value": "CrashLoopBackOff"
           },
           {
             "kind": "event",
             "object": "Pod wd-crashloop-backoff/crashloop",
-            "uid": "e1bb829e-ab04-443c-a292-bad379878158",
+            "uid": "6d576bcf-5d6f-439c-9ae8-186601e09a53",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod crashloop_wd-crashloop-backoff(e1bb829e-ab04-443c-a292-bad379878158)",
-            "time": "2026-10-02T20:45:17Z",
-            "firstTime": "2026-10-02T20:43:35Z",
+            "value": "Back-off restarting failed container app in pod crashloop_wd-crashloop-backoff(6d576bcf-5d6f-439c-9ae8-186601e09a53)",
+            "time": "2026-10-02T22:19:59Z",
+            "firstTime": "2026-10-02T22:18:11Z",
             "count": 9,
-            "note": "fieldPath=spec.containers{app}; event repeated 9 times (aggregated; first 2026-10-02T20:43:35Z, last 2026-10-02T20:45:17Z)"
+            "note": "fieldPath=spec.containers{app}; event repeated 9 times (aggregated; first 2026-10-02T22:18:11Z, last 2026-10-02T22:19:59Z)"
           }
         ]
       },
@@ -65,18 +65,18 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-crashloop-backoff/crashloop",
-              "uid": "e1bb829e-ab04-443c-a292-bad379878158",
+              "uid": "6d576bcf-5d6f-439c-9ae8-186601e09a53",
               "field": "status.containerStatuses[app].lastState.terminated.exitCode",
               "value": "1",
-              "time": "2026-10-02T20:45:02Z"
+              "time": "2026-10-02T22:19:45Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-crashloop-backoff/crashloop",
-              "uid": "e1bb829e-ab04-443c-a292-bad379878158",
+              "uid": "6d576bcf-5d6f-439c-9ae8-186601e09a53",
               "field": "status.containerStatuses[app].lastState.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:45:02Z"
+              "time": "2026-10-02T22:19:45Z"
             }
           ]
         }

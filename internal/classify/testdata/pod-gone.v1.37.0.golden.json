@@ -1,5 +1,5 @@
 {
-  "observedAt": "2026-10-02T21:03:06.586382Z",
+  "observedAt": "2026-10-02T22:13:14.100731Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-pod-gone",
@@ -18,49 +18,49 @@
         {
           "kind": "event",
           "object": "Pod wd-pod-gone/gone",
-          "uid": "e1800a36-c58d-4bf3-905f-9cb469773d01",
+          "uid": "04dae0b0-fb98-4965-93da-8b0112cd0209",
           "field": "event Scheduled",
-          "value": "Successfully assigned wd-pod-gone/gone to wd-1370-6832-worker",
-          "time": "2026-10-02T21:02:46Z",
+          "value": "Successfully assigned wd-pod-gone/gone to wd-1370-3307-worker",
+          "time": "2026-10-02T22:12:53Z",
           "count": 1
         },
         {
           "kind": "event",
           "object": "Pod wd-pod-gone/gone",
-          "uid": "e1800a36-c58d-4bf3-905f-9cb469773d01",
+          "uid": "04dae0b0-fb98-4965-93da-8b0112cd0209",
           "field": "event Pulled",
           "value": "Container image \"busybox:1.37\" already present on machine and can be accessed by the pod",
-          "time": "2026-10-02T21:02:46Z",
+          "time": "2026-10-02T22:12:53Z",
           "count": 1,
           "note": "fieldPath=spec.containers{app}"
         },
         {
           "kind": "event",
           "object": "Pod wd-pod-gone/gone",
-          "uid": "e1800a36-c58d-4bf3-905f-9cb469773d01",
+          "uid": "04dae0b0-fb98-4965-93da-8b0112cd0209",
           "field": "event Created",
           "value": "Container created",
-          "time": "2026-10-02T21:02:46Z",
+          "time": "2026-10-02T22:12:53Z",
           "count": 1,
           "note": "fieldPath=spec.containers{app}"
         },
         {
           "kind": "event",
           "object": "Pod wd-pod-gone/gone",
-          "uid": "e1800a36-c58d-4bf3-905f-9cb469773d01",
+          "uid": "04dae0b0-fb98-4965-93da-8b0112cd0209",
           "field": "event Started",
           "value": "Container started",
-          "time": "2026-10-02T21:02:46Z",
+          "time": "2026-10-02T22:12:53Z",
           "count": 1,
           "note": "fieldPath=spec.containers{app}"
         },
         {
           "kind": "event",
           "object": "Pod wd-pod-gone/gone",
-          "uid": "e1800a36-c58d-4bf3-905f-9cb469773d01",
+          "uid": "04dae0b0-fb98-4965-93da-8b0112cd0209",
           "field": "event Killing",
           "value": "Stopping container app",
-          "time": "2026-10-02T21:02:47Z",
+          "time": "2026-10-02T22:12:54Z",
           "count": 1,
           "note": "fieldPath=spec.containers{app}"
         }
@@ -69,7 +69,7 @@
   ],
   "containers": [],
   "notes": [
-    "5 event(s) still reference this pod name (UIDs: e1800a36-c58d-4bf3-905f-9cb469773d01); they are listed as evidence and do not identify a cause by themselves"
+    "5 event(s) still reference this pod name (UIDs: 04dae0b0-fb98-4965-93da-8b0112cd0209); they are listed as evidence and do not identify a cause by themselves"
   ],
   "checked": [
     "pod status and spec",

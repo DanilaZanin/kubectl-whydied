@@ -17,10 +17,10 @@ import (
 // every piece of evidence in a report against it, so an invented field, value,
 // time, UID, containerID or container scope cannot pass.
 type API struct {
-	Pod       map[string]any
-	Events    []map[string]any
-	Node      map[string]any
-	OwnerUIDs map[string]bool
+	Pod    map[string]any
+	Events []map[string]any
+	Node   map[string]any
+	Owners map[string]map[string]any // uid -> owner object (ReplicaSet, Deployment, Job, ...)
 }
 
 type pathStep struct {
@@ -169,8 +169,12 @@ func Validate(rep *classify.Report, api *API) error {
 			if !ok {
 				return fmt.Errorf("%s: the field does not exist in the pod object", ctx)
 			}
-			if sv, isScalar := scalar(got); isScalar && ev.Value != "" && ev.Value != sv && !strings.Contains(ev.Value, sv) {
+			if sv, isScalar := scalar(got); isScalar && ev.Value != "" && ev.Value != sv &&
+				(!strings.HasSuffix(ev.Field, ".resources.limits.memory") || ev.Value != "spec memory limit "+sv) {
 				return fmt.Errorf("%s: value %q differs from the API value %q", ctx, ev.Value, sv)
+			}
+			if err := checkTime(ctx, api.Pod, ev, got); err != nil {
+				return err
 			}
 			if container != "" {
 				if m := containerSel.FindStringSubmatch(ev.Field); m != nil && m[1] != container {
@@ -178,20 +182,39 @@ func Validate(rep *classify.Report, api *API) error {
 				}
 			}
 		case classify.EvOwner:
-			if ev.UID != podUID && !api.OwnerUIDs[ev.UID] {
-				return fmt.Errorf("%s: uid %q is neither the pod nor an owner in the API", ctx, ev.UID)
-			}
 			if strings.HasPrefix(ev.Field, "metadata.ownerReferences") {
+				if ev.UID != podUID {
+					return fmt.Errorf("%s: uid %q is not the pod's", ctx, ev.UID)
+				}
 				if _, ok := resolve(api.Pod, ev.Field); !ok {
 					return fmt.Errorf("%s: not present on the pod", ctx)
 				}
+				return nil
+			}
+			obj, ok := api.Owners[ev.UID]
+			if !ok {
+				return fmt.Errorf("%s: uid %q is not an owner object in the API", ctx, ev.UID)
+			}
+			got, ok := resolve(obj, ev.Field)
+			if !ok {
+				return fmt.Errorf("%s: the field does not exist on the owner object", ctx)
+			}
+			if sv, isScalar := scalar(got); isScalar && ev.Value != sv {
+				return fmt.Errorf("%s: value %q differs from the API value %q", ctx, ev.Value, sv)
 			}
 		case classify.EvNodeCondition, classify.EvNodeMeta:
 			if ev.UID != nodeUID {
 				return fmt.Errorf("%s: uid %q is not the node's %q", ctx, ev.UID, nodeUID)
 			}
-			if _, ok := resolve(api.Node, ev.Field); !ok {
+			got, ok := resolve(api.Node, ev.Field)
+			if !ok {
 				return fmt.Errorf("%s: the field does not exist in the node object", ctx)
+			}
+			if err := checkNodeValue(ctx, ev, got); err != nil {
+				return err
+			}
+			if err := checkTime(ctx, api.Node, ev, got); err != nil {
+				return err
 			}
 		case classify.EvEvent:
 			reason := strings.TrimPrefix(ev.Field, "event ")
@@ -260,6 +283,74 @@ func Validate(rep *classify.Report, api *API) error {
 	return nil
 }
 
+func parseTime(v any) (time.Time, bool) {
+	str, ok := v.(string)
+	if !ok {
+		return time.Time{}, false
+	}
+	t, err := time.Parse(time.RFC3339Nano, str)
+	return t, err == nil
+}
+
+// checkTime requires the evidence time to come from the API object: the field
+// itself when it is a time, or the lastTransitionTime of a condition, or the
+// finishedAt of a terminated state.
+func checkTime(ctx string, obj map[string]any, ev classify.Evidence, got any) error {
+	if ev.Time == nil {
+		return nil
+	}
+	var cands []time.Time
+	if t, ok := parseTime(got); ok {
+		cands = append(cands, t)
+	}
+	if m, ok := got.(map[string]any); ok {
+		if t, ok := parseTime(m["lastTransitionTime"]); ok {
+			cands = append(cands, t)
+		}
+	}
+	if i := strings.LastIndex(ev.Field, "."); i > 0 {
+		if parent, ok := resolve(obj, ev.Field[:i]); ok {
+			if pm, ok := parent.(map[string]any); ok {
+				for _, k := range []string{"finishedAt", "lastTransitionTime"} {
+					if t, ok := parseTime(pm[k]); ok {
+						cands = append(cands, t)
+					}
+				}
+			}
+		}
+	}
+	for _, c := range cands {
+		if c.Equal(ev.Time.UTC()) {
+			return nil
+		}
+	}
+	return fmt.Errorf("%s: time %s is not backed by the API object (candidates %v)", ctx, ev.Time.UTC().Format(time.RFC3339), cands)
+}
+
+func checkNodeValue(ctx string, ev classify.Evidence, got any) error {
+	switch {
+	case ev.Field == "spec.taints":
+		list, _ := got.([]any)
+		for _, it := range list {
+			m, _ := it.(map[string]any)
+			if fmt.Sprintf("%s=%s:%s", str(m, "key"), str(m, "value"), str(m, "effect")) == ev.Value {
+				return nil
+			}
+		}
+		return fmt.Errorf("%s: no taint %q on the node", ctx, ev.Value)
+	case strings.HasPrefix(ev.Field, "status.conditions["):
+		m, _ := got.(map[string]any)
+		if want := fmt.Sprintf("%s: %s", str(m, "status"), str(m, "message")); ev.Value != want {
+			return fmt.Errorf("%s: value %q differs from the API condition %q", ctx, ev.Value, want)
+		}
+	default:
+		if sv, ok := scalar(got); ok && ev.Value != sv {
+			return fmt.Errorf("%s: value %q differs from the API value %q", ctx, ev.Value, sv)
+		}
+	}
+	return nil
+}
+
 // checkTermination compares the reported instance with the API: the source
 // field exists and the containerID and exit code match.
 func checkTermination(api *API, c classify.ContainerReport) error {
@@ -297,12 +388,40 @@ func toMap(v any) map[string]any {
 // data the classifier saw, so it only proves internal consistency; the kind
 // harness uses an API view fetched independently with kubectl instead.
 func APIFromSnapshot(s *collect.Snapshot) *API {
-	a := &API{Pod: toMap(s.Pod), Node: toMap(s.Node), OwnerUIDs: map[string]bool{}}
+	a := &API{Pod: toMap(s.Pod), Node: toMap(s.Node), Owners: map[string]map[string]any{}}
 	for i := range s.Events {
 		a.Events = append(a.Events, toMap(&s.Events[i]))
 	}
 	for _, o := range s.Owners {
-		a.OwnerUIDs[string(o.UID)] = true
+		anno := map[string]any{}
+		if o.Revision != "" {
+			anno["deployment.kubernetes.io/revision"] = o.Revision
+		}
+		a.Owners[string(o.UID)] = map[string]any{"metadata": map[string]any{"uid": string(o.UID), "name": o.Name, "annotations": anno}}
 	}
 	return a
+}
+
+// instanceKey identifies the container instances in an API view: pod UID, and
+// per container the restart count, the container IDs of the current and the
+// previous termination and the start of a running instance. If it changes
+// between two reads, a CrashLoop restart happened in between.
+func instanceKey(api *API) string {
+	if len(api.Pod) == 0 {
+		return "gone"
+	}
+	var parts []string
+	parts = append(parts, str(nested(api.Pod, "metadata"), "uid"))
+	for _, list := range []string{"initContainerStatuses", "containerStatuses", "ephemeralContainerStatuses"} {
+		items, _ := nested(api.Pod, "status")[list].([]any)
+		for _, it := range items {
+			m, _ := it.(map[string]any)
+			rc, _ := m["restartCount"].(float64)
+			parts = append(parts, fmt.Sprintf("%s|%v|%s|%s|%s", str(m, "name"), rc,
+				str(nested(m, "state", "terminated"), "containerID"),
+				str(nested(m, "lastState", "terminated"), "containerID"),
+				str(nested(m, "state", "running"), "startedAt")))
+		}
+	}
+	return strings.Join(parts, ";")
 }

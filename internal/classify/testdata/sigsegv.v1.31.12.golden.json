@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:53:17.688245Z",
+  "observedAt": "2026-10-02T22:28:06.811677Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-sigsegv",
     "name": "sigsegv",
-    "uid": "f0f446e5-5505-4828-a536-9735dc9de3a4",
+    "uid": "bb9c4055-61bf-43fa-976b-519af50c36df",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:52:57Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:27:45Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -21,11 +21,11 @@
       "currentState": "terminated (exitCode=139, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://7473eaca0d9776c6b6c9c535e6a7c6ec5bf79ef83a0838aaeeef7a51a79eb5fa",
+        "containerID": "containerd://a2a9fe8dc38e041aa8a897cb8c0a8d3807baa43d6c182337384e3b0563af8990",
         "exitCode": 139,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:53:12Z",
-        "finishedAt": "2026-10-02T20:53:13Z"
+        "startedAt": "2026-10-02T22:28:03Z",
+        "finishedAt": "2026-10-02T22:28:04Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,18 +34,18 @@
       "restart": {
         "policy": "Always",
         "decision": "back-off",
-        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures); a recent BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
           {
             "kind": "event",
             "object": "Pod wd-sigsegv/sigsegv",
-            "uid": "f0f446e5-5505-4828-a536-9735dc9de3a4",
+            "uid": "bb9c4055-61bf-43fa-976b-519af50c36df",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod sigsegv_wd-sigsegv(f0f446e5-5505-4828-a536-9735dc9de3a4)",
-            "time": "2026-10-02T20:53:13Z",
-            "firstTime": "2026-10-02T20:53:01Z",
+            "value": "Back-off restarting failed container app in pod sigsegv_wd-sigsegv(bb9c4055-61bf-43fa-976b-519af50c36df)",
+            "time": "2026-10-02T22:28:04Z",
+            "firstTime": "2026-10-02T22:27:49Z",
             "count": 2,
-            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:53:01Z, last 2026-10-02T20:53:13Z)"
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:27:49Z, last 2026-10-02T22:28:04Z)"
           }
         ]
       },
@@ -61,23 +61,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-sigsegv/sigsegv",
-              "uid": "f0f446e5-5505-4828-a536-9735dc9de3a4",
+              "uid": "bb9c4055-61bf-43fa-976b-519af50c36df",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "139",
-              "time": "2026-10-02T20:53:13Z"
+              "time": "2026-10-02T22:28:04Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-sigsegv/sigsegv",
-              "uid": "f0f446e5-5505-4828-a536-9735dc9de3a4",
+              "uid": "bb9c4055-61bf-43fa-976b-519af50c36df",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:53:13Z"
+              "time": "2026-10-02T22:28:04Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-sigsegv/sigsegv",
-              "uid": "f0f446e5-5505-4828-a536-9735dc9de3a4",
+              "uid": "bb9c4055-61bf-43fa-976b-519af50c36df",
               "field": "exit code 128+n",
               "value": "139 = 128+11 = SIGSEGV (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"

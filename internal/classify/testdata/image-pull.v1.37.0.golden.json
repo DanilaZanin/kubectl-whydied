@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T21:00:53.225775Z",
+  "observedAt": "2026-10-02T22:10:56.19656Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-image-pull",
     "name": "image-pull",
-    "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+    "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
     "exists": true,
     "phase": "Pending",
-    "node": "wd-1370-6832-worker",
-    "startTime": "2026-10-02T21:00:33Z",
+    "node": "wd-1370-3307-worker",
+    "startTime": "2026-10-02T22:10:35Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -27,10 +27,10 @@
           {
             "kind": "event",
             "object": "Pod wd-image-pull/image-pull",
-            "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+            "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
             "field": "event BackOff",
             "value": "Back-off pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\"",
-            "time": "2026-10-02T21:00:34Z",
+            "time": "2026-10-02T22:10:37Z",
             "count": 1,
             "note": "fieldPath=spec.containers{app}"
           }
@@ -45,76 +45,76 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+              "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
               "field": "status.containerStatuses[app].state.waiting.reason",
               "value": "ImagePullBackOff"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+              "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
               "field": "status.containerStatuses[app].state.waiting.message",
               "value": "Back-off pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\": ErrImagePull: failed to pull and unpack image \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to resolve reference \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to do request: Head \"https://registry.invalid/v2/wd-e2e/does-not-exist/manifests/1.0\": dial tcp: lookup registry.invalid on 192.168.5.2:53: no such host"
             },
             {
               "kind": "pod-spec",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+              "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
               "field": "spec.containers[app].image",
               "value": "registry.invalid/wd-e2e/does-not-exist:1.0"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+              "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
               "field": "event BackOff",
               "value": "Back-off pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\"",
-              "time": "2026-10-02T21:00:34Z",
+              "time": "2026-10-02T22:10:37Z",
               "count": 1,
               "note": "fieldPath=spec.containers{app}"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+              "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
               "field": "event Failed",
               "value": "Error: ImagePullBackOff",
-              "time": "2026-10-02T21:00:34Z",
+              "time": "2026-10-02T22:10:37Z",
               "count": 1,
               "note": "fieldPath=spec.containers{app}"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+              "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
               "field": "event Pulling",
               "value": "Pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\"",
-              "time": "2026-10-02T21:00:49Z",
-              "firstTime": "2026-10-02T21:00:33Z",
+              "time": "2026-10-02T22:10:48Z",
+              "firstTime": "2026-10-02T22:10:36Z",
               "count": 2,
-              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T21:00:33Z, last 2026-10-02T21:00:49Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:10:36Z, last 2026-10-02T22:10:48Z)"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+              "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
               "field": "event Failed",
               "value": "Failed to pull image \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to pull and unpack image \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to resolve reference \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to do request: Head \"https://registry.invalid/v2/wd-e2e/does-not-exist/manifests/1.0\": dial tcp: lookup registry.invalid on 192.168.5.2:53: no such host",
-              "time": "2026-10-02T21:00:49Z",
-              "firstTime": "2026-10-02T21:00:33Z",
+              "time": "2026-10-02T22:10:48Z",
+              "firstTime": "2026-10-02T22:10:36Z",
               "count": 2,
-              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T21:00:33Z, last 2026-10-02T21:00:49Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:10:36Z, last 2026-10-02T22:10:48Z)"
             },
             {
               "kind": "event",
               "object": "Pod wd-image-pull/image-pull",
-              "uid": "c2ddec04-af70-4631-8390-9be7d7041888",
+              "uid": "8b754344-8774-49b6-a8c2-bb0ac7f306e2",
               "field": "event Failed",
               "value": "Error: ErrImagePull",
-              "time": "2026-10-02T21:00:49Z",
-              "firstTime": "2026-10-02T21:00:33Z",
+              "time": "2026-10-02T22:10:48Z",
+              "firstTime": "2026-10-02T22:10:36Z",
               "count": 2,
-              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T21:00:33Z, last 2026-10-02T21:00:49Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:10:36Z, last 2026-10-02T22:10:48Z)"
             }
           ]
         }

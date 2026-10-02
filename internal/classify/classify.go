@@ -125,6 +125,11 @@ func Analyze(s *collect.Snapshot, o Options) (*Report, error) {
 			missing = append(missing, a.specOnly(c.Name, "regular"))
 		}
 	}
+	for _, c := range p.Spec.EphemeralContainers {
+		if !have[c.Name] && (o.Container == "" || o.Container == c.Name) {
+			missing = append(missing, a.specOnly(c.Name, "ephemeral"))
+		}
+	}
 	r.Containers = append(missing[:len(missing):len(missing)], r.Containers...)
 	a.attachLogs(r)
 	r.Context = a.nodeContext()

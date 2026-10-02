@@ -1,21 +1,21 @@
 {
-  "observedAt": "2026-10-02T20:52:58.327893Z",
+  "observedAt": "2026-10-02T22:27:45.496125Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-sidecar-stop",
-    "name": "sidecar-job-pdzb8",
-    "uid": "c6b3b7cd-86db-4d9d-a55a-6f48e06f75fe",
+    "name": "sidecar-job-4hg66",
+    "uid": "06a67ad2-9a65-466b-aac1-ef6d57b5fdfc",
     "exists": true,
     "phase": "Succeeded",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:52:02Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:26:48Z",
     "restartPolicy": "Never"
   },
   "owners": [
     {
       "kind": "Job",
       "name": "sidecar-job",
-      "uid": "9c9d4571-7033-442c-9f59-a71437ad6088",
+      "uid": "e80d24c6-d17f-4b5d-8794-5e440746385e",
       "found": true
     }
   ],
@@ -29,11 +29,11 @@
       "currentState": "terminated (exitCode=137, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://f73239a856241efa78a900e9c3a3c7ad61e2ca87c97d6ac024579582c4349214",
+        "containerID": "containerd://203db49d09f7c43f67f50d6ce5a93d37aa723ead86660264d05657173dae2fe9",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:52:03Z",
-        "finishedAt": "2026-10-02T20:52:39Z"
+        "startedAt": "2026-10-02T22:26:48Z",
+        "finishedAt": "2026-10-02T22:27:25Z"
       },
       "expected": {
         "state": "expected",
@@ -56,24 +56,24 @@
           "evidence": [
             {
               "kind": "pod-status",
-              "object": "Pod wd-sidecar-stop/sidecar-job-pdzb8",
-              "uid": "c6b3b7cd-86db-4d9d-a55a-6f48e06f75fe",
+              "object": "Pod wd-sidecar-stop/sidecar-job-4hg66",
+              "uid": "06a67ad2-9a65-466b-aac1-ef6d57b5fdfc",
               "field": "status.initContainerStatuses[side].state.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T20:52:39Z"
+              "time": "2026-10-02T22:27:25Z"
             },
             {
               "kind": "pod-status",
-              "object": "Pod wd-sidecar-stop/sidecar-job-pdzb8",
-              "uid": "c6b3b7cd-86db-4d9d-a55a-6f48e06f75fe",
+              "object": "Pod wd-sidecar-stop/sidecar-job-4hg66",
+              "uid": "06a67ad2-9a65-466b-aac1-ef6d57b5fdfc",
               "field": "status.initContainerStatuses[side].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:52:39Z"
+              "time": "2026-10-02T22:27:25Z"
             },
             {
               "kind": "convention",
-              "object": "Pod wd-sidecar-stop/sidecar-job-pdzb8",
-              "uid": "c6b3b7cd-86db-4d9d-a55a-6f48e06f75fe",
+              "object": "Pod wd-sidecar-stop/sidecar-job-4hg66",
+              "uid": "06a67ad2-9a65-466b-aac1-ef6d57b5fdfc",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"

@@ -1,28 +1,28 @@
 {
-  "observedAt": "2026-10-02T21:04:02.099235Z",
+  "observedAt": "2026-10-02T22:14:11.48601Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-rollout",
-    "name": "roll-9cd8ddc94-hd6w2",
-    "uid": "e7d166d3-25e0-4b6b-bc75-1c7d96eed5cf",
+    "name": "roll-9cd8ddc94-z7k2h",
+    "uid": "dc1432db-db1f-428b-827a-41026ef7aa53",
     "exists": true,
     "phase": "Running",
-    "node": "wd-1370-6832-worker",
-    "startTime": "2026-10-02T21:03:41Z",
-    "deletionTimestamp": "2026-10-02T21:05:12Z",
+    "node": "wd-1370-3307-worker",
+    "startTime": "2026-10-02T22:13:50Z",
+    "deletionTimestamp": "2026-10-02T22:15:21Z",
     "restartPolicy": "Always"
   },
   "owners": [
     {
       "kind": "ReplicaSet",
       "name": "roll-9cd8ddc94",
-      "uid": "ce930645-3c34-4d9c-8fce-385c47d0fb0c",
+      "uid": "2672483f-4d4a-4416-96bb-6d39ded70176",
       "found": true
     },
     {
       "kind": "Deployment",
       "name": "roll",
-      "uid": "74cbf171-9bc9-4f26-bb27-3f7d4aca5f7b",
+      "uid": "1ae2d2b5-8651-46f7-bbe9-c2f38d61b793",
       "found": true
     }
   ],
@@ -38,18 +38,18 @@
         {
           "kind": "event",
           "object": "ReplicaSet wd-rollout/roll-9cd8ddc94",
-          "uid": "ce930645-3c34-4d9c-8fce-385c47d0fb0c",
+          "uid": "2672483f-4d4a-4416-96bb-6d39ded70176",
           "field": "event SuccessfulDelete",
-          "value": "Deleted pod: roll-9cd8ddc94-hd6w2",
-          "time": "2026-10-02T21:03:42Z",
+          "value": "Deleted pod: roll-9cd8ddc94-z7k2h",
+          "time": "2026-10-02T22:13:51Z",
           "count": 1
         },
         {
           "kind": "owner",
-          "object": "Pod wd-rollout/roll-9cd8ddc94-hd6w2",
-          "uid": "e7d166d3-25e0-4b6b-bc75-1c7d96eed5cf",
+          "object": "Pod wd-rollout/roll-9cd8ddc94-z7k2h",
+          "uid": "dc1432db-db1f-428b-827a-41026ef7aa53",
           "field": "metadata.ownerReferences",
-          "value": "ReplicaSet/roll-9cd8ddc94 uid=ce930645-3c34-4d9c-8fce-385c47d0fb0c controller=true"
+          "value": "ReplicaSet/roll-9cd8ddc94 uid=2672483f-4d4a-4416-96bb-6d39ded70176 controller=true"
         }
       ]
     },
@@ -64,42 +64,42 @@
         {
           "kind": "owner",
           "object": "ReplicaSet wd-rollout/roll-9cd8ddc94",
-          "uid": "ce930645-3c34-4d9c-8fce-385c47d0fb0c",
+          "uid": "2672483f-4d4a-4416-96bb-6d39ded70176",
           "field": "metadata.annotations[deployment.kubernetes.io/revision]",
           "value": "1"
         },
         {
           "kind": "owner",
           "object": "Deployment wd-rollout/roll",
-          "uid": "74cbf171-9bc9-4f26-bb27-3f7d4aca5f7b",
+          "uid": "1ae2d2b5-8651-46f7-bbe9-c2f38d61b793",
           "field": "metadata.annotations[deployment.kubernetes.io/revision]",
           "value": "2"
         },
         {
           "kind": "event",
           "object": "Deployment wd-rollout/roll",
-          "uid": "74cbf171-9bc9-4f26-bb27-3f7d4aca5f7b",
+          "uid": "1ae2d2b5-8651-46f7-bbe9-c2f38d61b793",
           "field": "event ScalingReplicaSet",
           "value": "Scaled up replica set roll-9cd8ddc94 from 0 to 1",
-          "time": "2026-10-02T21:03:41Z",
+          "time": "2026-10-02T22:13:50Z",
           "count": 1
         },
         {
           "kind": "event",
           "object": "Deployment wd-rollout/roll",
-          "uid": "74cbf171-9bc9-4f26-bb27-3f7d4aca5f7b",
+          "uid": "1ae2d2b5-8651-46f7-bbe9-c2f38d61b793",
           "field": "event ScalingReplicaSet",
           "value": "Scaled up replica set roll-8664dfb86c from 0 to 1",
-          "time": "2026-10-02T21:03:42Z",
+          "time": "2026-10-02T22:13:51Z",
           "count": 1
         },
         {
           "kind": "event",
           "object": "Deployment wd-rollout/roll",
-          "uid": "74cbf171-9bc9-4f26-bb27-3f7d4aca5f7b",
+          "uid": "1ae2d2b5-8651-46f7-bbe9-c2f38d61b793",
           "field": "event ScalingReplicaSet",
           "value": "Scaled down replica set roll-9cd8ddc94 from 1 to 0",
-          "time": "2026-10-02T21:03:42Z",
+          "time": "2026-10-02T22:13:51Z",
           "count": 1
         }
       ]
@@ -111,11 +111,11 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 0,
-      "currentState": "running since 2026-10-02T21:03:42Z",
+      "currentState": "running since 2026-10-02T22:13:51Z",
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T21:03:42Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T22:13:51Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
@@ -125,16 +125,16 @@
           "evidence": [
             {
               "kind": "pod-status",
-              "object": "Pod wd-rollout/roll-9cd8ddc94-hd6w2",
-              "uid": "e7d166d3-25e0-4b6b-bc75-1c7d96eed5cf",
+              "object": "Pod wd-rollout/roll-9cd8ddc94-z7k2h",
+              "uid": "dc1432db-db1f-428b-827a-41026ef7aa53",
               "field": "status.containerStatuses[app].state.running.startedAt",
-              "value": "2026-10-02T21:03:42Z",
-              "time": "2026-10-02T21:03:42Z"
+              "value": "2026-10-02T22:13:51Z",
+              "time": "2026-10-02T22:13:51Z"
             },
             {
               "kind": "pod-status",
-              "object": "Pod wd-rollout/roll-9cd8ddc94-hd6w2",
-              "uid": "e7d166d3-25e0-4b6b-bc75-1c7d96eed5cf",
+              "object": "Pod wd-rollout/roll-9cd8ddc94-z7k2h",
+              "uid": "dc1432db-db1f-428b-827a-41026ef7aa53",
               "field": "status.containerStatuses[app].restartCount",
               "value": "0"
             }

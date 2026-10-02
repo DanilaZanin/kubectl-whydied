@@ -1,28 +1,28 @@
 {
-  "observedAt": "2026-10-02T20:52:03.305008Z",
+  "observedAt": "2026-10-02T22:26:48.497947Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-scale-down",
-    "name": "scaled-7c449d8654-98h94",
-    "uid": "c52ce9f2-c975-4658-9b4b-65b2ceec410d",
+    "name": "scaled-7c449d8654-58jvh",
+    "uid": "5c2cdad4-2f69-4636-bc65-3af2ca1931eb",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:51:46Z",
-    "deletionTimestamp": "2026-10-02T20:53:16Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:26:30Z",
+    "deletionTimestamp": "2026-10-02T22:28:01Z",
     "restartPolicy": "Always"
   },
   "owners": [
     {
       "kind": "ReplicaSet",
       "name": "scaled-7c449d8654",
-      "uid": "c661f3f4-44eb-4cc1-abc3-116c76400554",
+      "uid": "f5bffd03-5267-43bb-8b10-56169e648987",
       "found": true
     },
     {
       "kind": "Deployment",
       "name": "scaled",
-      "uid": "28c90fd9-7a48-4ccd-8ef7-0761a94c7688",
+      "uid": "adc6eec2-4ad7-459c-9a7a-35fb2e557f62",
       "found": true
     }
   ],
@@ -38,18 +38,18 @@
         {
           "kind": "event",
           "object": "ReplicaSet wd-scale-down/scaled-7c449d8654",
-          "uid": "c661f3f4-44eb-4cc1-abc3-116c76400554",
+          "uid": "f5bffd03-5267-43bb-8b10-56169e648987",
           "field": "event SuccessfulDelete",
-          "value": "Deleted pod: scaled-7c449d8654-98h94",
-          "time": "2026-10-02T20:51:46Z",
+          "value": "Deleted pod: scaled-7c449d8654-58jvh",
+          "time": "2026-10-02T22:26:31Z",
           "count": 1
         },
         {
           "kind": "owner",
-          "object": "Pod wd-scale-down/scaled-7c449d8654-98h94",
-          "uid": "c52ce9f2-c975-4658-9b4b-65b2ceec410d",
+          "object": "Pod wd-scale-down/scaled-7c449d8654-58jvh",
+          "uid": "5c2cdad4-2f69-4636-bc65-3af2ca1931eb",
           "field": "metadata.ownerReferences",
-          "value": "ReplicaSet/scaled-7c449d8654 uid=c661f3f4-44eb-4cc1-abc3-116c76400554 controller=true"
+          "value": "ReplicaSet/scaled-7c449d8654 uid=f5bffd03-5267-43bb-8b10-56169e648987 controller=true"
         }
       ]
     }
@@ -60,11 +60,11 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 0,
-      "currentState": "running since 2026-10-02T20:51:46Z",
+      "currentState": "running since 2026-10-02T22:26:30Z",
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T20:51:46Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T22:26:30Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
@@ -74,16 +74,16 @@
           "evidence": [
             {
               "kind": "pod-status",
-              "object": "Pod wd-scale-down/scaled-7c449d8654-98h94",
-              "uid": "c52ce9f2-c975-4658-9b4b-65b2ceec410d",
+              "object": "Pod wd-scale-down/scaled-7c449d8654-58jvh",
+              "uid": "5c2cdad4-2f69-4636-bc65-3af2ca1931eb",
               "field": "status.containerStatuses[app].state.running.startedAt",
-              "value": "2026-10-02T20:51:46Z",
-              "time": "2026-10-02T20:51:46Z"
+              "value": "2026-10-02T22:26:30Z",
+              "time": "2026-10-02T22:26:30Z"
             },
             {
               "kind": "pod-status",
-              "object": "Pod wd-scale-down/scaled-7c449d8654-98h94",
-              "uid": "c52ce9f2-c975-4658-9b4b-65b2ceec410d",
+              "object": "Pod wd-scale-down/scaled-7c449d8654-58jvh",
+              "uid": "5c2cdad4-2f69-4636-bc65-3af2ca1931eb",
               "field": "status.containerStatuses[app].restartCount",
               "value": "0"
             }

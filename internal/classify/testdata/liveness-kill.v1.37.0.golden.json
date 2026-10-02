@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T21:02:07.726552Z",
+  "observedAt": "2026-10-02T22:12:13.222015Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-liveness-kill",
     "name": "liveness-kill",
-    "uid": "1e45323b-a745-4764-a1c2-e4d990a41ccd",
+    "uid": "57b85d8a-0a54-46a8-9771-0ce73c80b3e8",
     "exists": true,
     "phase": "Running",
-    "node": "wd-1370-6832-worker",
-    "startTime": "2026-10-02T21:01:12Z",
+    "node": "wd-1370-3307-worker",
+    "startTime": "2026-10-02T22:11:15Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -18,14 +18,14 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 1,
-      "currentState": "running since 2026-10-02T21:01:50Z",
+      "currentState": "running since 2026-10-02T22:11:54Z",
       "termination": {
         "source": "lastState.terminated",
-        "containerID": "containerd://c329850844a5352b0ed425aeb23a1fb1885dbeab6422f348c2e88fd0560eda62",
+        "containerID": "containerd://241ce746f609274c777033395f39c1a6030872e34ae667a082b1af7e7a241b05",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T21:01:12Z",
-        "finishedAt": "2026-10-02T21:01:50Z"
+        "startedAt": "2026-10-02T22:11:16Z",
+        "finishedAt": "2026-10-02T22:11:54Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,7 +34,7 @@
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T21:01:50Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T22:11:54Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
@@ -48,34 +48,34 @@
             {
               "kind": "event",
               "object": "Pod wd-liveness-kill/liveness-kill",
-              "uid": "1e45323b-a745-4764-a1c2-e4d990a41ccd",
+              "uid": "57b85d8a-0a54-46a8-9771-0ce73c80b3e8",
               "field": "event Killing",
               "value": "Container app failed liveness probe, will be restarted",
-              "time": "2026-10-02T21:01:58Z",
-              "firstTime": "2026-10-02T21:01:20Z",
+              "time": "2026-10-02T22:12:02Z",
+              "firstTime": "2026-10-02T22:11:24Z",
               "count": 2,
-              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T21:01:20Z, last 2026-10-02T21:01:58Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:11:24Z, last 2026-10-02T22:12:02Z)"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-liveness-kill/liveness-kill",
-              "uid": "1e45323b-a745-4764-a1c2-e4d990a41ccd",
+              "uid": "57b85d8a-0a54-46a8-9771-0ce73c80b3e8",
               "field": "status.containerStatuses[app].lastState.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T21:01:50Z"
+              "time": "2026-10-02T22:11:54Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-liveness-kill/liveness-kill",
-              "uid": "1e45323b-a745-4764-a1c2-e4d990a41ccd",
+              "uid": "57b85d8a-0a54-46a8-9771-0ce73c80b3e8",
               "field": "status.containerStatuses[app].lastState.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T21:01:50Z"
+              "time": "2026-10-02T22:11:54Z"
             },
             {
               "kind": "pod-spec",
               "object": "Pod wd-liveness-kill/liveness-kill",
-              "uid": "1e45323b-a745-4764-a1c2-e4d990a41ccd",
+              "uid": "57b85d8a-0a54-46a8-9771-0ce73c80b3e8",
               "field": "spec.containers[app].livenessProbe",
               "value": "exec [cat /tmp/healthy] periodSeconds=2 failureThreshold=2 timeoutSeconds=1",
               "note": "failureThreshold is configured; the API does not report how many consecutive failures happened (event count is not a failure count)"
@@ -83,13 +83,13 @@
             {
               "kind": "event",
               "object": "Pod wd-liveness-kill/liveness-kill",
-              "uid": "1e45323b-a745-4764-a1c2-e4d990a41ccd",
+              "uid": "57b85d8a-0a54-46a8-9771-0ce73c80b3e8",
               "field": "event Unhealthy",
               "value": "Liveness probe failed: cat: can't open '/tmp/healthy': No such file or directory\n",
-              "time": "2026-10-02T21:01:58Z",
-              "firstTime": "2026-10-02T21:01:18Z",
+              "time": "2026-10-02T22:12:02Z",
+              "firstTime": "2026-10-02T22:11:22Z",
               "count": 4,
-              "note": "fieldPath=spec.containers{app}; event repeated 4 times (aggregated; first 2026-10-02T21:01:18Z, last 2026-10-02T21:01:58Z)"
+              "note": "fieldPath=spec.containers{app}; event repeated 4 times (aggregated; first 2026-10-02T22:11:22Z, last 2026-10-02T22:12:02Z)"
             }
           ]
         },
@@ -105,23 +105,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-liveness-kill/liveness-kill",
-              "uid": "1e45323b-a745-4764-a1c2-e4d990a41ccd",
+              "uid": "57b85d8a-0a54-46a8-9771-0ce73c80b3e8",
               "field": "status.containerStatuses[app].lastState.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T21:01:50Z"
+              "time": "2026-10-02T22:11:54Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-liveness-kill/liveness-kill",
-              "uid": "1e45323b-a745-4764-a1c2-e4d990a41ccd",
+              "uid": "57b85d8a-0a54-46a8-9771-0ce73c80b3e8",
               "field": "status.containerStatuses[app].lastState.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T21:01:50Z"
+              "time": "2026-10-02T22:11:54Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-liveness-kill/liveness-kill",
-              "uid": "1e45323b-a745-4764-a1c2-e4d990a41ccd",
+              "uid": "57b85d8a-0a54-46a8-9771-0ce73c80b3e8",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"

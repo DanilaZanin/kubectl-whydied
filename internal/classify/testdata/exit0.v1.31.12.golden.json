@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:46:54.235535Z",
+  "observedAt": "2026-10-02T22:21:33.679839Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-exit0",
     "name": "exit0",
-    "uid": "dee71153-deec-4593-82ee-c9df04da9130",
+    "uid": "224035a0-f10f-4d1d-83c1-b01259a8da98",
     "exists": true,
     "phase": "Succeeded",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:46:34Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:21:13Z",
     "restartPolicy": "Never"
   },
   "verdicts": [],
@@ -21,11 +21,11 @@
       "currentState": "terminated (exitCode=0, reason=Completed)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://05cf2fa92e42c6f4da1aafd93cdf75c7433382d50ddf6fd1c150296c7fb7f7d4",
+        "containerID": "containerd://2466d5b89cc86abd5375b8ff19d1c6665e0ac194551ad29c01e41e262bbd0cf3",
         "exitCode": 0,
         "reason": "Completed",
-        "startedAt": "2026-10-02T20:46:34Z",
-        "finishedAt": "2026-10-02T20:46:34Z"
+        "startedAt": "2026-10-02T22:21:13Z",
+        "finishedAt": "2026-10-02T22:21:13Z"
       },
       "expected": {
         "state": "expected",
@@ -45,18 +45,18 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-exit0/exit0",
-              "uid": "dee71153-deec-4593-82ee-c9df04da9130",
+              "uid": "224035a0-f10f-4d1d-83c1-b01259a8da98",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "0",
-              "time": "2026-10-02T20:46:34Z"
+              "time": "2026-10-02T22:21:13Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-exit0/exit0",
-              "uid": "dee71153-deec-4593-82ee-c9df04da9130",
+              "uid": "224035a0-f10f-4d1d-83c1-b01259a8da98",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Completed",
-              "time": "2026-10-02T20:46:34Z"
+              "time": "2026-10-02T22:21:13Z"
             }
           ]
         }

@@ -325,14 +325,13 @@ func runScenario(t *testing.T, dir string) {
 	for {
 		pod := e.resolveTarget(ctx)
 		if pod != "" {
-			before, _ := e.fetchAPI(ctx, pod)
-			rep, raw, err := runTool(ctx, e, pod)
+			rep, raw, err := e.attempt(ctx, pod)
+			var fe *fetchError
+			if errors.As(err, &fe) {
+				t.Fatalf("reading the API failed (not tolerated): %v", err)
+			}
 			if err == nil {
-				err = Evaluate(sc.Expect, rep, e.knownUIDs(ctx, rep)...)
-				if err == nil && before != nil {
-					err = e.validateEvidence(ctx, pod, rep, before)
-				}
-				if err == nil {
+				if err = Evaluate(sc.Expect, rep, e.knownUIDs(ctx, rep)...); err == nil {
 					requireStable(ctx, t, e)
 					t.Logf("PASS on k8s %s: pod %s\n%s", k8sLabel, pod, raw)
 					saveFixture(ctx, t, e, e.resolveTarget(ctx))
@@ -366,13 +365,9 @@ func requireStable(ctx context.Context, t *testing.T, e *env) {
 		if pod == "" {
 			t.Fatalf("stability check %d/3: target pod disappeared", i)
 		}
-		before, _ := e.fetchAPI(ctx, pod)
-		rep, raw, err := runTool(ctx, e, pod)
+		rep, raw, err := e.attempt(ctx, pod)
 		if err == nil {
 			err = Evaluate(e.sc.Expect, rep, e.knownUIDs(ctx, rep)...)
-		}
-		if err == nil && before != nil {
-			err = e.validateEvidence(ctx, pod, rep, before)
 		}
 		if err != nil {
 			t.Fatalf("stability check %d/3 failed for pod %s: %v\n%s", i, pod, err, raw)
@@ -380,76 +375,97 @@ func requireStable(ctx context.Context, t *testing.T, e *env) {
 	}
 }
 
+type fetchError struct{ err error }
+
+func (f *fetchError) Error() string { return "fetching the API view: " + f.err.Error() }
+func (f *fetchError) Unwrap() error { return f.err }
+
 // fetchAPI reads the pod, all events, the node and the owners with kubectl,
-// independently of the tool's own collector.
+// independently of the tool's own collector. A pod that does not exist yields an
+// events-only view (the documented pod-gone case); every other failure is a
+// *fetchError and fails the scenario.
 func (e *env) fetchAPI(ctx context.Context, pod string) (*API, error) {
-	get := func(args ...string) (map[string]any, error) {
-		out, err := e.kubectl(ctx, false, args...)
-		if err != nil {
-			return nil, fmt.Errorf("kubectl %v: %w\n%s", args, err, out)
+	api := &API{Pod: map[string]any{}, Node: map[string]any{}, Owners: map[string]map[string]any{}}
+	out, err := e.kubectl(ctx, false, "get", "pod", pod, "-o", "json")
+	switch {
+	case err == nil:
+		if err := json.Unmarshal([]byte(out), &api.Pod); err != nil {
+			return nil, &fetchError{err}
 		}
-		m := map[string]any{}
-		if err := json.Unmarshal([]byte(out), &m); err != nil {
-			return nil, err
-		}
-		return m, nil
-	}
-	api := &API{OwnerUIDs: map[string]bool{}}
-	var err error
-	if api.Pod, err = get("get", "pod", pod, "-o", "json"); err != nil {
-		return nil, err
+	case strings.Contains(out, "NotFound"):
+		// pod gone: validate against the events only
+	default:
+		return nil, &fetchError{fmt.Errorf("get pod: %w\n%s", err, out)}
 	}
 	evs, err := sh(ctx, "kubectl", "get", "events", "-A", "-o", "json")
 	if err != nil {
-		return nil, fmt.Errorf("get events: %w\n%s", err, evs)
+		return nil, &fetchError{fmt.Errorf("get events: %w\n%s", err, evs)}
 	}
 	var el struct {
 		Items []map[string]any `json:"items"`
 	}
 	if err := json.Unmarshal([]byte(evs), &el); err != nil {
-		return nil, err
+		return nil, &fetchError{err}
 	}
 	api.Events = el.Items
 	if node := str(nested(api.Pod, "spec"), "nodeName"); node != "" {
 		out, err := sh(ctx, "kubectl", "get", "node", node, "-o", "json")
 		if err != nil {
-			return nil, fmt.Errorf("get node: %w\n%s", err, out)
+			return nil, &fetchError{fmt.Errorf("get node: %w\n%s", err, out)}
 		}
-		_ = json.Unmarshal([]byte(out), &api.Node)
-	}
-	if api.Node == nil {
-		api.Node = map[string]any{}
+		if err := json.Unmarshal([]byte(out), &api.Node); err != nil {
+			return nil, &fetchError{err}
+		}
 	}
 	own, err := e.kubectl(ctx, false, "get", "replicasets,deployments,statefulsets,daemonsets,jobs,cronjobs", "-o", "json")
-	if err == nil {
-		var ol struct {
-			Items []map[string]any `json:"items"`
-		}
-		if json.Unmarshal([]byte(own), &ol) == nil {
-			for _, it := range ol.Items {
-				api.OwnerUIDs[str(nested(it, "metadata"), "uid")] = true
-			}
-		}
+	if err != nil {
+		return nil, &fetchError{fmt.Errorf("get owners: %w\n%s", err, own)}
+	}
+	var ol struct {
+		Items []map[string]any `json:"items"`
+	}
+	if err := json.Unmarshal([]byte(own), &ol); err != nil {
+		return nil, &fetchError{err}
+	}
+	for _, it := range ol.Items {
+		api.Owners[str(nested(it, "metadata"), "uid")] = it
 	}
 	return api, nil
 }
 
-// validateEvidence runs the tool's report through Validate against an API view
-// fetched before and after the run; either one backing the report is enough,
-// since a crash-looping pod can change between the two reads.
-func (e *env) validateEvidence(ctx context.Context, pod string, rep *classify.Report, before *API) error {
-	err := Validate(rep, before)
-	if err == nil {
-		return nil
+// attempt reads the API, runs the tool, reads the API again. Only when both reads
+// show the same instances is the report validated, against the first read or else
+// the second (an event can gain an occurrence in between). A changed instance
+// retries the attempt, bounded; the validation then refers to the same instance
+// the tool saw.
+func (e *env) attempt(ctx context.Context, pod string) (*classify.Report, string, error) {
+	var raw string
+	for try := 0; try < 6; try++ {
+		before, err := e.fetchAPI(ctx, pod)
+		if err != nil {
+			return nil, "", err
+		}
+		rep, out, err := runTool(ctx, e, pod)
+		raw = out
+		if err != nil {
+			return nil, raw, err
+		}
+		after, err := e.fetchAPI(ctx, pod)
+		if err != nil {
+			return nil, raw, err
+		}
+		if instanceKey(before) != instanceKey(after) {
+			time.Sleep(time.Second)
+			continue
+		}
+		if verr := Validate(rep, before); verr != nil {
+			if verr2 := Validate(rep, after); verr2 != nil {
+				return rep, raw, fmt.Errorf("evidence not backed by the API (first read: %w; second read: %w)", verr, verr2)
+			}
+		}
+		return rep, raw, nil
 	}
-	after, aerr := e.fetchAPI(ctx, pod)
-	if aerr != nil {
-		return aerr
-	}
-	if err2 := Validate(rep, after); err2 != nil {
-		return fmt.Errorf("evidence not backed by the API (before: %w; after: %w)", err, err2)
-	}
-	return nil
+	return nil, raw, errors.New("the container instance kept changing during the attempt")
 }
 
 func (e *env) knownUIDs(ctx context.Context, rep *classify.Report) []string {

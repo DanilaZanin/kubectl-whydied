@@ -1,16 +1,16 @@
 {
-  "observedAt": "2026-10-02T20:58:56.974776Z",
+  "observedAt": "2026-10-02T22:08:55.143147Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-evict-storage",
     "name": "evict-storage",
-    "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+    "uid": "c6abd15d-43bb-4fec-a0e0-fd1ebe71c5e7",
     "exists": true,
     "phase": "Failed",
     "reason": "Evicted",
     "message": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
-    "node": "wd-1370-6832-worker",
-    "startTime": "2026-10-02T20:58:17Z",
+    "node": "wd-1370-3307-worker",
+    "startTime": "2026-10-02T22:08:17Z",
     "restartPolicy": "Never"
   },
   "verdicts": [
@@ -22,24 +22,24 @@
         {
           "kind": "pod-status",
           "object": "Pod wd-evict-storage/evict-storage",
-          "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+          "uid": "c6abd15d-43bb-4fec-a0e0-fd1ebe71c5e7",
           "field": "status.reason",
           "value": "Evicted"
         },
         {
           "kind": "pod-status",
           "object": "Pod wd-evict-storage/evict-storage",
-          "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+          "uid": "c6abd15d-43bb-4fec-a0e0-fd1ebe71c5e7",
           "field": "status.message",
           "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". "
         },
         {
           "kind": "event",
           "object": "Pod wd-evict-storage/evict-storage",
-          "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+          "uid": "c6abd15d-43bb-4fec-a0e0-fd1ebe71c5e7",
           "field": "event Evicted",
           "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
-          "time": "2026-10-02T20:58:38Z",
+          "time": "2026-10-02T22:08:34Z",
           "count": 1
         }
       ]
@@ -54,11 +54,11 @@
       "currentState": "terminated (exitCode=137, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://a88a80bfb9c166def05a80bd2379257dc095aec5beb47761a7272907280b4c57",
+        "containerID": "containerd://4c667336c662b8e55b490418d3e1a961e0610c3580a19d65a0595f8d08f09d46",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:58:18Z",
-        "finishedAt": "2026-10-02T20:58:40Z"
+        "startedAt": "2026-10-02T22:08:18Z",
+        "finishedAt": "2026-10-02T22:08:36Z"
       },
       "expected": {
         "state": "expected",
@@ -82,23 +82,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+              "uid": "c6abd15d-43bb-4fec-a0e0-fd1ebe71c5e7",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T20:58:40Z"
+              "time": "2026-10-02T22:08:36Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+              "uid": "c6abd15d-43bb-4fec-a0e0-fd1ebe71c5e7",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:58:40Z"
+              "time": "2026-10-02T22:08:36Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-evict-storage/evict-storage",
-              "uid": "c03356cd-5f68-4c8d-a0b2-ffb15864e35a",
+              "uid": "c6abd15d-43bb-4fec-a0e0-fd1ebe71c5e7",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"
@@ -107,7 +107,7 @@
         }
       ],
       "logTail": [
-        "unable to retrieve container logs for containerd://a88a80bfb9c166def05a80bd2379257dc095aec5beb47761a7272907280b4c57"
+        "unable to retrieve container logs for containerd://4c667336c662b8e55b490418d3e1a961e0610c3580a19d65a0595f8d08f09d46"
       ],
       "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }

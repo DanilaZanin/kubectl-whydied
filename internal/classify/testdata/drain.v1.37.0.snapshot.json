@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "collectedAt": "2026-10-02T20:58:18.112731Z",
+  "collectedAt": "2026-10-02T22:08:18.274612Z",
   "namespace": "wd-drain",
   "name": "drained",
   "pod": {
     "metadata": {
       "name": "drained",
       "namespace": "wd-drain",
-      "uid": "a319ef12-d448-4dc1-8e39-f6ae25a83f3e",
-      "resourceVersion": "822",
+      "uid": "6c05456f-ea30-42f6-b08e-4a820b645514",
+      "resourceVersion": "790",
       "generation": 2,
-      "creationTimestamp": "2026-10-02T20:57:46Z",
-      "deletionTimestamp": "2026-10-02T20:59:16Z",
+      "creationTimestamp": "2026-10-02T22:07:45Z",
+      "deletionTimestamp": "2026-10-02T22:09:16Z",
       "deletionGracePeriodSeconds": 90,
       "labels": {
         "app": "drained"
@@ -23,7 +23,7 @@
     "spec": {
       "volumes": [
         {
-          "name": "kube-api-access-lmb2x",
+          "name": "kube-api-access-2qcj6",
           "projected": {
             "sources": [
               {
@@ -72,7 +72,7 @@
           "resources": {},
           "volumeMounts": [
             {
-              "name": "kube-api-access-lmb2x",
+              "name": "kube-api-access-2qcj6",
               "readOnly": true,
               "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
             }
@@ -87,7 +87,7 @@
       "dnsPolicy": "ClusterFirst",
       "serviceAccountName": "default",
       "serviceAccount": "default",
-      "nodeName": "wd-1370-6832-worker",
+      "nodeName": "wd-1370-3307-worker",
       "securityContext": {},
       "schedulerName": "default-scheduler",
       "tolerations": [
@@ -116,7 +116,7 @@
           "type": "DisruptionTarget",
           "status": "True",
           "lastProbeTime": null,
-          "lastTransitionTime": "2026-10-02T20:57:46Z",
+          "lastTransitionTime": "2026-10-02T22:07:46Z",
           "reason": "EvictionByEvictionAPI",
           "message": "Eviction API: evicting"
         },
@@ -125,41 +125,41 @@
           "observedGeneration": 2,
           "status": "True",
           "lastProbeTime": null,
-          "lastTransitionTime": "2026-10-02T20:57:46Z"
+          "lastTransitionTime": "2026-10-02T22:07:46Z"
         },
         {
           "type": "Initialized",
           "observedGeneration": 2,
           "status": "True",
           "lastProbeTime": null,
-          "lastTransitionTime": "2026-10-02T20:57:46Z"
+          "lastTransitionTime": "2026-10-02T22:07:45Z"
         },
         {
           "type": "Ready",
           "observedGeneration": 2,
           "status": "True",
           "lastProbeTime": null,
-          "lastTransitionTime": "2026-10-02T20:57:46Z"
+          "lastTransitionTime": "2026-10-02T22:07:46Z"
         },
         {
           "type": "ContainersReady",
           "observedGeneration": 2,
           "status": "True",
           "lastProbeTime": null,
-          "lastTransitionTime": "2026-10-02T20:57:46Z"
+          "lastTransitionTime": "2026-10-02T22:07:46Z"
         },
         {
           "type": "PodScheduled",
           "observedGeneration": 2,
           "status": "True",
           "lastProbeTime": null,
-          "lastTransitionTime": "2026-10-02T20:57:46Z"
+          "lastTransitionTime": "2026-10-02T22:07:45Z"
         }
       ],
-      "hostIP": "172.20.0.2",
+      "hostIP": "172.20.0.3",
       "hostIPs": [
         {
-          "ip": "172.20.0.2"
+          "ip": "172.20.0.3"
         }
       ],
       "podIP": "10.244.1.3",
@@ -168,13 +168,13 @@
           "ip": "10.244.1.3"
         }
       ],
-      "startTime": "2026-10-02T20:57:46Z",
+      "startTime": "2026-10-02T22:07:45Z",
       "containerStatuses": [
         {
           "name": "app",
           "state": {
             "running": {
-              "startedAt": "2026-10-02T20:57:46Z"
+              "startedAt": "2026-10-02T22:07:46Z"
             }
           },
           "lastState": {},
@@ -182,12 +182,12 @@
           "restartCount": 0,
           "image": "docker.io/library/busybox:1.37",
           "imageID": "sha256:ad4f11f7c85f87c0a6d6c0fe492ad53f9cdcff6e8c88b881360c70eff701c67b",
-          "containerID": "containerd://34223f9cbcf8bddc65c24dae4914748f3578467ab51a22a7e9b915341719cba3",
+          "containerID": "containerd://23634c5c23b6b03909cb7e81ab28df1f4e1913a06922b49430dbee75e4634f1a",
           "started": true,
           "resources": {},
           "volumeMounts": [
             {
-              "name": "kube-api-access-lmb2x",
+              "name": "kube-api-access-2qcj6",
               "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
               "readOnly": true,
               "recursiveReadOnly": "Disabled"
@@ -211,15 +211,15 @@
   },
   "node": {
     "metadata": {
-      "name": "wd-1370-6832-worker",
-      "uid": "2504ec2b-f695-4f77-a8a6-3e0c59f744df",
-      "resourceVersion": "817",
-      "creationTimestamp": "2026-10-02T20:55:38Z",
+      "name": "wd-1370-3307-worker",
+      "uid": "25f3c2fa-4f0e-4e1f-ae84-fb8f4f06eb79",
+      "resourceVersion": "785",
+      "creationTimestamp": "2026-10-02T22:05:34Z",
       "labels": {
         "beta.kubernetes.io/arch": "arm64",
         "beta.kubernetes.io/os": "linux",
         "kubernetes.io/arch": "arm64",
-        "kubernetes.io/hostname": "wd-1370-6832-worker",
+        "kubernetes.io/hostname": "wd-1370-3307-worker",
         "kubernetes.io/os": "linux"
       },
       "annotations": {
@@ -232,13 +232,13 @@
       "podCIDRs": [
         "10.244.1.0/24"
       ],
-      "providerID": "kind://docker/wd-1370-6832/wd-1370-6832-worker",
+      "providerID": "kind://docker/wd-1370-3307/wd-1370-3307-worker",
       "unschedulable": true,
       "taints": [
         {
           "key": "node.kubernetes.io/unschedulable",
           "effect": "NoSchedule",
-          "timeAdded": "2026-10-02T20:57:46Z"
+          "timeAdded": "2026-10-02T22:07:46Z"
         }
       ]
     },
@@ -267,32 +267,32 @@
         {
           "type": "MemoryPressure",
           "status": "False",
-          "lastHeartbeatTime": "2026-10-02T20:56:08Z",
-          "lastTransitionTime": "2026-10-02T20:55:38Z",
+          "lastHeartbeatTime": "2026-10-02T22:06:04Z",
+          "lastTransitionTime": "2026-10-02T22:05:34Z",
           "reason": "KubeletHasSufficientMemory",
           "message": "kubelet has sufficient memory available"
         },
         {
           "type": "DiskPressure",
           "status": "False",
-          "lastHeartbeatTime": "2026-10-02T20:56:08Z",
-          "lastTransitionTime": "2026-10-02T20:55:38Z",
+          "lastHeartbeatTime": "2026-10-02T22:06:04Z",
+          "lastTransitionTime": "2026-10-02T22:05:34Z",
           "reason": "KubeletHasNoDiskPressure",
           "message": "kubelet has no disk pressure"
         },
         {
           "type": "PIDPressure",
           "status": "False",
-          "lastHeartbeatTime": "2026-10-02T20:56:08Z",
-          "lastTransitionTime": "2026-10-02T20:55:38Z",
+          "lastHeartbeatTime": "2026-10-02T22:06:04Z",
+          "lastTransitionTime": "2026-10-02T22:05:34Z",
           "reason": "KubeletHasSufficientPID",
           "message": "kubelet has sufficient PID available"
         },
         {
           "type": "Ready",
           "status": "True",
-          "lastHeartbeatTime": "2026-10-02T20:56:08Z",
-          "lastTransitionTime": "2026-10-02T20:55:49Z",
+          "lastHeartbeatTime": "2026-10-02T22:06:04Z",
+          "lastTransitionTime": "2026-10-02T22:05:45Z",
           "reason": "KubeletReady",
           "message": "kubelet is posting ready status"
         }
@@ -300,11 +300,11 @@
       "addresses": [
         {
           "type": "InternalIP",
-          "address": "172.20.0.2"
+          "address": "172.20.0.3"
         },
         {
           "type": "Hostname",
-          "address": "wd-1370-6832-worker"
+          "address": "wd-1370-3307-worker"
         }
       ],
       "daemonEndpoints": {
@@ -313,8 +313,8 @@
         }
       },
       "nodeInfo": {
-        "machineID": "d8b965157a5840efb58312164b662b8a",
-        "systemUUID": "437df758-51ac-4b7a-b125-149b8c85f440",
+        "machineID": "96f1a861ab3b4153b902bf6997c331a1",
+        "systemUUID": "881fdaa8-284d-4706-a1df-d36c2a6b3a19",
         "bootID": "ce2996bd-7038-42c4-bf02-1c996c4c1e35",
         "kernelVersion": "6.8.0-117-generic",
         "osImage": "Debian GNU/Linux 13 (trixie)",
@@ -362,27 +362,27 @@
   "events": [
     {
       "metadata": {
-        "name": "drained.18dad1f849f9ed80",
+        "name": "drained.18dad5ca1b349b72",
         "namespace": "wd-drain",
-        "uid": "561db52a-8384-468b-bdf0-69afd2ce30d4",
-        "resourceVersion": "809",
-        "creationTimestamp": "2026-10-02T20:57:46Z"
+        "uid": "6a40baaa-d2c7-4785-ac5f-60467401f6d4",
+        "resourceVersion": "776",
+        "creationTimestamp": "2026-10-02T22:07:45Z"
       },
       "involvedObject": {
         "kind": "Pod",
         "namespace": "wd-drain",
         "name": "drained",
-        "uid": "a319ef12-d448-4dc1-8e39-f6ae25a83f3e",
+        "uid": "6c05456f-ea30-42f6-b08e-4a820b645514",
         "apiVersion": "v1",
-        "resourceVersion": "807"
+        "resourceVersion": "774"
       },
       "reason": "Scheduled",
-      "message": "Successfully assigned wd-drain/drained to wd-1370-6832-worker",
+      "message": "Successfully assigned wd-drain/drained to wd-1370-3307-worker",
       "source": {
         "component": "default-scheduler"
       },
-      "firstTimestamp": "2026-10-02T20:57:46Z",
-      "lastTimestamp": "2026-10-02T20:57:46Z",
+      "firstTimestamp": "2026-10-02T22:07:45Z",
+      "lastTimestamp": "2026-10-02T22:07:45Z",
       "count": 1,
       "type": "Normal",
       "eventTime": null,
@@ -391,247 +391,274 @@
     },
     {
       "metadata": {
-        "name": "drained.18dad1f860e4caa8",
+        "name": "drained.18dad5ca322dac57",
         "namespace": "wd-drain",
-        "uid": "3b0ef638-cb37-4838-8596-2bfc2fd0d380",
-        "resourceVersion": "812",
-        "creationTimestamp": "2026-10-02T20:57:46Z"
+        "uid": "47ce827c-8773-45be-9a1f-f832b119722b",
+        "resourceVersion": "779",
+        "creationTimestamp": "2026-10-02T22:07:46Z"
       },
       "involvedObject": {
         "kind": "Pod",
         "namespace": "wd-drain",
         "name": "drained",
-        "uid": "a319ef12-d448-4dc1-8e39-f6ae25a83f3e",
+        "uid": "6c05456f-ea30-42f6-b08e-4a820b645514",
         "apiVersion": "v1",
-        "resourceVersion": "808",
+        "resourceVersion": "775",
         "fieldPath": "spec.containers{app}"
       },
       "reason": "Pulled",
       "message": "Container image \"busybox:1.37\" already present on machine and can be accessed by the pod",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:57:46Z",
-      "lastTimestamp": "2026-10-02T20:57:46Z",
+      "firstTimestamp": "2026-10-02T22:07:46Z",
+      "lastTimestamp": "2026-10-02T22:07:46Z",
       "count": 1,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "drained.18dad1f8615a908f",
+        "name": "drained.18dad5ca328e4d52",
         "namespace": "wd-drain",
-        "uid": "163ea874-7cc7-48a6-b3e0-248ec34d66de",
-        "resourceVersion": "813",
-        "creationTimestamp": "2026-10-02T20:57:46Z"
+        "uid": "ca62eaf3-f375-40ce-9513-ab50f9f4d769",
+        "resourceVersion": "781",
+        "creationTimestamp": "2026-10-02T22:07:46Z"
       },
       "involvedObject": {
         "kind": "Pod",
         "namespace": "wd-drain",
         "name": "drained",
-        "uid": "a319ef12-d448-4dc1-8e39-f6ae25a83f3e",
+        "uid": "6c05456f-ea30-42f6-b08e-4a820b645514",
         "apiVersion": "v1",
-        "resourceVersion": "808",
+        "resourceVersion": "775",
         "fieldPath": "spec.containers{app}"
       },
       "reason": "Created",
       "message": "Container created",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:57:46Z",
-      "lastTimestamp": "2026-10-02T20:57:46Z",
+      "firstTimestamp": "2026-10-02T22:07:46Z",
+      "lastTimestamp": "2026-10-02T22:07:46Z",
       "count": 1,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "drained.18dad1f8637a18c4",
+        "name": "drained.18dad5ca34815958",
         "namespace": "wd-drain",
-        "uid": "74005a3e-e244-40fd-ba67-6ac8b03de718",
-        "resourceVersion": "814",
-        "creationTimestamp": "2026-10-02T20:57:46Z"
+        "uid": "82267ece-b33f-4625-9b24-ec1dcff0b535",
+        "resourceVersion": "782",
+        "creationTimestamp": "2026-10-02T22:07:46Z"
       },
       "involvedObject": {
         "kind": "Pod",
         "namespace": "wd-drain",
         "name": "drained",
-        "uid": "a319ef12-d448-4dc1-8e39-f6ae25a83f3e",
+        "uid": "6c05456f-ea30-42f6-b08e-4a820b645514",
         "apiVersion": "v1",
-        "resourceVersion": "808",
+        "resourceVersion": "775",
         "fieldPath": "spec.containers{app}"
       },
       "reason": "Started",
       "message": "Container started",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:57:46Z",
-      "lastTimestamp": "2026-10-02T20:57:46Z",
+      "firstTimestamp": "2026-10-02T22:07:46Z",
+      "lastTimestamp": "2026-10-02T22:07:46Z",
       "count": 1,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "drained.18dad1f898aff826",
+        "name": "drained.18dad5ca3db0b131",
         "namespace": "wd-drain",
-        "uid": "83c10008-2163-4dbd-8a50-c7e3e3f2f96e",
-        "resourceVersion": "821",
-        "creationTimestamp": "2026-10-02T20:57:47Z"
+        "uid": "f7bd9d4c-eead-48bb-9204-deec7db0313b",
+        "resourceVersion": "789",
+        "creationTimestamp": "2026-10-02T22:07:46Z"
       },
       "involvedObject": {
         "kind": "Pod",
         "namespace": "wd-drain",
         "name": "drained",
-        "uid": "a319ef12-d448-4dc1-8e39-f6ae25a83f3e",
+        "uid": "6c05456f-ea30-42f6-b08e-4a820b645514",
         "apiVersion": "v1",
-        "resourceVersion": "808",
+        "resourceVersion": "775",
         "fieldPath": "spec.containers{app}"
       },
       "reason": "Killing",
       "message": "Stopping container app",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:57:47Z",
-      "lastTimestamp": "2026-10-02T20:57:47Z",
+      "firstTimestamp": "2026-10-02T22:07:46Z",
+      "lastTimestamp": "2026-10-02T22:07:46Z",
       "count": 1,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "wd-1370-6832-worker.18dad1da76ba3ef3",
+        "name": "wd-1370-3307-worker.18dad5ab66d8bc94",
         "namespace": "default",
-        "uid": "d8c013f6-e16e-40ed-a079-401494ab6971",
-        "resourceVersion": "477",
-        "creationTimestamp": "2026-10-02T20:55:38Z"
+        "uid": "94e72035-b41a-4cda-9624-bba7c7ff150e",
+        "resourceVersion": "440",
+        "creationTimestamp": "2026-10-02T22:05:33Z"
       },
       "involvedObject": {
         "kind": "Node",
-        "name": "wd-1370-6832-worker",
+        "name": "wd-1370-3307-worker",
         "apiVersion": "v1"
       },
       "reason": "NodeHasSufficientMemory",
-      "message": "Node wd-1370-6832-worker status is now: NodeHasSufficientMemory",
+      "message": "Node wd-1370-3307-worker status is now: NodeHasSufficientMemory",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:55:38Z",
-      "lastTimestamp": "2026-10-02T20:55:38Z",
+      "firstTimestamp": "2026-10-02T22:05:33Z",
+      "lastTimestamp": "2026-10-02T22:05:34Z",
       "count": 3,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "wd-1370-6832-worker.18dad1da76ba50b1",
+        "name": "wd-1370-3307-worker.18dad5ab66d8cd2e",
         "namespace": "default",
-        "uid": "32c4e535-35a6-45be-b20b-a48cc0b507fe",
-        "resourceVersion": "478",
-        "creationTimestamp": "2026-10-02T20:55:38Z"
+        "uid": "e9f527fe-4b56-44a5-94dd-b641438cb3a5",
+        "resourceVersion": "442",
+        "creationTimestamp": "2026-10-02T22:05:33Z"
       },
       "involvedObject": {
         "kind": "Node",
-        "name": "wd-1370-6832-worker",
+        "name": "wd-1370-3307-worker",
         "apiVersion": "v1"
       },
       "reason": "NodeHasNoDiskPressure",
-      "message": "Node wd-1370-6832-worker status is now: NodeHasNoDiskPressure",
+      "message": "Node wd-1370-3307-worker status is now: NodeHasNoDiskPressure",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:55:38Z",
-      "lastTimestamp": "2026-10-02T20:55:38Z",
+      "firstTimestamp": "2026-10-02T22:05:33Z",
+      "lastTimestamp": "2026-10-02T22:05:34Z",
       "count": 3,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "wd-1370-6832-worker.18dad1da76ba59a4",
+        "name": "wd-1370-3307-worker.18dad5ab66d8d6f2",
         "namespace": "default",
-        "uid": "f974cea0-c412-431f-ba20-587e8c991fb7",
-        "resourceVersion": "481",
-        "creationTimestamp": "2026-10-02T20:55:38Z"
+        "uid": "557d2210-a267-41ef-8b56-540b4aa045bd",
+        "resourceVersion": "445",
+        "creationTimestamp": "2026-10-02T22:05:33Z"
       },
       "involvedObject": {
         "kind": "Node",
-        "name": "wd-1370-6832-worker",
+        "name": "wd-1370-3307-worker",
         "apiVersion": "v1"
       },
       "reason": "NodeHasSufficientPID",
-      "message": "Node wd-1370-6832-worker status is now: NodeHasSufficientPID",
+      "message": "Node wd-1370-3307-worker status is now: NodeHasSufficientPID",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:55:38Z",
-      "lastTimestamp": "2026-10-02T20:55:38Z",
+      "firstTimestamp": "2026-10-02T22:05:33Z",
+      "lastTimestamp": "2026-10-02T22:05:34Z",
       "count": 3,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "wd-1370-6832-worker.18dad1da7b405f41",
+        "name": "wd-1370-3307-worker.18dad5ab6a2ed433",
         "namespace": "default",
-        "uid": "1d1a0f69-1a70-403e-ba81-b304ff8ff759",
-        "resourceVersion": "474",
-        "creationTimestamp": "2026-10-02T20:55:38Z"
+        "uid": "11f6598e-89e7-4bc4-b590-36f56f5d493e",
+        "resourceVersion": "438",
+        "creationTimestamp": "2026-10-02T22:05:34Z"
       },
       "involvedObject": {
         "kind": "Node",
-        "name": "wd-1370-6832-worker",
+        "name": "wd-1370-3307-worker",
         "apiVersion": "v1"
       },
       "reason": "NodeAllocatableEnforced",
       "message": "Updated Node Allocatable limit across pods",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:55:38Z",
-      "lastTimestamp": "2026-10-02T20:55:38Z",
+      "firstTimestamp": "2026-10-02T22:05:34Z",
+      "lastTimestamp": "2026-10-02T22:05:34Z",
       "count": 1,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "wd-1370-6832-worker.18dad1dae3785b87",
+        "name": "wd-1370-3307-worker.18dad5ab7130c563",
         "namespace": "default",
-        "uid": "e050fd30-2d17-461a-81df-49344dbb82c0",
-        "resourceVersion": "510",
-        "creationTimestamp": "2026-10-02T20:55:39Z"
+        "uid": "5eb0f6a8-01ee-4a76-bf2a-669be78d35a1",
+        "resourceVersion": "455",
+        "creationTimestamp": "2026-10-02T22:05:34Z"
       },
       "involvedObject": {
         "kind": "Node",
-        "name": "wd-1370-6832-worker",
+        "name": "wd-1370-3307-worker",
+        "uid": "25f3c2fa-4f0e-4e1f-ae84-fb8f4f06eb79",
+        "apiVersion": "v1"
+      },
+      "reason": "CIDRAssignmentFailed",
+      "message": "Node wd-1370-3307-worker status is now: CIDRAssignmentFailed",
+      "source": {
+        "component": "cidrAllocator"
+      },
+      "firstTimestamp": "2026-10-02T22:05:34Z",
+      "lastTimestamp": "2026-10-02T22:05:34Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "cidrAllocator",
+      "reportingInstance": ""
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3307-worker.18dad5abceea6688",
+        "namespace": "default",
+        "uid": "1b8596bb-00f4-42ac-aa78-d37a3b27849f",
+        "resourceVersion": "474",
+        "creationTimestamp": "2026-10-02T22:05:35Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3307-worker",
         "apiVersion": "v1"
       },
       "reason": "Starting",
@@ -639,32 +666,32 @@
       "firstTimestamp": null,
       "lastTimestamp": null,
       "type": "Normal",
-      "eventTime": "2026-10-02T20:55:39.882584Z",
+      "eventTime": "2026-10-02T22:05:35.720784Z",
       "action": "StartKubeProxy",
       "reportingComponent": "kube-proxy",
-      "reportingInstance": "kube-proxy-wd-1370-6832-worker"
+      "reportingInstance": "kube-proxy-wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "wd-1370-6832-worker.18dad1dba5f1e0cc",
+        "name": "wd-1370-3307-worker.18dad5ac87087c8e",
         "namespace": "default",
-        "uid": "f04742e5-9401-4273-a93f-9f8011d65e69",
-        "resourceVersion": "518",
-        "creationTimestamp": "2026-10-02T20:55:43Z"
+        "uid": "66b8e61d-2076-410b-b123-1efe6c006d73",
+        "resourceVersion": "480",
+        "creationTimestamp": "2026-10-02T22:05:38Z"
       },
       "involvedObject": {
         "kind": "Node",
-        "name": "wd-1370-6832-worker",
-        "uid": "2504ec2b-f695-4f77-a8a6-3e0c59f744df",
+        "name": "wd-1370-3307-worker",
+        "uid": "25f3c2fa-4f0e-4e1f-ae84-fb8f4f06eb79",
         "apiVersion": "v1"
       },
       "reason": "RegisteredNode",
-      "message": "Node wd-1370-6832-worker event: Registered Node wd-1370-6832-worker in Controller",
+      "message": "Node wd-1370-3307-worker event: Registered Node wd-1370-3307-worker in Controller",
       "source": {
         "component": "node-controller"
       },
-      "firstTimestamp": "2026-10-02T20:55:43Z",
-      "lastTimestamp": "2026-10-02T20:55:43Z",
+      "firstTimestamp": "2026-10-02T22:05:38Z",
+      "lastTimestamp": "2026-10-02T22:05:38Z",
       "count": 1,
       "type": "Normal",
       "eventTime": null,
@@ -673,59 +700,59 @@
     },
     {
       "metadata": {
-        "name": "wd-1370-6832-worker.18dad1dd3bcabcc1",
+        "name": "wd-1370-3307-worker.18dad5ae242cad8b",
         "namespace": "default",
-        "uid": "db382365-a45a-49d1-90f9-f8adb884494c",
-        "resourceVersion": "583",
-        "creationTimestamp": "2026-10-02T20:55:49Z"
+        "uid": "83fc93e2-f043-4329-a866-724be24de01b",
+        "resourceVersion": "545",
+        "creationTimestamp": "2026-10-02T22:05:45Z"
       },
       "involvedObject": {
         "kind": "Node",
-        "name": "wd-1370-6832-worker",
-        "uid": "2504ec2b-f695-4f77-a8a6-3e0c59f744df",
+        "name": "wd-1370-3307-worker",
+        "uid": "25f3c2fa-4f0e-4e1f-ae84-fb8f4f06eb79",
         "apiVersion": "v1"
       },
       "reason": "NodeReady",
-      "message": "Node wd-1370-6832-worker status is now: NodeReady",
+      "message": "Node wd-1370-3307-worker status is now: NodeReady",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:55:49Z",
-      "lastTimestamp": "2026-10-02T20:55:49Z",
+      "firstTimestamp": "2026-10-02T22:05:45Z",
+      "lastTimestamp": "2026-10-02T22:05:45Z",
       "count": 1,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     },
     {
       "metadata": {
-        "name": "wd-1370-6832-worker.18dad1f96486faeb",
+        "name": "wd-1370-3307-worker.18dad5ca38f133fd",
         "namespace": "default",
-        "uid": "4e89fdda-6349-481f-afca-e5b54fcb9783",
-        "resourceVersion": "829",
-        "creationTimestamp": "2026-10-02T20:57:50Z"
+        "uid": "7c4bcfd6-3152-47d4-b0c2-b6a00fcab869",
+        "resourceVersion": "786",
+        "creationTimestamp": "2026-10-02T22:07:46Z"
       },
       "involvedObject": {
         "kind": "Node",
-        "name": "wd-1370-6832-worker",
-        "uid": "2504ec2b-f695-4f77-a8a6-3e0c59f744df",
+        "name": "wd-1370-3307-worker",
+        "uid": "25f3c2fa-4f0e-4e1f-ae84-fb8f4f06eb79",
         "apiVersion": "v1"
       },
       "reason": "NodeNotSchedulable",
-      "message": "Node wd-1370-6832-worker status is now: NodeNotSchedulable",
+      "message": "Node wd-1370-3307-worker status is now: NodeNotSchedulable",
       "source": {
         "component": "kubelet",
-        "host": "wd-1370-6832-worker"
+        "host": "wd-1370-3307-worker"
       },
-      "firstTimestamp": "2026-10-02T20:57:50Z",
-      "lastTimestamp": "2026-10-02T20:57:50Z",
+      "firstTimestamp": "2026-10-02T22:07:46Z",
+      "lastTimestamp": "2026-10-02T22:07:46Z",
       "count": 1,
       "type": "Normal",
       "eventTime": null,
       "reportingComponent": "kubelet",
-      "reportingInstance": "wd-1370-6832-worker"
+      "reportingInstance": "wd-1370-3307-worker"
     }
   ]
 }

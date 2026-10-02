@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:59:35.662272Z",
+  "observedAt": "2026-10-02T22:09:35.066587Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-exit1",
     "name": "exit1",
-    "uid": "3a91368f-47f4-4730-887a-567486025d08",
+    "uid": "c4aeae80-2d33-4229-9e8a-7e606516362f",
     "exists": true,
     "phase": "Running",
-    "node": "wd-1370-6832-worker",
-    "startTime": "2026-10-02T20:59:15Z",
+    "node": "wd-1370-3307-worker",
+    "startTime": "2026-10-02T22:09:14Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -21,11 +21,11 @@
       "currentState": "terminated (exitCode=1, reason=Error)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://200b3ef35555efc98b8bf50c35c0043acbe74694f091d4420b2b5559f31ace68",
+        "containerID": "containerd://b0bd1a6181802fe32422673e95df4a1aef6f47841d7e4faf31640af8c7f45825",
         "exitCode": 1,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:59:32Z",
-        "finishedAt": "2026-10-02T20:59:33Z"
+        "startedAt": "2026-10-02T22:09:28Z",
+        "finishedAt": "2026-10-02T22:09:29Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,18 +34,18 @@
       "restart": {
         "policy": "Always",
         "decision": "back-off",
-        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures); a recent BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
           {
             "kind": "event",
             "object": "Pod wd-exit1/exit1",
-            "uid": "3a91368f-47f4-4730-887a-567486025d08",
+            "uid": "c4aeae80-2d33-4229-9e8a-7e606516362f",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod exit1_wd-exit1(3a91368f-47f4-4730-887a-567486025d08)",
-            "time": "2026-10-02T20:59:33Z",
-            "firstTime": "2026-10-02T20:59:19Z",
+            "value": "Back-off restarting failed container app in pod exit1_wd-exit1(c4aeae80-2d33-4229-9e8a-7e606516362f)",
+            "time": "2026-10-02T22:09:29Z",
+            "firstTime": "2026-10-02T22:09:19Z",
             "count": 2,
-            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:59:19Z, last 2026-10-02T20:59:33Z)"
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:09:19Z, last 2026-10-02T22:09:29Z)"
           }
         ]
       },
@@ -58,18 +58,18 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-exit1/exit1",
-              "uid": "3a91368f-47f4-4730-887a-567486025d08",
+              "uid": "c4aeae80-2d33-4229-9e8a-7e606516362f",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "1",
-              "time": "2026-10-02T20:59:33Z"
+              "time": "2026-10-02T22:09:29Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-exit1/exit1",
-              "uid": "3a91368f-47f4-4730-887a-567486025d08",
+              "uid": "c4aeae80-2d33-4229-9e8a-7e606516362f",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:59:33Z"
+              "time": "2026-10-02T22:09:29Z"
             }
           ]
         }

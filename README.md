@@ -5,27 +5,27 @@ Explain why a Kubernetes container or pod died or restarted. Every claim carries
 
 ```
 Pod wd-oom/oom
-  uid=bd5990a2-0173-417e-a6b2-365cfbe1697c node=wd-1370-6894-worker phase=Running restartPolicy=Always
-  observed at 2026-10-02T20:04:56Z; correlation window 5m0s
+  uid=155643d3-b901-4f5c-948d-852ea48c4ef9 node=wd-1370-3307-worker phase=Running restartPolicy=Always
+  observed at 2026-10-02T22:12:53Z; correlation window 5m0s
 
 Summary
   [confirmed] app: oom-kill-reported: the runtime reported an OOM kill for this container instance (API reported exitCode=137, reason=OOMKilled)
 
 Container app (regular)
   state: terminated (exitCode=137, reason=OOMKilled); restartCount=2 (as reported now; may have been reset)
-  explained instance: state.terminated, containerID=containerd://8afb63428b6bf956c1a255f0b7b0e21da2a1826056911763e5034a73d722fd28
+  explained instance: state.terminated, containerID=containerd://51a3ee50f5f496c99082d5b5bdd4aa479a716cf6e7be3c48eb3e23070c9011ea
   API reported exitCode=137 reason=OOMKilled
-  started 2026-10-02T20:04:39Z, finished 2026-10-02T20:04:39Z
+  started 2026-10-02T22:12:45Z, finished 2026-10-02T22:12:45Z
   stop expected for this role: unexpected: the container stopped with a non-zero exit code while its pod was not being terminated
-  restart: policy=Always decision=restarting: restart policy Always restarts this container (with back-off after repeated failures)
-    - [event] Pod wd-oom/oom event BackOff = "Back-off restarting failed container app in pod oom_wd-oom(bd5990a2-0173-417e-a6b2-365cfbe1697c)" @ 2026-10-02T20:04:40Z (uid bd5990a2-0173-417e-a6b2-365cfbe1697c) [fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:04:27Z, last 2026-10-02T20:04:40Z)]
+  restart: policy=Always decision=back-off: restart policy Always restarts this container (with back-off after repeated failures); a recent BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay
+    - [event] Pod wd-oom/oom event BackOff = "Back-off restarting failed container app in pod oom_wd-oom(155643d3-b901-4f5c-948d-852ea48c4ef9)" @ 2026-10-02T22:12:45Z (uid 155643d3-b901-4f5c-948d-852ea48c4ef9) [fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:12:35Z, last 2026-10-02T22:12:45Z)]
   [confirmed] oom-kill-reported: the runtime reported an OOM kill for this container instance (API reported exitCode=137, reason=OOMKilled)
     caveat: OOM level is unknown: the same reason is reported for a container cgroup limit, a pod-level cgroup limit and node-wide memory exhaustion
     caveat: memory usage at kill time is not available from the API
-    - [pod-status] Pod wd-oom/oom status.containerStatuses[app].state.terminated.exitCode = 137 @ 2026-10-02T20:04:39Z (uid bd5990a2-0173-417e-a6b2-365cfbe1697c)
-    - [pod-status] Pod wd-oom/oom status.containerStatuses[app].state.terminated.reason = OOMKilled @ 2026-10-02T20:04:39Z (uid bd5990a2-0173-417e-a6b2-365cfbe1697c)
-    - [pod-spec] Pod wd-oom/oom spec.containers[app].resources.limits.memory = "spec memory limit 32Mi" (uid bd5990a2-0173-417e-a6b2-365cfbe1697c)
-  logs of this instance (last 1 lines):
+    - [pod-status] Pod wd-oom/oom status.containerStatuses[app].state.terminated.exitCode = 137 @ 2026-10-02T22:12:45Z (uid 155643d3-b901-4f5c-948d-852ea48c4ef9)
+    - [pod-status] Pod wd-oom/oom status.containerStatuses[app].state.terminated.reason = OOMKilled @ 2026-10-02T22:12:45Z (uid 155643d3-b901-4f5c-948d-852ea48c4ef9)
+    - [pod-spec] Pod wd-oom/oom spec.containers[app].resources.limits.memory = "spec memory limit 32Mi" (uid 155643d3-b901-4f5c-948d-852ea48c4ef9)
+  logs of this instance (last 1 lines; the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption):
     | allocating
 
 Checked
@@ -36,7 +36,7 @@ Checked
   - previous container logs
 ```
 
-Real output: the `oom` e2e scenario on kind v1.37.0 (a container with a 32Mi limit that allocates until it is killed). It was produced by `kubectl whydied oom -n wd-oom --window 5m --previous-logs 10 --dump-snapshot oom.json` and replayed with `kubectl whydied --from-snapshot oom.json --window 5m -c app --no-color`; nothing was edited.
+Real output of `kubectl whydied --from-snapshot internal/classify/testdata/oom.v1.37.0.snapshot.json -c app --window 5m --no-color`. The snapshot is in this repository: it was captured from the `oom` e2e scenario on kind v1.37.0 (a container with a 32Mi limit that allocates until it is killed). Nothing was edited.
 
 ## Why
 
@@ -103,7 +103,7 @@ such as `SystemOOM`), `get` on ReplicaSets, Deployments, StatefulSets, DaemonSet
 | --- | --- | --- |
 | OOM kill reported by the runtime | `terminated.reason == OOMKilled` on the explained instance | `confirmed`. The OOM level (container limit, pod cgroup, node) is stated as unknown |
 | Application exit, code 0 to 128 | `terminated.exitCode` of the explained instance (`state.terminated`, else `lastState.terminated`) | `confirmed` |
-| Exit code 129 to 255 | `128+n` signal convention, labelled as convention; `exit(N)` by the application looks identical | `likely`, competing explanation named |
+| Exit code 129 to 192 | `128+n` signal convention for Linux signals 1 to 64, labelled as convention; `exit(N)` by the application looks identical. Codes above 192 are reported as plain exit codes | `likely`, competing explanation named |
 | Kubelet could not observe the exit | `terminated.reason == ContainerStatusUnknown` (the 137 is synthesized) | `confirmed` fact, cause `no data` |
 | Container could not start | `StartError`, `ContainerCannotRun`, `CreateContainerError` reason and message, quoted verbatim | `confirmed` |
 | Liveness or startup probe kill | `Killing` event whose message names the probe, with `fieldPath` of this container, and whose time lies within the instance's lifetime (its start to its finish); events from another instance are ignored | `confirmed`, otherwise no verdict |
@@ -137,7 +137,7 @@ such as `SystemOOM`), `get` on ReplicaSets, Deployments, StatefulSets, DaemonSet
 - **OOM level is unknown.** `OOMKilled` is confirmed as "the runtime reported an OOM kill". Whether it was the container limit, a pod cgroup or node-wide pressure is not in the API. The tool never tells you to raise a limit as a fact.
 - **Node OOM and cloud paths are not classified in v0.1.** A `SystemOOM` node event is shown as a candidate only, because it names a process, not a pod. GKE preemptible and spot nodes, Karpenter, cluster-autoscaler and spot termination handlers are shown as context lines from node labels, taints and annotations, with no verdict drawn from them.
 - **Probe failures.** A probe kill is confirmed only when a `Killing` event names the probe and the container. The reason of each individual probe failure is shown as context. Event `count` is shown as "event repeated N times", never as consecutive failures.
-- **Grace period.** "Killed after the grace period" is never computed as fact. It appears as `likely` only with a deletion context and lists the competing explanations.
+- **Grace period.** "Killed after the grace period" is never computed from guesses. It appears as `likely` only when the grace of the trigger is known: the non-zero `deletionGracePeriodSeconds` for a deletion, or the probe's own (else the pod's) `terminationGracePeriodSeconds` for a probe kill. Once the kubelet has zeroed `deletionGracePeriodSeconds`, the grace used is unknown and no verdict is drawn. Competing explanations are listed.
 - **kind cannot reproduce everything.** See the table below.
 
 ## Verification

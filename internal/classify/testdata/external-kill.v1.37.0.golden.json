@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T21:00:33.885583Z",
+  "observedAt": "2026-10-02T22:10:36.238354Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-external-kill",
     "name": "victim",
-    "uid": "3023233a-f4b4-4a0f-8a97-16509706d4a1",
+    "uid": "f6d9bd22-65df-4739-97ab-0d6736358d12",
     "exists": true,
     "phase": "Running",
-    "node": "wd-1370-6832-worker",
-    "startTime": "2026-10-02T21:00:14Z",
+    "node": "wd-1370-3307-worker",
+    "startTime": "2026-10-02T22:10:15Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -18,14 +18,14 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 1,
-      "currentState": "running since 2026-10-02T21:00:17Z",
+      "currentState": "running since 2026-10-02T22:10:17Z",
       "termination": {
         "source": "lastState.terminated",
-        "containerID": "containerd://c5b556ebfa44c7831826ebcc7faa741a31588fbb3ab6cb0b1deabd5688271d6e",
+        "containerID": "containerd://e3985c2b2fe9aadb82ead1822c6bfa8502b5e313e5e2bcc6aaf3797dc4da361f",
         "exitCode": 137,
         "reason": "Error",
-        "startedAt": "2026-10-02T21:00:14Z",
-        "finishedAt": "2026-10-02T21:00:16Z"
+        "startedAt": "2026-10-02T22:10:16Z",
+        "finishedAt": "2026-10-02T22:10:16Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,7 +34,7 @@
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T21:00:17Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T22:10:17Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
@@ -49,23 +49,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-external-kill/victim",
-              "uid": "3023233a-f4b4-4a0f-8a97-16509706d4a1",
+              "uid": "f6d9bd22-65df-4739-97ab-0d6736358d12",
               "field": "status.containerStatuses[app].lastState.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T21:00:16Z"
+              "time": "2026-10-02T22:10:16Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-external-kill/victim",
-              "uid": "3023233a-f4b4-4a0f-8a97-16509706d4a1",
+              "uid": "f6d9bd22-65df-4739-97ab-0d6736358d12",
               "field": "status.containerStatuses[app].lastState.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T21:00:16Z"
+              "time": "2026-10-02T22:10:16Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-external-kill/victim",
-              "uid": "3023233a-f4b4-4a0f-8a97-16509706d4a1",
+              "uid": "f6d9bd22-65df-4739-97ab-0d6736358d12",
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"

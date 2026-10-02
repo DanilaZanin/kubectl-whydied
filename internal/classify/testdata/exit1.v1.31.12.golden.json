@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:47:13.602535Z",
+  "observedAt": "2026-10-02T22:21:53.637483Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-exit1",
     "name": "exit1",
-    "uid": "85a5fe05-8544-4dc9-a6e5-0f5ac071df71",
+    "uid": "3962738c-5b15-41e7-ab6b-7a0afdc61997",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:46:53Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:21:33Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -18,14 +18,14 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 2,
-      "currentState": "running since 2026-10-02T20:47:11Z",
+      "currentState": "terminated (exitCode=1, reason=Error)",
       "termination": {
-        "source": "lastState.terminated",
-        "containerID": "containerd://36a07b46878c3edf2a6828f010fc8ba044d7158b87c4ba55ed825866f478a15e",
+        "source": "state.terminated",
+        "containerID": "containerd://2add7c4e1135aaeda411b86117086e58a90f8cf850efbcd69956b9c9bc7aaca7",
         "exitCode": 1,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:46:55Z",
-        "finishedAt": "2026-10-02T20:46:56Z"
+        "startedAt": "2026-10-02T22:21:49Z",
+        "finishedAt": "2026-10-02T22:21:50Z"
       },
       "expected": {
         "state": "unexpected",
@@ -33,18 +33,19 @@
       },
       "restart": {
         "policy": "Always",
-        "decision": "running",
-        "detail": "running since 2026-10-02T20:47:11Z; restartCount=2 as reported now (it can reset when the pod is recreated)",
+        "decision": "back-off",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures); a recent BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
           {
             "kind": "event",
             "object": "Pod wd-exit1/exit1",
-            "uid": "85a5fe05-8544-4dc9-a6e5-0f5ac071df71",
+            "uid": "3962738c-5b15-41e7-ab6b-7a0afdc61997",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod exit1_wd-exit1(85a5fe05-8544-4dc9-a6e5-0f5ac071df71)",
-            "time": "2026-10-02T20:46:57Z",
-            "count": 1,
-            "note": "fieldPath=spec.containers{app}"
+            "value": "Back-off restarting failed container app in pod exit1_wd-exit1(3962738c-5b15-41e7-ab6b-7a0afdc61997)",
+            "time": "2026-10-02T22:21:51Z",
+            "firstTime": "2026-10-02T22:21:37Z",
+            "count": 2,
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:21:37Z, last 2026-10-02T22:21:51Z)"
           }
         ]
       },
@@ -57,18 +58,18 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-exit1/exit1",
-              "uid": "85a5fe05-8544-4dc9-a6e5-0f5ac071df71",
-              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "uid": "3962738c-5b15-41e7-ab6b-7a0afdc61997",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "1",
-              "time": "2026-10-02T20:46:56Z"
+              "time": "2026-10-02T22:21:50Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-exit1/exit1",
-              "uid": "85a5fe05-8544-4dc9-a6e5-0f5ac071df71",
-              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "uid": "3962738c-5b15-41e7-ab6b-7a0afdc61997",
+              "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:46:56Z"
+              "time": "2026-10-02T22:21:50Z"
             }
           ]
         }
@@ -76,7 +77,6 @@
       "logTail": [
         "failing"
       ],
-      "logsPrevious": true,
       "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],

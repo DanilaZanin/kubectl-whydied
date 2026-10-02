@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:47:52.2781Z",
+  "observedAt": "2026-10-02T22:22:33.535786Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-exit2",
     "name": "exit2",
-    "uid": "56466f00-e360-42f3-879a-b22315b12260",
+    "uid": "3dbfa77a-949d-4b80-b447-b00969253df4",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:47:32Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:22:13Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -18,14 +18,14 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 1,
-      "currentState": "terminated (exitCode=2, reason=Error)",
+      "currentState": "waiting: CrashLoopBackOff (back-off 10s restarting failed container=app pod=exit2_wd-exit2(3dbfa77a-949d-4b80-b447-b00969253df4))",
       "termination": {
-        "source": "state.terminated",
-        "containerID": "containerd://41b5983d5c78257549b4d5637ac108263cee820264454e351ee30344447ae9e2",
+        "source": "lastState.terminated",
+        "containerID": "containerd://931a83d2fc8fc8d31884fa0884041e2963283226efda7042b8080f1ffee029ee",
         "exitCode": 2,
         "reason": "Error",
-        "startedAt": "2026-10-02T20:47:34Z",
-        "finishedAt": "2026-10-02T20:47:35Z"
+        "startedAt": "2026-10-02T22:22:15Z",
+        "finishedAt": "2026-10-02T22:22:16Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,15 +34,22 @@
       "restart": {
         "policy": "Always",
         "decision": "back-off",
-        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "detail": "the kubelet is delaying the next start (CrashLoopBackOff: exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
+          {
+            "kind": "pod-status",
+            "object": "Pod wd-exit2/exit2",
+            "uid": "3dbfa77a-949d-4b80-b447-b00969253df4",
+            "field": "status.containerStatuses[app].state.waiting.reason",
+            "value": "CrashLoopBackOff"
+          },
           {
             "kind": "event",
             "object": "Pod wd-exit2/exit2",
-            "uid": "56466f00-e360-42f3-879a-b22315b12260",
+            "uid": "3dbfa77a-949d-4b80-b447-b00969253df4",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod exit2_wd-exit2(56466f00-e360-42f3-879a-b22315b12260)",
-            "time": "2026-10-02T20:47:36Z",
+            "value": "Back-off restarting failed container app in pod exit2_wd-exit2(3dbfa77a-949d-4b80-b447-b00969253df4)",
+            "time": "2026-10-02T22:22:17Z",
             "count": 1,
             "note": "fieldPath=spec.containers{app}"
           }
@@ -57,23 +64,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-exit2/exit2",
-              "uid": "56466f00-e360-42f3-879a-b22315b12260",
-              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "uid": "3dbfa77a-949d-4b80-b447-b00969253df4",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
               "value": "2",
-              "time": "2026-10-02T20:47:35Z"
+              "time": "2026-10-02T22:22:16Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-exit2/exit2",
-              "uid": "56466f00-e360-42f3-879a-b22315b12260",
-              "field": "status.containerStatuses[app].state.terminated.reason",
+              "uid": "3dbfa77a-949d-4b80-b447-b00969253df4",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
               "value": "Error",
-              "time": "2026-10-02T20:47:35Z"
+              "time": "2026-10-02T22:22:16Z"
             },
             {
               "kind": "convention",
               "object": "Pod wd-exit2/exit2",
-              "uid": "56466f00-e360-42f3-879a-b22315b12260",
+              "uid": "3dbfa77a-949d-4b80-b447-b00969253df4",
               "field": "exit code",
               "value": "2; by convention 2 often means misuse of a shell builtin, but its meaning is defined by the program"
             }
@@ -83,6 +90,7 @@
       "logTail": [
         "failing"
       ],
+      "logsPrevious": true,
       "logNote": "the logs API returns no container ID: these lines are associated with the explained instance by position (previous or current container) and are an assumption"
     }
   ],

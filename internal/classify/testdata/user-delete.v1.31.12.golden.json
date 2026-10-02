@@ -1,15 +1,15 @@
 {
-  "observedAt": "2026-10-02T20:55:05.80256Z",
+  "observedAt": "2026-10-02T22:29:54.959073Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-user-delete",
     "name": "victim",
-    "uid": "a8aeca1f-3fc3-4a38-bd40-df157d209d3a",
+    "uid": "6a94257c-306e-4fc7-ab0a-034011c5a8f5",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:54:48Z",
-    "deletionTimestamp": "2026-10-02T20:56:19Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:29:37Z",
+    "deletionTimestamp": "2026-10-02T22:31:08Z",
     "restartPolicy": "Always"
   },
   "verdicts": [
@@ -25,15 +25,15 @@
         {
           "kind": "pod-status",
           "object": "Pod wd-user-delete/victim",
-          "uid": "a8aeca1f-3fc3-4a38-bd40-df157d209d3a",
+          "uid": "6a94257c-306e-4fc7-ab0a-034011c5a8f5",
           "field": "metadata.deletionTimestamp",
-          "value": "2026-10-02T20:56:19Z",
-          "time": "2026-10-02T20:56:19Z"
+          "value": "2026-10-02T22:31:08Z",
+          "time": "2026-10-02T22:31:08Z"
         },
         {
           "kind": "pod-status",
           "object": "Pod wd-user-delete/victim",
-          "uid": "a8aeca1f-3fc3-4a38-bd40-df157d209d3a",
+          "uid": "6a94257c-306e-4fc7-ab0a-034011c5a8f5",
           "field": "metadata.deletionGracePeriodSeconds",
           "value": "90"
         }
@@ -46,11 +46,11 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 0,
-      "currentState": "running since 2026-10-02T20:54:48Z",
+      "currentState": "running since 2026-10-02T22:29:38Z",
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T20:54:48Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T22:29:38Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
@@ -61,15 +61,15 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-user-delete/victim",
-              "uid": "a8aeca1f-3fc3-4a38-bd40-df157d209d3a",
+              "uid": "6a94257c-306e-4fc7-ab0a-034011c5a8f5",
               "field": "status.containerStatuses[app].state.running.startedAt",
-              "value": "2026-10-02T20:54:48Z",
-              "time": "2026-10-02T20:54:48Z"
+              "value": "2026-10-02T22:29:38Z",
+              "time": "2026-10-02T22:29:38Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-user-delete/victim",
-              "uid": "a8aeca1f-3fc3-4a38-bd40-df157d209d3a",
+              "uid": "6a94257c-306e-4fc7-ab0a-034011c5a8f5",
               "field": "status.containerStatuses[app].restartCount",
               "value": "0"
             }

@@ -1,22 +1,22 @@
 {
-  "observedAt": "2026-10-02T20:51:26.043595Z",
+  "observedAt": "2026-10-02T22:26:10.201371Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-preemption",
     "name": "low",
-    "uid": "61e0a7ce-532f-4a01-8ef4-dc16f15314b3",
+    "uid": "72166b74-4792-46e4-82c0-e292986a4a28",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:51:08Z",
-    "deletionTimestamp": "2026-10-02T20:52:39Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:25:52Z",
+    "deletionTimestamp": "2026-10-02T22:27:23Z",
     "restartPolicy": "Always"
   },
   "verdicts": [
     {
       "kind": "preemption-scheduler",
       "confidence": "confirmed",
-      "summary": "the scheduler initiated preemption of this pod to make room for a higher-priority pod; outcome at observation time: the pod is being deleted (metadata.deletionTimestamp 2026-10-02T20:52:39Z)",
+      "summary": "the scheduler initiated preemption of this pod to make room for a higher-priority pod; outcome at observation time: the pod is being deleted (metadata.deletionTimestamp 2026-10-02T22:27:23Z)",
       "competing": [
         "the DisruptionTarget condition shows a disruption was initiated; it does not by itself guarantee the disruption completed"
       ],
@@ -24,18 +24,18 @@
         {
           "kind": "pod-condition",
           "object": "Pod wd-preemption/low",
-          "uid": "61e0a7ce-532f-4a01-8ef4-dc16f15314b3",
+          "uid": "72166b74-4792-46e4-82c0-e292986a4a28",
           "field": "status.conditions[DisruptionTarget]",
           "value": "status=True reason=PreemptionByScheduler message=\"default-scheduler: preempting to accommodate a higher priority pod\"",
-          "time": "2026-10-02T20:51:09Z"
+          "time": "2026-10-02T22:25:53Z"
         },
         {
           "kind": "event",
           "object": "Pod wd-preemption/low",
-          "uid": "61e0a7ce-532f-4a01-8ef4-dc16f15314b3",
+          "uid": "72166b74-4792-46e4-82c0-e292986a4a28",
           "field": "event Preempted",
-          "value": "Preempted by pod 7722fd53-0756-467c-89cc-3f10c373a3a2 on node wd-13112-4393-worker",
-          "time": "2026-10-02T20:51:09Z",
+          "value": "Preempted by pod d4227b1c-6d31-4f65-a1e6-7156770b0131 on node wd-13112-6203-worker",
+          "time": "2026-10-02T22:25:53Z",
           "count": 1
         }
       ]
@@ -47,11 +47,11 @@
       "role": "regular",
       "image": "docker.io/library/busybox:1.37",
       "restartCount": 0,
-      "currentState": "running since 2026-10-02T20:51:09Z",
+      "currentState": "running since 2026-10-02T22:25:52Z",
       "restart": {
         "policy": "Always",
         "decision": "running",
-        "detail": "running since 2026-10-02T20:51:09Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+        "detail": "running since 2026-10-02T22:25:52Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
       },
       "verdicts": [
         {
@@ -62,15 +62,15 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-preemption/low",
-              "uid": "61e0a7ce-532f-4a01-8ef4-dc16f15314b3",
+              "uid": "72166b74-4792-46e4-82c0-e292986a4a28",
               "field": "status.containerStatuses[app].state.running.startedAt",
-              "value": "2026-10-02T20:51:09Z",
-              "time": "2026-10-02T20:51:09Z"
+              "value": "2026-10-02T22:25:52Z",
+              "time": "2026-10-02T22:25:52Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-preemption/low",
-              "uid": "61e0a7ce-532f-4a01-8ef4-dc16f15314b3",
+              "uid": "72166b74-4792-46e4-82c0-e292986a4a28",
               "field": "status.containerStatuses[app].restartCount",
               "value": "0"
             }

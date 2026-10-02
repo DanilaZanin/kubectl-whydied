@@ -229,7 +229,7 @@ func listMode(ctx context.Context, cs kubernetes.Interface, ns string, copts cla
 		return exitError
 	}
 	reports := []*classify.Report{}
-	var failures []listFailure
+	failures := []listFailure{}
 	for i := range pods {
 		p := &pods[i]
 		snap, err := collect.Collect(ctx, cs, collect.Options{Namespace: p.Namespace, Pod: p.Name})

@@ -1,14 +1,14 @@
 {
-  "observedAt": "2026-10-02T20:50:29.040821Z",
+  "observedAt": "2026-10-02T22:25:11.874763Z",
   "window": "5m0s",
   "pod": {
     "namespace": "wd-oom",
     "name": "oom",
-    "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
+    "uid": "f3d599d4-2f6c-4257-a02e-b4019399546b",
     "exists": true,
     "phase": "Running",
-    "node": "wd-13112-4393-worker",
-    "startTime": "2026-10-02T20:50:09Z",
+    "node": "wd-13112-6203-worker",
+    "startTime": "2026-10-02T22:24:51Z",
     "restartPolicy": "Always"
   },
   "verdicts": [],
@@ -21,11 +21,11 @@
       "currentState": "terminated (exitCode=137, reason=OOMKilled)",
       "termination": {
         "source": "state.terminated",
-        "containerID": "containerd://81a9137f988b5e0e44116bff8184e0a79bf08d9701e5170fe7c7d86dc6885262",
+        "containerID": "containerd://a0b5e4afa2981c64c5dd489872fe7f9d947dc10e5dc7ee14318d8e8d3104734e",
         "exitCode": 137,
         "reason": "OOMKilled",
-        "startedAt": "2026-10-02T20:50:25Z",
-        "finishedAt": "2026-10-02T20:50:25Z"
+        "startedAt": "2026-10-02T22:25:05Z",
+        "finishedAt": "2026-10-02T22:25:05Z"
       },
       "expected": {
         "state": "unexpected",
@@ -34,18 +34,18 @@
       "restart": {
         "policy": "Always",
         "decision": "back-off",
-        "detail": "a BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures); a recent BackOff event was recorded after this stop, so the next start is delayed (exponential back-off, documented cap 5 minutes); the API does not report the remaining delay",
         "evidence": [
           {
             "kind": "event",
             "object": "Pod wd-oom/oom",
-            "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
+            "uid": "f3d599d4-2f6c-4257-a02e-b4019399546b",
             "field": "event BackOff",
-            "value": "Back-off restarting failed container app in pod oom_wd-oom(3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f)",
-            "time": "2026-10-02T20:50:26Z",
-            "firstTime": "2026-10-02T20:50:11Z",
+            "value": "Back-off restarting failed container app in pod oom_wd-oom(f3d599d4-2f6c-4257-a02e-b4019399546b)",
+            "time": "2026-10-02T22:25:06Z",
+            "firstTime": "2026-10-02T22:24:53Z",
             "count": 2,
-            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:50:11Z, last 2026-10-02T20:50:26Z)"
+            "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T22:24:53Z, last 2026-10-02T22:25:06Z)"
           }
         ]
       },
@@ -62,23 +62,23 @@
             {
               "kind": "pod-status",
               "object": "Pod wd-oom/oom",
-              "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
+              "uid": "f3d599d4-2f6c-4257-a02e-b4019399546b",
               "field": "status.containerStatuses[app].state.terminated.exitCode",
               "value": "137",
-              "time": "2026-10-02T20:50:25Z"
+              "time": "2026-10-02T22:25:05Z"
             },
             {
               "kind": "pod-status",
               "object": "Pod wd-oom/oom",
-              "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
+              "uid": "f3d599d4-2f6c-4257-a02e-b4019399546b",
               "field": "status.containerStatuses[app].state.terminated.reason",
               "value": "OOMKilled",
-              "time": "2026-10-02T20:50:25Z"
+              "time": "2026-10-02T22:25:05Z"
             },
             {
               "kind": "pod-spec",
               "object": "Pod wd-oom/oom",
-              "uid": "3b8b40b2-fa2c-4797-ae4e-bfcd77d9261f",
+              "uid": "f3d599d4-2f6c-4257-a02e-b4019399546b",
               "field": "spec.containers[app].resources.limits.memory",
               "value": "spec memory limit 32Mi"
             }
