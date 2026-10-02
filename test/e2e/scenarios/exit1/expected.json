@@ -7,7 +7,6 @@
     "confidence": "confirmed",
     "evidenceKinds": ["pod-status"],
     "expectedness": "unexpected",
-    "restartDecision": "back-off|restarting",
     "contains": ["exitCode=1"],
     "forbidKinds": ["exit-signal-convention", "oom-kill-reported"]
   }

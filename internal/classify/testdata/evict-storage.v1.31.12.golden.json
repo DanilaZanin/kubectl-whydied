@@ -62,12 +62,12 @@
       },
       "expected": {
         "state": "expected",
-        "why": "the stop is part of pod termination: the pod status reason is Evicted"
+        "why": "the stop is part of pod termination: the pod status reason is Evicted (this instance ended after the termination started)"
       },
       "restart": {
         "policy": "Never",
         "decision": "not-restarting",
-        "detail": "restart policy Never does not restart a container that ended with exitCode=137"
+        "detail": "the pod is in the terminal phase Failed, so the kubelet no longer restarts its containers (restart policy Never)"
       },
       "verdicts": [
         {

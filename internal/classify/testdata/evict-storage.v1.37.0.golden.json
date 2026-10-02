@@ -58,9 +58,15 @@
         "reason": "ContainerStatusUnknown",
         "message": "The container could not be located when the pod was deleted.  The container used to be Running"
       },
+      "previousTermination": {
+        "source": "lastState.terminated",
+        "exitCode": 137,
+        "reason": "ContainerStatusUnknown",
+        "message": "The container could not be located when the pod was deleted.  The container used to be Running"
+      },
       "expected": {
-        "state": "expected",
-        "why": "the stop is part of pod termination: the pod status reason is Evicted"
+        "state": "unknown",
+        "why": "the pod is terminating (the pod status reason is Evicted) but this instance ended at unknown time, before the termination started at 2026-10-02T19:09:38Z; it stopped for another reason"
       },
       "restart": {
         "policy": "Never",
@@ -72,6 +78,37 @@
           "kind": "status-unknown-synthesized",
           "confidence": "confirmed",
           "summary": "the kubelet could not observe how the container ended and synthesized exitCode=137; the exit code carries no information about the cause",
+          "competing": [
+            "any cause: the real exit status was never observed"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-evict-storage/evict-storage",
+              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "value": "137"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-evict-storage/evict-storage",
+              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "value": "ContainerStatusUnknown"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-evict-storage/evict-storage",
+              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+              "field": "status.containerStatuses[app].lastState.terminated.message",
+              "value": "The container could not be located when the pod was deleted.  The container used to be Running"
+            }
+          ]
+        },
+        {
+          "kind": "status-unknown-synthesized",
+          "confidence": "confirmed",
+          "summary": "previous instance (lastState.terminated): the kubelet could not observe how the container ended and synthesized exitCode=137; the exit code carries no information about the cause",
           "competing": [
             "any cause: the real exit status was never observed"
           ],

@@ -11,7 +11,7 @@
     "startTime": "2026-10-02T19:14:05Z",
     "restartPolicy": "Never"
   },
-  "verdicts": null,
+  "verdicts": [],
   "containers": [
     {
       "name": "app",
@@ -34,7 +34,7 @@
       "restart": {
         "policy": "Never",
         "decision": "not-restarting",
-        "detail": "restart policy Never does not restart a container that ended with exitCode=0"
+        "detail": "the pod is in the terminal phase Succeeded, so the kubelet no longer restarts its containers (restart policy Never)"
       },
       "verdicts": [
         {

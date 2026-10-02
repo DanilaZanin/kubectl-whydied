@@ -11,7 +11,7 @@
     "startTime": "2026-10-02T19:14:24Z",
     "restartPolicy": "Always"
   },
-  "verdicts": null,
+  "verdicts": [],
   "containers": [
     {
       "name": "app",

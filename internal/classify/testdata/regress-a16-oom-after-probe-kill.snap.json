@@ -1,0 +1,949 @@
+{
+  "version": 1,
+  "collectedAt": "2026-10-02T19:27:25.244419Z",
+  "namespace": "att",
+  "name": "a16",
+  "pod": {
+    "metadata": {
+      "name": "a16",
+      "namespace": "att",
+      "uid": "5e1f5d92-566a-4a23-82c4-0dae8145726f",
+      "resourceVersion": "1228",
+      "generation": 1,
+      "creationTimestamp": "2026-10-02T19:25:53Z",
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Pod\",\"metadata\":{\"annotations\":{},\"name\":\"a16\",\"namespace\":\"att\"},\"spec\":{\"containers\":[{\"command\":[\"sh\",\"-c\",\"if [ -f /st/ran ]; then touch /tmp/ok; sleep 5; x=a; while true; do x=$x$x$x$x; done; else touch /st/ran; exec sleep 3600; fi\"],\"image\":\"busybox:1.37\",\"imagePullPolicy\":\"IfNotPresent\",\"livenessProbe\":{\"exec\":{\"command\":[\"cat\",\"/tmp/ok\"]},\"failureThreshold\":2,\"initialDelaySeconds\":2,\"periodSeconds\":2},\"name\":\"app\",\"resources\":{\"limits\":{\"memory\":\"24Mi\"}},\"volumeMounts\":[{\"mountPath\":\"/st\",\"name\":\"st\"}]}],\"restartPolicy\":\"Always\",\"volumes\":[{\"emptyDir\":{},\"name\":\"st\"}]}}\n"
+      }
+    },
+    "spec": {
+      "volumes": [
+        {
+          "name": "st",
+          "emptyDir": {}
+        },
+        {
+          "name": "kube-api-access-99nd9",
+          "projected": {
+            "sources": [
+              {
+                "serviceAccountToken": {
+                  "expirationSeconds": 3607,
+                  "path": "token"
+                }
+              },
+              {
+                "configMap": {
+                  "name": "kube-root-ca.crt",
+                  "items": [
+                    {
+                      "key": "ca.crt",
+                      "path": "ca.crt"
+                    }
+                  ]
+                }
+              },
+              {
+                "downwardAPI": {
+                  "items": [
+                    {
+                      "path": "namespace",
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "metadata.namespace"
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "defaultMode": 420
+          }
+        }
+      ],
+      "containers": [
+        {
+          "name": "app",
+          "image": "busybox:1.37",
+          "command": [
+            "sh",
+            "-c",
+            "if [ -f /st/ran ]; then touch /tmp/ok; sleep 5; x=a; while true; do x=$x$x$x$x; done; else touch /st/ran; exec sleep 3600; fi"
+          ],
+          "resources": {
+            "limits": {
+              "memory": "24Mi"
+            },
+            "requests": {
+              "memory": "24Mi"
+            }
+          },
+          "volumeMounts": [
+            {
+              "name": "st",
+              "mountPath": "/st"
+            },
+            {
+              "name": "kube-api-access-99nd9",
+              "readOnly": true,
+              "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+            }
+          ],
+          "livenessProbe": {
+            "exec": {
+              "command": [
+                "cat",
+                "/tmp/ok"
+              ]
+            },
+            "initialDelaySeconds": 2,
+            "timeoutSeconds": 1,
+            "periodSeconds": 2,
+            "successThreshold": 1,
+            "failureThreshold": 2
+          },
+          "terminationMessagePath": "/dev/termination-log",
+          "terminationMessagePolicy": "File",
+          "imagePullPolicy": "IfNotPresent"
+        }
+      ],
+      "restartPolicy": "Always",
+      "terminationGracePeriodSeconds": 30,
+      "dnsPolicy": "ClusterFirst",
+      "serviceAccountName": "default",
+      "serviceAccount": "default",
+      "nodeName": "wd-attack-worker",
+      "securityContext": {},
+      "schedulerName": "default-scheduler",
+      "tolerations": [
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "priority": 0,
+      "enableServiceLinks": true,
+      "preemptionPolicy": "PreemptLowerPriority"
+    },
+    "status": {
+      "observedGeneration": 1,
+      "phase": "Running",
+      "conditions": [
+        {
+          "type": "PodReadyToStartContainers",
+          "observedGeneration": 1,
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:25:59Z"
+        },
+        {
+          "type": "Initialized",
+          "observedGeneration": 1,
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:25:59Z"
+        },
+        {
+          "type": "Ready",
+          "observedGeneration": 1,
+          "status": "False",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:27:06Z",
+          "reason": "ContainersNotReady",
+          "message": "containers with unready status: [app]"
+        },
+        {
+          "type": "ContainersReady",
+          "observedGeneration": 1,
+          "status": "False",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:27:06Z",
+          "reason": "ContainersNotReady",
+          "message": "containers with unready status: [app]"
+        },
+        {
+          "type": "PodScheduled",
+          "observedGeneration": 1,
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:25:58Z"
+        }
+      ],
+      "hostIP": "172.20.0.2",
+      "hostIPs": [
+        {
+          "ip": "172.20.0.2"
+        }
+      ],
+      "podIP": "10.244.1.12",
+      "podIPs": [
+        {
+          "ip": "10.244.1.12"
+        }
+      ],
+      "startTime": "2026-10-02T19:25:59Z",
+      "containerStatuses": [
+        {
+          "name": "app",
+          "state": {
+            "waiting": {
+              "reason": "CrashLoopBackOff",
+              "message": "back-off 20s restarting failed container=app pod=a16_att(5e1f5d92-566a-4a23-82c4-0dae8145726f)"
+            }
+          },
+          "lastState": {
+            "terminated": {
+              "exitCode": 137,
+              "reason": "OOMKilled",
+              "startedAt": "2026-10-02T19:27:00Z",
+              "finishedAt": "2026-10-02T19:27:05Z",
+              "containerID": "containerd://1d3c6cd824f468bb7ea2299dccce046f7c62add5541e314b609428c6fca0b91e"
+            }
+          },
+          "ready": false,
+          "restartCount": 3,
+          "image": "docker.io/library/busybox:1.37",
+          "imageID": "sha256:ad4f11f7c85f87c0a6d6c0fe492ad53f9cdcff6e8c88b881360c70eff701c67b",
+          "containerID": "containerd://1d3c6cd824f468bb7ea2299dccce046f7c62add5541e314b609428c6fca0b91e",
+          "started": false,
+          "allocatedResources": {
+            "memory": "24Mi"
+          },
+          "resources": {
+            "limits": {
+              "memory": "24Mi"
+            },
+            "requests": {
+              "memory": "24Mi"
+            }
+          },
+          "volumeMounts": [
+            {
+              "name": "st",
+              "mountPath": "/st"
+            },
+            {
+              "name": "kube-api-access-99nd9",
+              "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+              "readOnly": true,
+              "recursiveReadOnly": "Disabled"
+            }
+          ],
+          "user": {
+            "linux": {
+              "uid": 0,
+              "gid": 0,
+              "supplementalGroups": [
+                0,
+                10
+              ]
+            }
+          }
+        }
+      ],
+      "qosClass": "Burstable",
+      "allocatedResources": {
+        "memory": "24Mi"
+      },
+      "resources": {
+        "limits": {
+          "memory": "24Mi"
+        },
+        "requests": {
+          "memory": "24Mi"
+        }
+      }
+    }
+  },
+  "node": {
+    "metadata": {
+      "name": "wd-attack-worker",
+      "uid": "5151d325-7b49-4c18-82b1-6072ef5864e3",
+      "resourceVersion": "986",
+      "creationTimestamp": "2026-10-02T19:25:34Z",
+      "labels": {
+        "beta.kubernetes.io/arch": "arm64",
+        "beta.kubernetes.io/os": "linux",
+        "kubernetes.io/arch": "arm64",
+        "kubernetes.io/hostname": "wd-attack-worker",
+        "kubernetes.io/os": "linux"
+      },
+      "annotations": {
+        "node.alpha.kubernetes.io/ttl": "0",
+        "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+      }
+    },
+    "spec": {
+      "podCIDR": "10.244.1.0/24",
+      "podCIDRs": [
+        "10.244.1.0/24"
+      ],
+      "providerID": "kind://docker/wd-attack/wd-attack-worker"
+    },
+    "status": {
+      "capacity": {
+        "cpu": "4",
+        "ephemeral-storage": "105087164416",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "hugepages-32Mi": "0",
+        "hugepages-64Ki": "0",
+        "memory": "8113628Ki",
+        "pods": "110"
+      },
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "105087164416",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "hugepages-32Mi": "0",
+        "hugepages-64Ki": "0",
+        "memory": "8113628Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "type": "MemoryPressure",
+          "status": "False",
+          "lastHeartbeatTime": "2026-10-02T19:26:05Z",
+          "lastTransitionTime": "2026-10-02T19:25:34Z",
+          "reason": "KubeletHasSufficientMemory",
+          "message": "kubelet has sufficient memory available"
+        },
+        {
+          "type": "DiskPressure",
+          "status": "False",
+          "lastHeartbeatTime": "2026-10-02T19:26:05Z",
+          "lastTransitionTime": "2026-10-02T19:25:34Z",
+          "reason": "KubeletHasNoDiskPressure",
+          "message": "kubelet has no disk pressure"
+        },
+        {
+          "type": "PIDPressure",
+          "status": "False",
+          "lastHeartbeatTime": "2026-10-02T19:26:05Z",
+          "lastTransitionTime": "2026-10-02T19:25:34Z",
+          "reason": "KubeletHasSufficientPID",
+          "message": "kubelet has sufficient PID available"
+        },
+        {
+          "type": "Ready",
+          "status": "True",
+          "lastHeartbeatTime": "2026-10-02T19:26:05Z",
+          "lastTransitionTime": "2026-10-02T19:25:47Z",
+          "reason": "KubeletReady",
+          "message": "kubelet is posting ready status"
+        }
+      ],
+      "addresses": [
+        {
+          "type": "InternalIP",
+          "address": "172.20.0.2"
+        },
+        {
+          "type": "Hostname",
+          "address": "wd-attack-worker"
+        }
+      ],
+      "daemonEndpoints": {
+        "kubeletEndpoint": {
+          "Port": 10250
+        }
+      },
+      "nodeInfo": {
+        "machineID": "8022a6d161d947a1a34e94fa0ac9e87f",
+        "systemUUID": "eba52075-dd44-4a41-a377-21d2bb62947c",
+        "bootID": "ce2996bd-7038-42c4-bf02-1c996c4c1e35",
+        "kernelVersion": "6.8.0-117-generic",
+        "osImage": "Debian GNU/Linux 13 (trixie)",
+        "containerRuntimeVersion": "containerd://2.3.4",
+        "kubeletVersion": "v1.37.0",
+        "kubeProxyVersion": "",
+        "operatingSystem": "linux",
+        "architecture": "arm64",
+        "runningInUserNamespace": false
+      },
+      "runtimeHandlers": [
+        {
+          "name": "",
+          "features": {
+            "recursiveReadOnlyMounts": true,
+            "userNamespaces": true
+          }
+        },
+        {
+          "name": "runc",
+          "features": {
+            "recursiveReadOnlyMounts": true,
+            "userNamespaces": true
+          }
+        },
+        {
+          "name": "test-handler",
+          "features": {
+            "recursiveReadOnlyMounts": true,
+            "userNamespaces": true
+          }
+        }
+      ],
+      "features": {
+        "supplementalGroupsPolicy": true
+      },
+      "declaredFeatures": [
+        "ExtendWebSocketsToKubelet",
+        "InPlacePodLevelResourcesVerticalScaling",
+        "InPlacePodVerticalScalingInitContainers",
+        "RestartAllContainersOnContainerExits"
+      ]
+    }
+  },
+  "events": [
+    {
+      "metadata": {
+        "name": "a16.18daccf4ce5133f7",
+        "namespace": "att",
+        "uid": "440ca781-d5bd-4c87-9649-b83520b0bd3e",
+        "resourceVersion": "610",
+        "creationTimestamp": "2026-10-02T19:25:53Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "att",
+        "name": "a16",
+        "uid": "5e1f5d92-566a-4a23-82c4-0dae8145726f",
+        "apiVersion": "v1",
+        "resourceVersion": "608"
+      },
+      "reason": "FailedScheduling",
+      "message": "0/2 nodes are available: 1 node(s) had untolerated taint(s), 1 node(s) were unschedulable. preemption: 0/2 nodes are available: 2 Preemption is not helpful for scheduling.",
+      "source": {
+        "component": "default-scheduler"
+      },
+      "firstTimestamp": "2026-10-02T19:25:53Z",
+      "lastTimestamp": "2026-10-02T19:25:53Z",
+      "count": 1,
+      "type": "Warning",
+      "eventTime": null,
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": ""
+    },
+    {
+      "metadata": {
+        "name": "a16.18daccf60dc21b79",
+        "namespace": "att",
+        "uid": "91ae72f5-4970-4a4d-8c73-1f25e23bde8f",
+        "resourceVersion": "657",
+        "creationTimestamp": "2026-10-02T19:25:59Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "att",
+        "name": "a16",
+        "uid": "5e1f5d92-566a-4a23-82c4-0dae8145726f",
+        "apiVersion": "v1",
+        "resourceVersion": "609"
+      },
+      "reason": "Scheduled",
+      "message": "Successfully assigned att/a16 to wd-attack-worker",
+      "source": {
+        "component": "default-scheduler"
+      },
+      "firstTimestamp": "2026-10-02T19:25:58Z",
+      "lastTimestamp": "2026-10-02T19:25:58Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": ""
+    },
+    {
+      "metadata": {
+        "name": "a16.18daccf6496d5ca5",
+        "namespace": "att",
+        "uid": "2ba796a5-a515-464a-b393-f24963e27401",
+        "resourceVersion": "1204",
+        "creationTimestamp": "2026-10-02T19:26:00Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "att",
+        "name": "a16",
+        "uid": "5e1f5d92-566a-4a23-82c4-0dae8145726f",
+        "apiVersion": "v1",
+        "resourceVersion": "636",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Pulled",
+      "message": "Container image \"busybox:1.37\" already present on machine and can be accessed by the pod",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:25:59Z",
+      "lastTimestamp": "2026-10-02T19:27:00Z",
+      "count": 4,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "a16.18daccf64a1b7142",
+        "namespace": "att",
+        "uid": "6859ec1b-f293-4b99-9e25-fad923050bb5",
+        "resourceVersion": "1205",
+        "creationTimestamp": "2026-10-02T19:26:00Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "att",
+        "name": "a16",
+        "uid": "5e1f5d92-566a-4a23-82c4-0dae8145726f",
+        "apiVersion": "v1",
+        "resourceVersion": "636",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Created",
+      "message": "Container created",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:26:00Z",
+      "lastTimestamp": "2026-10-02T19:27:00Z",
+      "count": 4,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "a16.18daccf64e176b08",
+        "namespace": "att",
+        "uid": "a4b73dfe-c326-4124-b673-b1181e7c0a6e",
+        "resourceVersion": "1206",
+        "creationTimestamp": "2026-10-02T19:26:00Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "att",
+        "name": "a16",
+        "uid": "5e1f5d92-566a-4a23-82c4-0dae8145726f",
+        "apiVersion": "v1",
+        "resourceVersion": "636",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Started",
+      "message": "Container started",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:26:00Z",
+      "lastTimestamp": "2026-10-02T19:27:00Z",
+      "count": 4,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "a16.18daccf7233cdc74",
+        "namespace": "att",
+        "uid": "afbeb7f4-f656-415e-a935-6c13eb08afa9",
+        "resourceVersion": "818",
+        "creationTimestamp": "2026-10-02T19:26:03Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "att",
+        "name": "a16",
+        "uid": "5e1f5d92-566a-4a23-82c4-0dae8145726f",
+        "apiVersion": "v1",
+        "resourceVersion": "636",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Unhealthy",
+      "message": "Liveness probe failed: cat: can't open '/tmp/ok': No such file or directory\n",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:26:03Z",
+      "lastTimestamp": "2026-10-02T19:26:05Z",
+      "count": 2,
+      "type": "Warning",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "a16.18daccf79aab17e0",
+        "namespace": "att",
+        "uid": "8b59de99-f2c3-42a1-a860-10642dc779bf",
+        "resourceVersion": "819",
+        "creationTimestamp": "2026-10-02T19:26:05Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "att",
+        "name": "a16",
+        "uid": "5e1f5d92-566a-4a23-82c4-0dae8145726f",
+        "apiVersion": "v1",
+        "resourceVersion": "636",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Killing",
+      "message": "Container app failed liveness probe, will be restarted",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:26:05Z",
+      "lastTimestamp": "2026-10-02T19:26:05Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "a16.18dacd0139a4741e",
+        "namespace": "att",
+        "uid": "e68576f2-bfad-4aea-a52a-181af89e9043",
+        "resourceVersion": "1226",
+        "creationTimestamp": "2026-10-02T19:26:46Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "att",
+        "name": "a16",
+        "uid": "5e1f5d92-566a-4a23-82c4-0dae8145726f",
+        "apiVersion": "v1",
+        "resourceVersion": "636",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "BackOff",
+      "message": "Back-off restarting failed container app in pod a16_att(5e1f5d92-566a-4a23-82c4-0dae8145726f)",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:26:46Z",
+      "lastTimestamp": "2026-10-02T19:27:07Z",
+      "count": 4,
+      "type": "Warning",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf05eff43d0",
+        "namespace": "default",
+        "uid": "0b30b791-d5d2-49d5-a1d1-ccf8da0a25a1",
+        "resourceVersion": "433",
+        "creationTimestamp": "2026-10-02T19:25:34Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "Starting",
+      "message": "Starting kubelet.",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:25:34Z",
+      "lastTimestamp": "2026-10-02T19:25:34Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf05fb7db83",
+        "namespace": "default",
+        "uid": "6d4194f4-0f08-470c-aade-da660d115d8e",
+        "resourceVersion": "442",
+        "creationTimestamp": "2026-10-02T19:25:34Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeHasSufficientMemory",
+      "message": "Node wd-attack-worker status is now: NodeHasSufficientMemory",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:25:34Z",
+      "lastTimestamp": "2026-10-02T19:25:34Z",
+      "count": 3,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf05fb7f828",
+        "namespace": "default",
+        "uid": "6d477384-d001-463a-b15a-9298cc7ef647",
+        "resourceVersion": "452",
+        "creationTimestamp": "2026-10-02T19:25:34Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeHasNoDiskPressure",
+      "message": "Node wd-attack-worker status is now: NodeHasNoDiskPressure",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:25:34Z",
+      "lastTimestamp": "2026-10-02T19:25:34Z",
+      "count": 3,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf05fb80f45",
+        "namespace": "default",
+        "uid": "89061e3b-f884-498b-aae2-69bfa4b3cd1b",
+        "resourceVersion": "455",
+        "creationTimestamp": "2026-10-02T19:25:34Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeHasSufficientPID",
+      "message": "Node wd-attack-worker status is now: NodeHasSufficientPID",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:25:34Z",
+      "lastTimestamp": "2026-10-02T19:25:34Z",
+      "count": 3,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf063dec6c5",
+        "namespace": "default",
+        "uid": "be3669af-5373-4154-8753-7c6a6f08b92c",
+        "resourceVersion": "440",
+        "creationTimestamp": "2026-10-02T19:25:34Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeAllocatableEnforced",
+      "message": "Updated Node Allocatable limit across pods",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:25:34Z",
+      "lastTimestamp": "2026-10-02T19:25:34Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf06af440ef",
+        "namespace": "default",
+        "uid": "2c3eb184-2956-41c4-a774-e941af8c3ae0",
+        "resourceVersion": "457",
+        "creationTimestamp": "2026-10-02T19:25:34Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "uid": "5151d325-7b49-4c18-82b1-6072ef5864e3",
+        "apiVersion": "v1"
+      },
+      "reason": "CIDRAssignmentFailed",
+      "message": "Node wd-attack-worker status is now: CIDRAssignmentFailed",
+      "source": {
+        "component": "cidrAllocator"
+      },
+      "firstTimestamp": "2026-10-02T19:25:34Z",
+      "lastTimestamp": "2026-10-02T19:25:34Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "cidrAllocator",
+      "reportingInstance": ""
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf1021fdbbc",
+        "namespace": "default",
+        "uid": "7535a8d4-99fb-49ea-8765-c01c6fb127a2",
+        "resourceVersion": "473",
+        "creationTimestamp": "2026-10-02T19:25:37Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "Starting",
+      "source": {},
+      "firstTimestamp": null,
+      "lastTimestamp": null,
+      "type": "Normal",
+      "eventTime": "2026-10-02T19:25:37.328019Z",
+      "action": "StartKubeProxy",
+      "reportingComponent": "kube-proxy",
+      "reportingInstance": "kube-proxy-wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf1610c663a",
+        "namespace": "default",
+        "uid": "615cbf6e-ffec-4530-b751-e45ca6e84cbb",
+        "resourceVersion": "482",
+        "creationTimestamp": "2026-10-02T19:25:38Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "uid": "5151d325-7b49-4c18-82b1-6072ef5864e3",
+        "apiVersion": "v1"
+      },
+      "reason": "RegisteredNode",
+      "message": "Node wd-attack-worker event: Registered Node wd-attack-worker in Controller",
+      "source": {
+        "component": "node-controller"
+      },
+      "firstTimestamp": "2026-10-02T19:25:38Z",
+      "lastTimestamp": "2026-10-02T19:25:38Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "node-controller",
+      "reportingInstance": ""
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf35c94a08b",
+        "namespace": "default",
+        "uid": "233ca941-5051-4fb5-807f-685755fb497d",
+        "resourceVersion": "542",
+        "creationTimestamp": "2026-10-02T19:25:47Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "uid": "5151d325-7b49-4c18-82b1-6072ef5864e3",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeReady",
+      "message": "Node wd-attack-worker status is now: NodeReady",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:25:47Z",
+      "lastTimestamp": "2026-10-02T19:25:47Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf53f1dabf1",
+        "namespace": "default",
+        "uid": "6146cdaf-04fd-43d3-9270-31a0fb61a7c6",
+        "resourceVersion": "970",
+        "creationTimestamp": "2026-10-02T19:25:55Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "uid": "5151d325-7b49-4c18-82b1-6072ef5864e3",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeNotSchedulable",
+      "message": "Node wd-attack-worker status is now: NodeNotSchedulable",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:25:55Z",
+      "lastTimestamp": "2026-10-02T19:26:15Z",
+      "count": 2,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-attack-worker.18daccf7a0e8147d",
+        "namespace": "default",
+        "uid": "f213ad10-2141-4a73-9c0d-ac957caa5a47",
+        "resourceVersion": "1019",
+        "creationTimestamp": "2026-10-02T19:26:05Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-attack-worker",
+        "uid": "5151d325-7b49-4c18-82b1-6072ef5864e3",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeSchedulable",
+      "message": "Node wd-attack-worker status is now: NodeSchedulable",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-attack-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:26:05Z",
+      "lastTimestamp": "2026-10-02T19:26:26Z",
+      "count": 2,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-attack-worker"
+    }
+  ]
+}

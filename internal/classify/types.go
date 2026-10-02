@@ -133,6 +133,7 @@ type ContainerReport struct {
 	CurrentState string `json:"currentState"`
 
 	Termination  *Termination    `json:"termination,omitempty"`
+	Previous     *Termination    `json:"previousTermination,omitempty"` // real lastState when state.terminated is synthesized
 	Expected     *Expectedness   `json:"expected,omitempty"`
 	Restart      RestartDecision `json:"restart"`
 	Verdicts     []Verdict       `json:"verdicts"`

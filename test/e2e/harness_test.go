@@ -328,8 +328,9 @@ func runScenario(t *testing.T, dir string) {
 			rep, raw, err := runTool(ctx, e, pod)
 			if err == nil {
 				if err = Evaluate(sc.Expect, rep, e.knownUIDs(ctx, rep)...); err == nil {
+					requireStable(ctx, t, e)
 					t.Logf("PASS on k8s %s: pod %s\n%s", k8sLabel, pod, raw)
-					saveFixture(ctx, t, e, pod)
+					saveFixture(ctx, t, e, e.resolveTarget(ctx))
 					return
 				}
 			}
@@ -346,6 +347,27 @@ func runScenario(t *testing.T, dir string) {
 			t.Fatalf("scenario did not reach the expected state in %ds: %s\n--- describe pods\n%s\n--- events\n%s", sc.TimeoutSeconds, last, desc, evs)
 		}
 		time.Sleep(3 * time.Second)
+	}
+}
+
+// requireStable runs the tool three more times, five seconds apart. The
+// expectation must hold every time: polling until it matches first would
+// otherwise hide a verdict that is wrong in a transient state.
+func requireStable(ctx context.Context, t *testing.T, e *env) {
+	t.Helper()
+	for i := 1; i <= 3; i++ {
+		time.Sleep(5 * time.Second)
+		pod := e.resolveTarget(ctx)
+		if pod == "" {
+			t.Fatalf("stability check %d/3: target pod disappeared", i)
+		}
+		rep, raw, err := runTool(ctx, e, pod)
+		if err == nil {
+			err = Evaluate(e.sc.Expect, rep, e.knownUIDs(ctx, rep)...)
+		}
+		if err != nil {
+			t.Fatalf("stability check %d/3 failed for pod %s: %v\n%s", i, pod, err, raw)
+		}
 	}
 }
 

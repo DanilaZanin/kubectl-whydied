@@ -33,6 +33,8 @@ type analysis struct {
 	nameEvents  []*corev1.Event
 
 	gaps []collect.Gap
+
+	eventsDenied string // non-empty when the pod events could not be read: "RBAC" or "error"
 }
 
 // Analyze classifies a snapshot. It never mutates it.
@@ -43,8 +45,16 @@ func Analyze(s *collect.Snapshot, o Options) (*Report, error) {
 	a := &analysis{s: s, o: o, pod: s.Pod, otherUIDs: map[string]int{}}
 	a.gaps = append(a.gaps, s.Gaps...)
 	a.sortEvents()
+	for _, g := range s.Gaps {
+		if g.Source == "events for pod name" {
+			a.eventsDenied = "error"
+			if strings.Contains(g.Reason, "forbidden") {
+				a.eventsDenied = "RBAC"
+			}
+		}
+	}
 
-	r := &Report{ObservedAt: s.CollectedAt, Window: o.Window.String()}
+	r := &Report{ObservedAt: s.CollectedAt, Window: o.Window.String(), Verdicts: []Verdict{}, Containers: []ContainerReport{}}
 	r.Pod = PodInfo{Namespace: s.Namespace, Name: s.Name, Exists: s.Pod != nil}
 	for _, ow := range s.Owners {
 		r.Owners = append(r.Owners, OwnerInfo{Kind: ow.Kind, Name: ow.Name, UID: string(ow.UID), Found: ow.Found})
@@ -79,7 +89,9 @@ func Analyze(s *collect.Snapshot, o Options) (*Report, error) {
 		}
 	}
 
-	r.Verdicts = a.podVerdicts()
+	if vs := a.podVerdicts(); vs != nil {
+		r.Verdicts = vs
+	}
 	for _, ref := range collect.AllStatuses(p) {
 		if o.Container != "" && ref.Status.Name != o.Container {
 			continue
@@ -166,7 +178,11 @@ func (a *analysis) notes() []string {
 func (a *analysis) checked() []string {
 	c := []string{"pod status and spec"}
 	if a.pod != nil {
-		c = append(c, "events by involvedObject.uid for the pod ("+fmt.Sprint(len(a.podEvents))+" found)")
+		if a.eventsDenied != "" {
+			c = append(c, "events: not readable ("+a.eventsDenied+"); causes that only an event can prove were not evaluated")
+		} else {
+			c = append(c, "events by involvedObject.uid for the pod ("+fmt.Sprint(len(a.podEvents))+" found)")
+		}
 		if len(a.s.Owners) > 0 {
 			var parts []string
 			for _, o := range a.s.Owners {
@@ -183,7 +199,11 @@ func (a *analysis) checked() []string {
 			c = append(c, "previous container logs")
 		}
 	} else {
-		c = append(c, "events by pod name ("+fmt.Sprint(len(a.nameEvents))+" found)")
+		if a.eventsDenied != "" {
+			c = append(c, "events: not readable ("+a.eventsDenied+")")
+		} else {
+			c = append(c, "events by pod name ("+fmt.Sprint(len(a.nameEvents))+" found)")
+		}
 	}
 	return c
 }
@@ -217,14 +237,14 @@ func (a *analysis) gone(r *Report) {
 		if len(l) > 1 {
 			r.Notes = append(r.Notes, "more than one UID used this pod name; events from different pods may be mixed")
 		}
-	} else {
+	} else if a.eventsDenied == "" {
 		a.gaps = append(a.gaps, collect.Gap{Source: "events", Reason: "no events reference this pod name; events expire after about one hour by default"})
 	}
 	r.Verdicts = []Verdict{v}
 }
 
 func (a *analysis) eventGaps(r *Report) {
-	if len(a.podEvents) > 0 {
+	if len(a.podEvents) > 0 || a.eventsDenied != "" {
 		return
 	}
 	for _, c := range r.Containers {

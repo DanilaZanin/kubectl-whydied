@@ -172,9 +172,9 @@ func podTerminal(p *corev1.Pod) bool {
 	return p.Status.Phase == corev1.PodSucceeded || p.Status.Phase == corev1.PodFailed
 }
 
-func condition(p *corev1.Pod, t corev1.PodConditionType) *corev1.PodCondition {
+func disruptionTarget(p *corev1.Pod) *corev1.PodCondition {
 	for i := range p.Status.Conditions {
-		if p.Status.Conditions[i].Type == t {
+		if p.Status.Conditions[i].Type == corev1.DisruptionTarget {
 			return &p.Status.Conditions[i]
 		}
 	}
@@ -194,4 +194,40 @@ func signalName(n int) string {
 		return s
 	}
 	return fmt.Sprintf("signal %d", n)
+}
+
+// Match levels of an event against one container instance.
+const (
+	matchNone  = iota // the event lies entirely outside the instance's lifetime
+	matchSpans        // an aggregated event spans the instance, but no known occurrence is inside it
+	matchExact        // the first or the last occurrence lies inside the instance's lifetime
+)
+
+// instanceMatch tells how an (aggregated) event relates to the instance that
+// ended with term. Only the first and the last occurrence have known times, and
+// both are real occurrences, so an endpoint inside [start, finish] confirms the
+// link. An event wholly before the start belongs to an earlier instance; wholly
+// after the end, to a later one. Timestamps have one-second resolution, hence the slack.
+func instanceMatch(e *corev1.Event, term *corev1.ContainerStateTerminated) int {
+	if term == nil || term.FinishedAt.IsZero() {
+		return matchNone
+	}
+	first, last := eventTimes(e)
+	if last.IsZero() {
+		return matchNone
+	}
+	slack := time.Second
+	start := term.StartedAt.Time
+	if start.IsZero() {
+		start = term.FinishedAt.Add(-time.Minute)
+	}
+	lo, hi := start.Add(-slack), term.FinishedAt.Add(slack)
+	in := func(t time.Time) bool { return !t.Before(lo) && !t.After(hi) }
+	switch {
+	case in(first) || in(last):
+		return matchExact
+	case first.Before(lo) && last.After(hi) && eventCount(e) > 2:
+		return matchSpans
+	}
+	return matchNone
 }

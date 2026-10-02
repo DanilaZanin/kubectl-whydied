@@ -11,7 +11,7 @@
     "startTime": "2026-10-02T19:10:10Z",
     "restartPolicy": "Always"
   },
-  "verdicts": null,
+  "verdicts": [],
   "containers": [
     {
       "name": "app",
@@ -40,7 +40,7 @@
         {
           "kind": "liveness-probe-kill",
           "confidence": "confirmed",
-          "summary": "the kubelet reported stopping the container because it failed its liveness probe (Killing event names the probe and this container)",
+          "summary": "the kubelet reported stopping the container because it failed its liveness probe (Killing event names the probe and this container, and its time lies inside this instance's lifetime)",
           "competing": [
             "the internal reason for each probe failure is only in the Unhealthy event text (context lines)"
           ],

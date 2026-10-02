@@ -64,7 +64,7 @@ func (a *analysis) podVerdicts() []Verdict {
 
 func (a *analysis) disruption() (Verdict, bool) {
 	p := a.pod
-	cond := condition(p, corev1.DisruptionTarget)
+	cond := disruptionTarget(p)
 	if cond != nil && cond.Status != corev1.ConditionTrue {
 		cond = nil
 	}
@@ -242,7 +242,7 @@ func (a *analysis) scaleReason(cd Verdict) []Verdict {
 		out = append(out, v)
 	}
 	// HPA evidence: SuccessfulRescale near the delete event.
-	if len(cd.Evidence) > 0 && cd.Evidence[0].Time != nil {
+	if len(out) == 0 && len(cd.Evidence) > 0 && cd.Evidence[0].Time != nil {
 		var hits []Evidence
 		for _, e := range a.hpaEvents {
 			if e.Reason == "SuccessfulRescale" && covers(e, *cd.Evidence[0].Time, a.o.Window) {
@@ -252,7 +252,7 @@ func (a *analysis) scaleReason(cd Verdict) []Verdict {
 		if len(hits) > 0 {
 			out = append(out, Verdict{Kind: KindScaleHPA, Confidence: Likely,
 				Summary:   "a HorizontalPodAutoscaler targeting the Deployment reported a rescale within the correlation window of the delete",
-				Competing: []string{"a manual scale at the same time is not distinguishable"},
+				Competing: []string{"a manual scale or a rollout at the same time is not distinguishable by this event alone"},
 				Evidence:  hits})
 		}
 	}

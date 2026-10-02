@@ -5,26 +5,26 @@ Explain why a Kubernetes container or pod died or restarted. Every claim carries
 
 ```
 Pod wd-oom/oom
-  uid=ef87093c-a755-45a7-91ee-47b3ab2f787b node=wd-1370-3240-worker phase=Running restartPolicy=Always
-  observed at 2026-10-02T19:10:59Z; correlation window 5m0s
+  uid=bd5990a2-0173-417e-a6b2-365cfbe1697c node=wd-1370-6894-worker phase=Running restartPolicy=Always
+  observed at 2026-10-02T20:04:56Z; correlation window 5m0s
 
 Summary
   [confirmed] app: oom-kill-reported: the runtime reported an OOM kill for this container instance (API reported exitCode=137, reason=OOMKilled)
 
 Container app (regular)
-  state: terminated (exitCode=137, reason=OOMKilled); restartCount=1 (as reported now; may have been reset)
-  explained instance: state.terminated, containerID=containerd://6107cf87781008b8d58d546b8bfd40bba5c89799edbcb730b03a685a2651cc5e
+  state: terminated (exitCode=137, reason=OOMKilled); restartCount=2 (as reported now; may have been reset)
+  explained instance: state.terminated, containerID=containerd://8afb63428b6bf956c1a255f0b7b0e21da2a1826056911763e5034a73d722fd28
   API reported exitCode=137 reason=OOMKilled
-  started 2026-10-02T19:10:56Z, finished 2026-10-02T19:10:56Z
+  started 2026-10-02T20:04:39Z, finished 2026-10-02T20:04:39Z
   stop expected for this role: unexpected: the container stopped with a non-zero exit code while its pod was not being terminated
   restart: policy=Always decision=restarting: restart policy Always restarts this container (with back-off after repeated failures)
-    - [event] Pod wd-oom/oom event BackOff = "Back-off restarting failed container app in pod oom_wd-oom(ef87093c-a755-45a7-91ee-47b3ab2f787b)" @ 2026-10-02T19:10:57Z (uid ef87093c-a755-45a7-91ee-47b3ab2f787b) [fieldPath=spec.containers{app}]
+    - [event] Pod wd-oom/oom event BackOff = "Back-off restarting failed container app in pod oom_wd-oom(bd5990a2-0173-417e-a6b2-365cfbe1697c)" @ 2026-10-02T20:04:40Z (uid bd5990a2-0173-417e-a6b2-365cfbe1697c) [fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T20:04:27Z, last 2026-10-02T20:04:40Z)]
   [confirmed] oom-kill-reported: the runtime reported an OOM kill for this container instance (API reported exitCode=137, reason=OOMKilled)
     caveat: OOM level is unknown: the same reason is reported for a container cgroup limit, a pod-level cgroup limit and node-wide memory exhaustion
     caveat: memory usage at kill time is not available from the API
-    - [pod-status] Pod wd-oom/oom status.containerStatuses[app].state.terminated.exitCode = 137 @ 2026-10-02T19:10:56Z (uid ef87093c-a755-45a7-91ee-47b3ab2f787b)
-    - [pod-status] Pod wd-oom/oom status.containerStatuses[app].state.terminated.reason = OOMKilled @ 2026-10-02T19:10:56Z (uid ef87093c-a755-45a7-91ee-47b3ab2f787b)
-    - [pod-spec] Pod wd-oom/oom spec.containers[app].resources.limits.memory = "spec memory limit 32Mi" (uid ef87093c-a755-45a7-91ee-47b3ab2f787b)
+    - [pod-status] Pod wd-oom/oom status.containerStatuses[app].state.terminated.exitCode = 137 @ 2026-10-02T20:04:39Z (uid bd5990a2-0173-417e-a6b2-365cfbe1697c)
+    - [pod-status] Pod wd-oom/oom status.containerStatuses[app].state.terminated.reason = OOMKilled @ 2026-10-02T20:04:39Z (uid bd5990a2-0173-417e-a6b2-365cfbe1697c)
+    - [pod-spec] Pod wd-oom/oom spec.containers[app].resources.limits.memory = "spec memory limit 32Mi" (uid bd5990a2-0173-417e-a6b2-365cfbe1697c)
   logs of this instance (last 1 lines):
     | allocating
 
@@ -36,7 +36,7 @@ Checked
   - previous container logs
 ```
 
-Real output: the `oom` e2e scenario on kind v1.37.0 (a container with a 32Mi limit that allocates until it is killed). It was produced by `kubectl whydied oom -n wd-oom --previous-logs 10` and replayed with `--from-snapshot -c app --no-color`; nothing was edited.
+Real output: the `oom` e2e scenario on kind v1.37.0 (a container with a 32Mi limit that allocates until it is killed). It was produced by `kubectl whydied oom -n wd-oom --window 5m --previous-logs 10 --dump-snapshot oom.json` and replayed with `kubectl whydied --from-snapshot oom.json --window 5m -c app --no-color`; nothing was edited.
 
 ## Why
 
@@ -100,8 +100,8 @@ A denied read becomes a line under **Gaps** and is never treated as evidence.
 | Exit code 129 to 255 | `128+n` signal convention, labelled as convention; `exit(N)` by the application looks identical | `likely`, competing explanation named |
 | Kubelet could not observe the exit | `terminated.reason == ContainerStatusUnknown` (the 137 is synthesized) | `confirmed` fact, cause `no data` |
 | Container could not start | `StartError`, `ContainerCannotRun`, `CreateContainerError` reason and message, quoted verbatim | `confirmed` |
-| Liveness or startup probe kill | `Killing` event whose message names the probe, with `fieldPath` of this container, time range covering the termination | `confirmed`; `likely` when the event time does not cover the termination |
-| postStart hook failed | `FailedPostStartHook` events for this container | `confirmed` |
+| Liveness or startup probe kill | `Killing` event whose message names the probe, with `fieldPath` of this container, and whose time lies within the instance's lifetime (its start to its finish); events from another instance are ignored | `confirmed`, otherwise no verdict |
+| postStart hook failed | `FailedPostStartHook` events for this container within the instance's lifetime | `confirmed`, or no verdict when the events belong to another instance |
 | Image cannot be pulled | waiting reason `ErrImagePull`, `ImagePullBackOff`, `InvalidImageName`, with the runtime message | `confirmed` |
 | Scheduler preemption | `DisruptionTarget` condition `PreemptionByScheduler` (or a `Preempted` event) | `confirmed` |
 | Kubelet admission preemption | `status.reason == Preempting` | `confirmed` |

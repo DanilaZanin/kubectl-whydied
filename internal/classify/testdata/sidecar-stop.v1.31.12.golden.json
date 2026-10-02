@@ -19,7 +19,7 @@
       "found": true
     }
   ],
-  "verdicts": null,
+  "verdicts": [],
   "containers": [
     {
       "name": "side",
@@ -77,6 +77,51 @@
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"
+            }
+          ]
+        },
+        {
+          "kind": "killed-after-grace",
+          "confidence": "likely",
+          "summary": "termination began at 2026-10-02T19:15:44Z (earliest termination evidence) and the container ended with exitCode=137 30s later, at or after the 30s grace period: consistent with a SIGKILL after the grace period",
+          "competing": [
+            "the effective grace period can differ (probe-level override, preStop time, eviction override)",
+            "an OOM kill not labelled OOMKilled, an external SIGKILL, or the application calling exit(137)"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-spec",
+              "object": "Pod wd-sidecar-stop/sidecar-job-2srfv",
+              "uid": "c1eec3ef-3731-4473-8abf-f62ed42a3b13",
+              "field": "spec.terminationGracePeriodSeconds",
+              "value": "30",
+              "note": "pod-level value; a probe-level override, preStop time or eviction override can change the effective grace"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-sidecar-stop/sidecar-job-2srfv",
+              "uid": "c1eec3ef-3731-4473-8abf-f62ed42a3b13",
+              "field": "event Killing",
+              "value": "Stopping container side",
+              "time": "2026-10-02T19:15:44Z",
+              "count": 1,
+              "note": "fieldPath=spec.initContainers{side}"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sidecar-stop/sidecar-job-2srfv",
+              "uid": "c1eec3ef-3731-4473-8abf-f62ed42a3b13",
+              "field": "status.initContainerStatuses[side].state.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:16:14Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sidecar-stop/sidecar-job-2srfv",
+              "uid": "c1eec3ef-3731-4473-8abf-f62ed42a3b13",
+              "field": "status.initContainerStatuses[side].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:16:14Z"
             }
           ]
         }

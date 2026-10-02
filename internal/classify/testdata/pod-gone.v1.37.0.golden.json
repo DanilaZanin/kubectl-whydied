@@ -67,7 +67,7 @@
       ]
     }
   ],
-  "containers": null,
+  "containers": [],
   "notes": [
     "5 event(s) still reference this pod name (UIDs: a81cb6a2-23bf-4fc4-8063-f0746dde9895); they are listed as evidence and do not identify a cause by themselves"
   ],

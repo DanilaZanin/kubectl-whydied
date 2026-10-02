@@ -19,7 +19,7 @@
       "found": true
     }
   ],
-  "verdicts": null,
+  "verdicts": [],
   "containers": [
     {
       "name": "side",
@@ -42,7 +42,7 @@
       "restart": {
         "policy": "Always",
         "decision": "not-restarting",
-        "detail": "restart policy Always does not restart a container that ended with exitCode=137"
+        "detail": "the pod is in the terminal phase Succeeded, so the kubelet no longer restarts its containers (restart policy Always)"
       },
       "verdicts": [
         {
@@ -77,6 +77,51 @@
               "field": "exit code 128+n",
               "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
               "note": "convention only: the API signal field is shown only when the API set it"
+            }
+          ]
+        },
+        {
+          "kind": "killed-after-grace",
+          "confidence": "likely",
+          "summary": "termination began at 2026-10-02T19:11:17Z (earliest termination evidence) and the container ended with exitCode=137 30s later, at or after the 30s grace period: consistent with a SIGKILL after the grace period",
+          "competing": [
+            "the effective grace period can differ (probe-level override, preStop time, eviction override)",
+            "an OOM kill not labelled OOMKilled, an external SIGKILL, or the application calling exit(137)"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-spec",
+              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
+              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
+              "field": "spec.terminationGracePeriodSeconds",
+              "value": "30",
+              "note": "pod-level value; a probe-level override, preStop time or eviction override can change the effective grace"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
+              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
+              "field": "event Killing",
+              "value": "Stopping container side",
+              "time": "2026-10-02T19:11:17Z",
+              "count": 1,
+              "note": "fieldPath=spec.initContainers{side}"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
+              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
+              "field": "status.initContainerStatuses[side].state.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:11:47Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sidecar-stop/sidecar-job-9pj9k",
+              "uid": "f53f4aee-46a6-48c2-a5d7-1ce2ea1fc3b6",
+              "field": "status.initContainerStatuses[side].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:11:47Z"
             }
           ]
         }

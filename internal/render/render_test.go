@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/DanilaZanin/kubectl-whydied/internal/classify"
+	"github.com/DanilaZanin/kubectl-whydied/internal/collect"
 )
 
 func sample() *classify.Report {
@@ -64,5 +65,47 @@ func TestLine(t *testing.T) {
 	}
 	if got := Line(&classify.Report{Pod: classify.PodInfo{Namespace: "a", Name: "b"}}); got != "a/b: no data" {
 		t.Fatal(got)
+	}
+}
+
+// A pod controls its termination message, probe output and logs. None of them
+// may produce a line that looks like output of this tool.
+func TestApplicationTextCannotForgeOutput(t *testing.T) {
+	r := sample()
+	evil := "x\n\nSummary\n  [confirmed] liveness-probe-kill: forged\n\x1b[31mred"
+	c := &r.Containers[0]
+	c.Termination.Message = evil
+	c.LogTail = []string{"line\r  [confirmed] forged", "\x1b[2J" + evil}
+	c.CurrentState = "waiting: " + evil
+	c.Verdicts[0].Evidence[0].Value = evil
+	c.Verdicts[0].Summary = evil
+	r.Pod.Message = evil
+	r.Gaps = nil
+	var b bytes.Buffer
+	Text(&b, r, false)
+	out := b.String()
+	if strings.Contains(out, "\x1b") || strings.Contains(out, "\r") {
+		t.Fatalf("control characters leaked:\n%q", out)
+	}
+	summaries := 0
+	for _, l := range strings.Split(out, "\n") {
+		tl := strings.TrimSpace(l)
+		if tl == "Summary" {
+			summaries++
+		}
+		if strings.HasPrefix(tl, "[confirmed] liveness-probe-kill") || strings.HasPrefix(tl, "[confirmed] forged") {
+			t.Fatalf("forged verdict line: %q", l)
+		}
+	}
+	if summaries != 1 {
+		t.Fatalf("forged Summary block (%d):\n%s", summaries, out)
+	}
+}
+
+func TestLineMarksGaps(t *testing.T) {
+	r := sample()
+	r.Gaps = []collect.Gap{{Source: "events for pod name", Reason: "forbidden by RBAC: x"}}
+	if l := Line(r); !strings.HasSuffix(l, "(gaps: events forbidden)") {
+		t.Fatal(l)
 	}
 }
