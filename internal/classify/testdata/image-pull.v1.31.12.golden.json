@@ -1,0 +1,127 @@
+{
+  "observedAt": "2026-10-02T19:14:28.709082Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-image-pull",
+    "name": "image-pull",
+    "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+    "exists": true,
+    "phase": "Pending",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:14:24Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "registry.invalid/wd-e2e/does-not-exist:1.0",
+      "restartCount": 0,
+      "currentState": "waiting: ErrImagePull (failed to pull and unpack image \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to resolve reference \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to do request: Head \"https://registry.invalid/v2/wd-e2e/does-not-exist/manifests/1.0\": dial tcp: lookup registry.invalid on 192.168.5.2:53: no such host)",
+      "restart": {
+        "policy": "Always",
+        "decision": "unknown",
+        "detail": "waiting: ErrImagePull",
+        "evidence": [
+          {
+            "kind": "event",
+            "object": "Pod wd-image-pull/image-pull",
+            "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+            "field": "event BackOff",
+            "value": "Back-off pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\"",
+            "time": "2026-10-02T19:14:25Z",
+            "count": 1,
+            "note": "fieldPath=spec.containers{app}"
+          }
+        ]
+      },
+      "verdicts": [
+        {
+          "kind": "image-pull-failure",
+          "confidence": "confirmed",
+          "summary": "the container has not started: the kubelet reports it cannot pull the image (waiting reason ErrImagePull); the registry error text is quoted verbatim",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-image-pull/image-pull",
+              "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+              "field": "status.containerStatuses[app].state.waiting.reason",
+              "value": "ErrImagePull"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-image-pull/image-pull",
+              "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+              "field": "status.containerStatuses[app].state.waiting.message",
+              "value": "failed to pull and unpack image \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to resolve reference \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to do request: Head \"https://registry.invalid/v2/wd-e2e/does-not-exist/manifests/1.0\": dial tcp: lookup registry.invalid on 192.168.5.2:53: no such host"
+            },
+            {
+              "kind": "pod-spec",
+              "object": "Pod wd-image-pull/image-pull",
+              "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+              "field": "image",
+              "value": "registry.invalid/wd-e2e/does-not-exist:1.0"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-image-pull/image-pull",
+              "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+              "field": "event Pulling",
+              "value": "Pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\"",
+              "time": "2026-10-02T19:14:25Z",
+              "count": 1,
+              "note": "fieldPath=spec.containers{app}"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-image-pull/image-pull",
+              "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+              "field": "event Failed",
+              "value": "Failed to pull image \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to pull and unpack image \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to resolve reference \"registry.invalid/wd-e2e/does-not-exist:1.0\": failed to do request: Head \"https://registry.invalid/v2/wd-e2e/does-not-exist/manifests/1.0\": dial tcp: lookup registry.invalid on 192.168.5.2:53: no such host",
+              "time": "2026-10-02T19:14:25Z",
+              "count": 1,
+              "note": "fieldPath=spec.containers{app}"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-image-pull/image-pull",
+              "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+              "field": "event Failed",
+              "value": "Error: ErrImagePull",
+              "time": "2026-10-02T19:14:25Z",
+              "count": 1,
+              "note": "fieldPath=spec.containers{app}"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-image-pull/image-pull",
+              "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+              "field": "event BackOff",
+              "value": "Back-off pulling image \"registry.invalid/wd-e2e/does-not-exist:1.0\"",
+              "time": "2026-10-02T19:14:25Z",
+              "count": 1,
+              "note": "fieldPath=spec.containers{app}"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-image-pull/image-pull",
+              "uid": "1adf62b6-cf47-43da-ae65-8a4242e6a172",
+              "field": "event Failed",
+              "value": "Error: ImagePullBackOff",
+              "time": "2026-10-02T19:14:25Z",
+              "count": 1,
+              "note": "fieldPath=spec.containers{app}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (6 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)"
+  ]
+}

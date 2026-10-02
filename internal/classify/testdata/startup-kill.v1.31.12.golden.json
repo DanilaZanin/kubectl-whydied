@@ -1,0 +1,141 @@
+{
+  "observedAt": "2026-10-02T19:16:59.780763Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-startup-kill",
+    "name": "startup-kill",
+    "uid": "07b643d3-d71e-42af-87aa-fdd75be987ca",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:16:21Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 1,
+      "currentState": "running since 2026-10-02T19:16:58Z",
+      "termination": {
+        "source": "lastState.terminated",
+        "containerID": "containerd://988c6aa44d139bd2ed67b2c9f8e3a5bb5dd6dff102006c6551c56fdef890d1f0",
+        "exitCode": 137,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:16:22Z",
+        "finishedAt": "2026-10-02T19:16:58Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "running",
+        "detail": "running since 2026-10-02T19:16:58Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+      },
+      "verdicts": [
+        {
+          "kind": "startup-probe-kill",
+          "confidence": "confirmed",
+          "summary": "the kubelet reported stopping the container because it failed its startup probe (Killing event names the probe and this container)",
+          "competing": [
+            "the internal reason for each probe failure is only in the Unhealthy event text (context lines)"
+          ],
+          "evidence": [
+            {
+              "kind": "event",
+              "object": "Pod wd-startup-kill/startup-kill",
+              "uid": "07b643d3-d71e-42af-87aa-fdd75be987ca",
+              "field": "event Killing",
+              "value": "Container app failed startup probe, will be restarted",
+              "time": "2026-10-02T19:16:28Z",
+              "count": 1,
+              "note": "fieldPath=spec.containers{app}"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-startup-kill/startup-kill",
+              "uid": "07b643d3-d71e-42af-87aa-fdd75be987ca",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:16:58Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-startup-kill/startup-kill",
+              "uid": "07b643d3-d71e-42af-87aa-fdd75be987ca",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:16:58Z"
+            },
+            {
+              "kind": "pod-spec",
+              "object": "Pod wd-startup-kill/startup-kill",
+              "uid": "07b643d3-d71e-42af-87aa-fdd75be987ca",
+              "field": "spec.containers[app].startupProbe",
+              "value": "exec [cat /tmp/never-created] periodSeconds=2 failureThreshold=3 timeoutSeconds=1",
+              "note": "failureThreshold is configured; the API does not report how many consecutive failures happened (event count is not a failure count)"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-startup-kill/startup-kill",
+              "uid": "07b643d3-d71e-42af-87aa-fdd75be987ca",
+              "field": "event Unhealthy",
+              "value": "Startup probe failed: cat: can't open '/tmp/never-created': No such file or directory\n",
+              "time": "2026-10-02T19:16:28Z",
+              "firstTime": "2026-10-02T19:16:24Z",
+              "count": 3,
+              "note": "fieldPath=spec.containers{app}; event repeated 3 times (aggregated; first 2026-10-02T19:16:24Z, last 2026-10-02T19:16:28Z)"
+            }
+          ]
+        },
+        {
+          "kind": "exit-signal-convention",
+          "confidence": "likely",
+          "summary": "API reported exitCode=137; by convention that is SIGKILL (128+9), but the API does not say what sent it",
+          "competing": [
+            "the application called exit(137) itself; the API cannot distinguish that from death by SIGKILL",
+            "an OOM kill that the runtime did not label OOMKilled"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-startup-kill/startup-kill",
+              "uid": "07b643d3-d71e-42af-87aa-fdd75be987ca",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:16:58Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-startup-kill/startup-kill",
+              "uid": "07b643d3-d71e-42af-87aa-fdd75be987ca",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:16:58Z"
+            },
+            {
+              "kind": "convention",
+              "object": "Pod wd-startup-kill/startup-kill",
+              "uid": "07b643d3-d71e-42af-87aa-fdd75be987ca",
+              "field": "exit code 128+n",
+              "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
+              "note": "convention only: the API signal field is shown only when the API set it"
+            }
+          ]
+        }
+      ],
+      "logsPrevious": true
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (6 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

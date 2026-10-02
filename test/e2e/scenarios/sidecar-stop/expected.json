@@ -1,0 +1,12 @@
+{
+  "description": "a native sidecar (restartable init container) is stopped when the Job's main container completes; the stop is expected for its role",
+  "timeoutSeconds": 240,
+  "target": {"selector": "app=sidecar-job", "container": "side"},
+  "expect": {
+    "container": "side",
+    "verdictKind": "exit-signal-convention",
+    "confidence": "likely",
+    "role": "sidecar",
+    "expectedness": "expected"
+  }
+}

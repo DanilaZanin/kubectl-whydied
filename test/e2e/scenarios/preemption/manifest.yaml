@@ -1,0 +1,30 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: wd-e2e-low
+value: 100
+globalDefault: false
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: wd-e2e-high
+value: 100000
+globalDefault: false
+preemptionPolicy: PreemptLowerPriority
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: low
+  labels: {app: low}
+spec:
+  priorityClassName: wd-e2e-low
+  terminationGracePeriodSeconds: 90
+  nodeSelector: {kubernetes.io/os: linux}
+  containers:
+  - name: app
+    image: busybox:1.37
+    imagePullPolicy: IfNotPresent
+    command: ["sleep", "3600"]
+    resources: {requests: {cpu: "{{cpu60}}"}}

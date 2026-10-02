@@ -1,0 +1,15 @@
+{
+  "description": "manual kubectl scale: the ReplicaSet deletes a pod. The delete is confirmed; no rollout reason may be claimed",
+  "timeoutSeconds": 200,
+  "steps": [
+    {"wait": ["--for=condition=Available", "deployment/scaled", "--timeout=120s"]},
+    {"kubectl": ["scale", "deployment/scaled", "--replicas=1"]}
+  ],
+  "target": {"selector": "app=scaled", "terminating": true},
+  "expect": {
+    "verdictKind": "controller-delete",
+    "confidence": "confirmed",
+    "evidenceKinds": ["event", "owner"],
+    "forbidKinds": ["scale-reason-rollout"]
+  }
+}

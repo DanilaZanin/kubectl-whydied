@@ -1,0 +1,88 @@
+{
+  "observedAt": "2026-10-02T19:16:22.160549Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-sigterm",
+    "name": "sigterm",
+    "uid": "bdac9765-5eab-4b75-9910-cdf33cacc81b",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:16:18Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 1,
+      "currentState": "running since 2026-10-02T19:16:20Z",
+      "termination": {
+        "source": "lastState.terminated",
+        "containerID": "containerd://413914c9c9e276f5379417977c1d56924e18b0d7c3abb192f6755cbff53f9077",
+        "exitCode": 143,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:16:18Z",
+        "finishedAt": "2026-10-02T19:16:19Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "running",
+        "detail": "running since 2026-10-02T19:16:20Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+      },
+      "verdicts": [
+        {
+          "kind": "exit-signal-convention",
+          "confidence": "likely",
+          "summary": "API reported exitCode=143; by convention that is SIGTERM (128+15), but the API does not say what sent it",
+          "competing": [
+            "the application called exit(143) itself; the API cannot distinguish that from death by SIGTERM"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sigterm/sigterm",
+              "uid": "bdac9765-5eab-4b75-9910-cdf33cacc81b",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "value": "143",
+              "time": "2026-10-02T19:16:19Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sigterm/sigterm",
+              "uid": "bdac9765-5eab-4b75-9910-cdf33cacc81b",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:16:19Z"
+            },
+            {
+              "kind": "convention",
+              "object": "Pod wd-sigterm/sigterm",
+              "uid": "bdac9765-5eab-4b75-9910-cdf33cacc81b",
+              "field": "exit code 128+n",
+              "value": "143 = 128+15 = SIGTERM (shell/runtime convention, Linux numbering)",
+              "note": "convention only: the API signal field is shown only when the API set it"
+            }
+          ]
+        }
+      ],
+      "logTail": [
+        "Terminated"
+      ],
+      "logsPrevious": true
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (4 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

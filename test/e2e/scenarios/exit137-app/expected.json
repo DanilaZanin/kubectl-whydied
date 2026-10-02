@@ -1,0 +1,13 @@
+{
+  "description": "NEGATIVE: the application itself calls exit(137); the API cannot tell that from SIGKILL, so no verdict may claim SIGKILL as confirmed",
+  "target": {"selector": "app=exit137-app", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "exit-signal-convention",
+    "confidence": "likely",
+    "evidenceKinds": ["pod-status", "convention"],
+    "competingContains": "exit(137) itself",
+    "forbidKinds": ["oom-kill-reported"],
+    "forbidConfirmedText": ["SIGKILL"]
+  }
+}

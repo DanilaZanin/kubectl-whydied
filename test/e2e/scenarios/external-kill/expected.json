@@ -1,0 +1,15 @@
+{
+  "description": "a privileged pod with hostPID sends kill -9 to the victim's process: SIGKILL without an OOM report. The API shows exit 137 only",
+  "timeoutSeconds": 200,
+  "target": {"selector": "app=victim", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "exit-signal-convention",
+    "confidence": "likely",
+    "evidenceKinds": ["pod-status", "convention"],
+    "contains": ["SIGKILL"],
+    "competingContains": "exit(137) itself",
+    "forbidKinds": ["oom-kill-reported"],
+    "forbidConfirmedText": ["SIGKILL"]
+  }
+}

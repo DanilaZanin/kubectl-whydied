@@ -1,0 +1,755 @@
+{
+  "version": 1,
+  "collectedAt": "2026-10-02T19:12:34.537371Z",
+  "namespace": "wd-taint-eviction",
+  "name": "tainted",
+  "pod": {
+    "metadata": {
+      "name": "tainted",
+      "namespace": "wd-taint-eviction",
+      "uid": "1cef7b3d-4ea6-4773-8a7c-36c4eca92c1b",
+      "resourceVersion": "1656",
+      "generation": 2,
+      "creationTimestamp": "2026-10-02T19:12:33Z",
+      "deletionTimestamp": "2026-10-02T19:14:03Z",
+      "deletionGracePeriodSeconds": 90,
+      "labels": {
+        "app": "tainted"
+      },
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Pod\",\"metadata\":{\"annotations\":{},\"labels\":{\"app\":\"tainted\"},\"name\":\"tainted\",\"namespace\":\"wd-taint-eviction\"},\"spec\":{\"containers\":[{\"command\":[\"sleep\",\"3600\"],\"image\":\"busybox:1.37\",\"imagePullPolicy\":\"IfNotPresent\",\"name\":\"app\"}],\"terminationGracePeriodSeconds\":90}}\n"
+      }
+    },
+    "spec": {
+      "volumes": [
+        {
+          "name": "kube-api-access-txtkl",
+          "projected": {
+            "sources": [
+              {
+                "serviceAccountToken": {
+                  "expirationSeconds": 3607,
+                  "path": "token"
+                }
+              },
+              {
+                "configMap": {
+                  "name": "kube-root-ca.crt",
+                  "items": [
+                    {
+                      "key": "ca.crt",
+                      "path": "ca.crt"
+                    }
+                  ]
+                }
+              },
+              {
+                "downwardAPI": {
+                  "items": [
+                    {
+                      "path": "namespace",
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "metadata.namespace"
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "defaultMode": 420
+          }
+        }
+      ],
+      "containers": [
+        {
+          "name": "app",
+          "image": "busybox:1.37",
+          "command": [
+            "sleep",
+            "3600"
+          ],
+          "resources": {},
+          "volumeMounts": [
+            {
+              "name": "kube-api-access-txtkl",
+              "readOnly": true,
+              "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+            }
+          ],
+          "terminationMessagePath": "/dev/termination-log",
+          "terminationMessagePolicy": "File",
+          "imagePullPolicy": "IfNotPresent"
+        }
+      ],
+      "restartPolicy": "Always",
+      "terminationGracePeriodSeconds": 90,
+      "dnsPolicy": "ClusterFirst",
+      "serviceAccountName": "default",
+      "serviceAccount": "default",
+      "nodeName": "wd-1370-3240-worker",
+      "securityContext": {},
+      "schedulerName": "default-scheduler",
+      "tolerations": [
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "priority": 0,
+      "enableServiceLinks": true,
+      "preemptionPolicy": "PreemptLowerPriority"
+    },
+    "status": {
+      "observedGeneration": 1,
+      "phase": "Running",
+      "conditions": [
+        {
+          "type": "PodReadyToStartContainers",
+          "observedGeneration": 1,
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:12:33Z"
+        },
+        {
+          "type": "Initialized",
+          "observedGeneration": 1,
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:12:33Z"
+        },
+        {
+          "type": "Ready",
+          "observedGeneration": 1,
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:12:33Z"
+        },
+        {
+          "type": "ContainersReady",
+          "observedGeneration": 1,
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:12:33Z"
+        },
+        {
+          "type": "PodScheduled",
+          "observedGeneration": 1,
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:12:33Z"
+        },
+        {
+          "type": "DisruptionTarget",
+          "observedGeneration": 1,
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-10-02T19:12:33Z",
+          "reason": "DeletionByTaintManager",
+          "message": "Taint manager: deleting due to NoExecute taint"
+        }
+      ],
+      "hostIP": "172.20.0.3",
+      "hostIPs": [
+        {
+          "ip": "172.20.0.3"
+        }
+      ],
+      "podIP": "10.244.1.27",
+      "podIPs": [
+        {
+          "ip": "10.244.1.27"
+        }
+      ],
+      "startTime": "2026-10-02T19:12:33Z",
+      "containerStatuses": [
+        {
+          "name": "app",
+          "state": {
+            "running": {
+              "startedAt": "2026-10-02T19:12:33Z"
+            }
+          },
+          "lastState": {},
+          "ready": true,
+          "restartCount": 0,
+          "image": "docker.io/library/busybox:1.37",
+          "imageID": "sha256:ad4f11f7c85f87c0a6d6c0fe492ad53f9cdcff6e8c88b881360c70eff701c67b",
+          "containerID": "containerd://ec65f59512f5d858f079b67a375fdbcffcdb6c6a5a75192c2926d672f898c5a4",
+          "started": true,
+          "resources": {},
+          "volumeMounts": [
+            {
+              "name": "kube-api-access-txtkl",
+              "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+              "readOnly": true,
+              "recursiveReadOnly": "Disabled"
+            }
+          ],
+          "user": {
+            "linux": {
+              "uid": 0,
+              "gid": 0,
+              "supplementalGroups": [
+                0,
+                10
+              ]
+            }
+          }
+        }
+      ],
+      "qosClass": "BestEffort",
+      "resources": {}
+    }
+  },
+  "node": {
+    "metadata": {
+      "name": "wd-1370-3240-worker",
+      "uid": "285e919f-ab33-4544-a6ca-4f33f186c10d",
+      "resourceVersion": "1646",
+      "creationTimestamp": "2026-10-02T19:08:38Z",
+      "labels": {
+        "beta.kubernetes.io/arch": "arm64",
+        "beta.kubernetes.io/os": "linux",
+        "kubernetes.io/arch": "arm64",
+        "kubernetes.io/hostname": "wd-1370-3240-worker",
+        "kubernetes.io/os": "linux"
+      },
+      "annotations": {
+        "node.alpha.kubernetes.io/ttl": "0",
+        "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+      }
+    },
+    "spec": {
+      "podCIDR": "10.244.1.0/24",
+      "podCIDRs": [
+        "10.244.1.0/24"
+      ],
+      "providerID": "kind://docker/wd-1370-3240/wd-1370-3240-worker",
+      "taints": [
+        {
+          "key": "wd-e2e",
+          "value": "1",
+          "effect": "NoExecute"
+        }
+      ]
+    },
+    "status": {
+      "capacity": {
+        "cpu": "4",
+        "ephemeral-storage": "105087164416",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "hugepages-32Mi": "0",
+        "hugepages-64Ki": "0",
+        "memory": "8113628Ki",
+        "pods": "110"
+      },
+      "allocatable": {
+        "cpu": "4",
+        "ephemeral-storage": "105087164416",
+        "hugepages-1Gi": "0",
+        "hugepages-2Mi": "0",
+        "hugepages-32Mi": "0",
+        "hugepages-64Ki": "0",
+        "memory": "8113628Ki",
+        "pods": "110"
+      },
+      "conditions": [
+        {
+          "type": "MemoryPressure",
+          "status": "False",
+          "lastHeartbeatTime": "2026-10-02T19:09:09Z",
+          "lastTransitionTime": "2026-10-02T19:08:38Z",
+          "reason": "KubeletHasSufficientMemory",
+          "message": "kubelet has sufficient memory available"
+        },
+        {
+          "type": "DiskPressure",
+          "status": "False",
+          "lastHeartbeatTime": "2026-10-02T19:09:09Z",
+          "lastTransitionTime": "2026-10-02T19:08:38Z",
+          "reason": "KubeletHasNoDiskPressure",
+          "message": "kubelet has no disk pressure"
+        },
+        {
+          "type": "PIDPressure",
+          "status": "False",
+          "lastHeartbeatTime": "2026-10-02T19:09:09Z",
+          "lastTransitionTime": "2026-10-02T19:08:38Z",
+          "reason": "KubeletHasSufficientPID",
+          "message": "kubelet has sufficient PID available"
+        },
+        {
+          "type": "Ready",
+          "status": "True",
+          "lastHeartbeatTime": "2026-10-02T19:09:09Z",
+          "lastTransitionTime": "2026-10-02T19:08:51Z",
+          "reason": "KubeletReady",
+          "message": "kubelet is posting ready status"
+        }
+      ],
+      "addresses": [
+        {
+          "type": "InternalIP",
+          "address": "172.20.0.3"
+        },
+        {
+          "type": "Hostname",
+          "address": "wd-1370-3240-worker"
+        }
+      ],
+      "daemonEndpoints": {
+        "kubeletEndpoint": {
+          "Port": 10250
+        }
+      },
+      "nodeInfo": {
+        "machineID": "b2bca9fa0ce74490983d8947640e69f5",
+        "systemUUID": "98b26d73-4c96-4175-a146-e3d0ed1a58fa",
+        "bootID": "ce2996bd-7038-42c4-bf02-1c996c4c1e35",
+        "kernelVersion": "6.8.0-117-generic",
+        "osImage": "Debian GNU/Linux 13 (trixie)",
+        "containerRuntimeVersion": "containerd://2.3.4",
+        "kubeletVersion": "v1.37.0",
+        "kubeProxyVersion": "",
+        "operatingSystem": "linux",
+        "architecture": "arm64",
+        "runningInUserNamespace": false
+      },
+      "runtimeHandlers": [
+        {
+          "name": "",
+          "features": {
+            "recursiveReadOnlyMounts": true,
+            "userNamespaces": true
+          }
+        },
+        {
+          "name": "runc",
+          "features": {
+            "recursiveReadOnlyMounts": true,
+            "userNamespaces": true
+          }
+        },
+        {
+          "name": "test-handler",
+          "features": {
+            "recursiveReadOnlyMounts": true,
+            "userNamespaces": true
+          }
+        }
+      ],
+      "features": {
+        "supplementalGroupsPolicy": true
+      },
+      "declaredFeatures": [
+        "ExtendWebSocketsToKubelet",
+        "InPlacePodLevelResourcesVerticalScaling",
+        "InPlacePodVerticalScalingInitContainers",
+        "RestartAllContainersOnContainerExits"
+      ]
+    }
+  },
+  "events": [
+    {
+      "metadata": {
+        "name": "tainted.18dacc3a80af6c4e",
+        "namespace": "wd-taint-eviction",
+        "uid": "704ef176-f2d4-406c-a367-671834644e32",
+        "resourceVersion": "1639",
+        "creationTimestamp": "2026-10-02T19:12:33Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-taint-eviction",
+        "name": "tainted",
+        "uid": "1cef7b3d-4ea6-4773-8a7c-36c4eca92c1b",
+        "apiVersion": "v1",
+        "resourceVersion": "1637"
+      },
+      "reason": "Scheduled",
+      "message": "Successfully assigned wd-taint-eviction/tainted to wd-1370-3240-worker",
+      "source": {
+        "component": "default-scheduler"
+      },
+      "firstTimestamp": "2026-10-02T19:12:33Z",
+      "lastTimestamp": "2026-10-02T19:12:33Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": ""
+    },
+    {
+      "metadata": {
+        "name": "tainted.18dacc3a97347af6",
+        "namespace": "wd-taint-eviction",
+        "uid": "ce36f4b1-d0d9-4a72-8361-3544b30d0201",
+        "resourceVersion": "1641",
+        "creationTimestamp": "2026-10-02T19:12:33Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-taint-eviction",
+        "name": "tainted",
+        "uid": "1cef7b3d-4ea6-4773-8a7c-36c4eca92c1b",
+        "apiVersion": "v1",
+        "resourceVersion": "1638",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Pulled",
+      "message": "Container image \"busybox:1.37\" already present on machine and can be accessed by the pod",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:12:33Z",
+      "lastTimestamp": "2026-10-02T19:12:33Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "tainted.18dacc3a978ed64f",
+        "namespace": "wd-taint-eviction",
+        "uid": "bb1c4e22-9aeb-4f60-b7f8-eef8191d16ba",
+        "resourceVersion": "1643",
+        "creationTimestamp": "2026-10-02T19:12:33Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-taint-eviction",
+        "name": "tainted",
+        "uid": "1cef7b3d-4ea6-4773-8a7c-36c4eca92c1b",
+        "apiVersion": "v1",
+        "resourceVersion": "1638",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Created",
+      "message": "Container created",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:12:33Z",
+      "lastTimestamp": "2026-10-02T19:12:33Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "tainted.18dacc3a9987b414",
+        "namespace": "wd-taint-eviction",
+        "uid": "48d8d6c1-4730-4a39-8c88-4a9840935af3",
+        "resourceVersion": "1644",
+        "creationTimestamp": "2026-10-02T19:12:33Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-taint-eviction",
+        "name": "tainted",
+        "uid": "1cef7b3d-4ea6-4773-8a7c-36c4eca92c1b",
+        "apiVersion": "v1",
+        "resourceVersion": "1638",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Started",
+      "message": "Container started",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:12:33Z",
+      "lastTimestamp": "2026-10-02T19:12:33Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "tainted.18dacc3a9dbc76f5",
+        "namespace": "wd-taint-eviction",
+        "uid": "36c98f67-8d06-4473-9979-d10fc74eaff6",
+        "resourceVersion": "1647",
+        "creationTimestamp": "2026-10-02T19:12:33Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-taint-eviction",
+        "name": "tainted",
+        "apiVersion": "v1"
+      },
+      "reason": "TaintManagerEviction",
+      "message": "Marking for deletion Pod wd-taint-eviction/tainted",
+      "source": {
+        "component": "taint-eviction-controller"
+      },
+      "firstTimestamp": "2026-10-02T19:12:33Z",
+      "lastTimestamp": "2026-10-02T19:12:33Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "taint-eviction-controller",
+      "reportingInstance": ""
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3240-worker.18dacc03bae36f51",
+        "namespace": "default",
+        "uid": "f7aede31-6420-4d76-8990-ea42c35720db",
+        "resourceVersion": "443",
+        "creationTimestamp": "2026-10-02T19:08:38Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3240-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeHasSufficientMemory",
+      "message": "Node wd-1370-3240-worker status is now: NodeHasSufficientMemory",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:08:38Z",
+      "lastTimestamp": "2026-10-02T19:08:38Z",
+      "count": 3,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3240-worker.18dacc03bae3ad54",
+        "namespace": "default",
+        "uid": "928b6d58-a1d8-4ff4-8aa0-6359d5d26949",
+        "resourceVersion": "449",
+        "creationTimestamp": "2026-10-02T19:08:38Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3240-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeHasNoDiskPressure",
+      "message": "Node wd-1370-3240-worker status is now: NodeHasNoDiskPressure",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:08:38Z",
+      "lastTimestamp": "2026-10-02T19:08:38Z",
+      "count": 3,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3240-worker.18dacc03bae3c2f9",
+        "namespace": "default",
+        "uid": "2d051632-a60c-4ea9-bc24-393b2062b665",
+        "resourceVersion": "456",
+        "creationTimestamp": "2026-10-02T19:08:38Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3240-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeHasSufficientPID",
+      "message": "Node wd-1370-3240-worker status is now: NodeHasSufficientPID",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:08:38Z",
+      "lastTimestamp": "2026-10-02T19:08:38Z",
+      "count": 3,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3240-worker.18dacc03bec5094b",
+        "namespace": "default",
+        "uid": "86ed2a7f-8f26-4b83-9521-906cf02d982b",
+        "resourceVersion": "440",
+        "creationTimestamp": "2026-10-02T19:08:38Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3240-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeAllocatableEnforced",
+      "message": "Updated Node Allocatable limit across pods",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:08:38Z",
+      "lastTimestamp": "2026-10-02T19:08:38Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3240-worker.18dacc046079db43",
+        "namespace": "default",
+        "uid": "da3c1534-98f4-4746-b1f1-6cfa7939145b",
+        "resourceVersion": "475",
+        "creationTimestamp": "2026-10-02T19:08:41Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3240-worker",
+        "apiVersion": "v1"
+      },
+      "reason": "Starting",
+      "source": {},
+      "firstTimestamp": null,
+      "lastTimestamp": null,
+      "type": "Normal",
+      "eventTime": "2026-10-02T19:08:41.003726Z",
+      "action": "StartKubeProxy",
+      "reportingComponent": "kube-proxy",
+      "reportingInstance": "kube-proxy-wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3240-worker.18dacc04d914801e",
+        "namespace": "default",
+        "uid": "013671da-10fb-417f-b716-3dd0cc9a68a3",
+        "resourceVersion": "482",
+        "creationTimestamp": "2026-10-02T19:08:43Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3240-worker",
+        "uid": "285e919f-ab33-4544-a6ca-4f33f186c10d",
+        "apiVersion": "v1"
+      },
+      "reason": "RegisteredNode",
+      "message": "Node wd-1370-3240-worker event: Registered Node wd-1370-3240-worker in Controller",
+      "source": {
+        "component": "node-controller"
+      },
+      "firstTimestamp": "2026-10-02T19:08:43Z",
+      "lastTimestamp": "2026-10-02T19:08:43Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "node-controller",
+      "reportingInstance": ""
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3240-worker.18dacc06b5dc835d",
+        "namespace": "default",
+        "uid": "92759af1-916c-4177-b8d3-273db582abc1",
+        "resourceVersion": "546",
+        "creationTimestamp": "2026-10-02T19:08:51Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3240-worker",
+        "uid": "285e919f-ab33-4544-a6ca-4f33f186c10d",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeReady",
+      "message": "Node wd-1370-3240-worker status is now: NodeReady",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:08:51Z",
+      "lastTimestamp": "2026-10-02T19:08:51Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3240-worker.18dacc088591ffc6",
+        "namespace": "default",
+        "uid": "e577f52e-2666-4bfb-a400-8a13a1a7bdb4",
+        "resourceVersion": "580",
+        "creationTimestamp": "2026-10-02T19:08:58Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3240-worker",
+        "uid": "285e919f-ab33-4544-a6ca-4f33f186c10d",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeNotSchedulable",
+      "message": "Node wd-1370-3240-worker status is now: NodeNotSchedulable",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:08:58Z",
+      "lastTimestamp": "2026-10-02T19:08:58Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "wd-1370-3240-worker.18dacc0d41be084d",
+        "namespace": "default",
+        "uid": "11de523e-cbd6-43f2-bd5b-e156183c4c5a",
+        "resourceVersion": "628",
+        "creationTimestamp": "2026-10-02T19:09:19Z"
+      },
+      "involvedObject": {
+        "kind": "Node",
+        "name": "wd-1370-3240-worker",
+        "uid": "285e919f-ab33-4544-a6ca-4f33f186c10d",
+        "apiVersion": "v1"
+      },
+      "reason": "NodeSchedulable",
+      "message": "Node wd-1370-3240-worker status is now: NodeSchedulable",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:09:19Z",
+      "lastTimestamp": "2026-10-02T19:09:19Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "observedAt": "2026-10-02T19:14:05.500271Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-evict-storage",
+    "name": "evict-storage",
+    "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+    "exists": true,
+    "phase": "Failed",
+    "reason": "Evicted",
+    "message": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:13:33Z",
+    "restartPolicy": "Never"
+  },
+  "verdicts": [
+    {
+      "kind": "eviction-storage-limit",
+      "confidence": "confirmed",
+      "summary": "the kubelet evicted the pod because it exceeded a local storage limit (message quoted verbatim); this does not require node DiskPressure",
+      "evidence": [
+        {
+          "kind": "pod-status",
+          "object": "Pod wd-evict-storage/evict-storage",
+          "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+          "field": "status.reason",
+          "value": "Evicted"
+        },
+        {
+          "kind": "pod-status",
+          "object": "Pod wd-evict-storage/evict-storage",
+          "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+          "field": "status.message",
+          "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". "
+        },
+        {
+          "kind": "event",
+          "object": "Pod wd-evict-storage/evict-storage",
+          "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+          "field": "event Evicted",
+          "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
+          "time": "2026-10-02T19:14:02Z",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 0,
+      "currentState": "terminated (exitCode=137, reason=Error)",
+      "termination": {
+        "source": "state.terminated",
+        "containerID": "containerd://2468cd7b3bded614a0cc74f1bfd135c8ed92da69f34cf6eac6fcb279dab31884",
+        "exitCode": 137,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:13:34Z",
+        "finishedAt": "2026-10-02T19:14:04Z"
+      },
+      "expected": {
+        "state": "expected",
+        "why": "the stop is part of pod termination: the pod status reason is Evicted"
+      },
+      "restart": {
+        "policy": "Never",
+        "decision": "not-restarting",
+        "detail": "restart policy Never does not restart a container that ended with exitCode=137"
+      },
+      "verdicts": [
+        {
+          "kind": "exit-signal-convention",
+          "confidence": "likely",
+          "summary": "API reported exitCode=137; by convention that is SIGKILL (128+9), but the API does not say what sent it",
+          "competing": [
+            "the application called exit(137) itself; the API cannot distinguish that from death by SIGKILL",
+            "an OOM kill that the runtime did not label OOMKilled"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-evict-storage/evict-storage",
+              "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:14:04Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-evict-storage/evict-storage",
+              "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+              "field": "status.containerStatuses[app].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:14:04Z"
+            },
+            {
+              "kind": "convention",
+              "object": "Pod wd-evict-storage/evict-storage",
+              "uid": "bd6e9d8a-9d35-4d4f-9049-9645dda55194",
+              "field": "exit code 128+n",
+              "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
+              "note": "convention only: the API signal field is shown only when the API set it"
+            }
+          ]
+        }
+      ],
+      "logTail": [
+        "unable to retrieve container logs for containerd://2468cd7b3bded614a0cc74f1bfd135c8ed92da69f34cf6eac6fcb279dab31884"
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (6 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

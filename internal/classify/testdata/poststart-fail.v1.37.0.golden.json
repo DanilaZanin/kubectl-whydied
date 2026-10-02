@@ -1,0 +1,64 @@
+{
+  "observedAt": "2026-10-02T19:11:06.690285Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-poststart-fail",
+    "name": "poststart-fail",
+    "uid": "f33e3fc1-24df-4f35-b395-718f804c751e",
+    "exists": true,
+    "phase": "Pending",
+    "node": "wd-1370-3240-worker",
+    "startTime": "2026-10-02T19:11:02Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "busybox:1.37",
+      "restartCount": 0,
+      "currentState": "waiting: ContainerCreating",
+      "restart": {
+        "policy": "Always",
+        "decision": "unknown",
+        "detail": "waiting: ContainerCreating"
+      },
+      "verdicts": [
+        {
+          "kind": "poststart-hook-failed",
+          "confidence": "confirmed",
+          "summary": "the kubelet reported a failed postStart lifecycle hook for this container and killed it (FailedPostStartHook events)",
+          "evidence": [
+            {
+              "kind": "event",
+              "object": "Pod wd-poststart-fail/poststart-fail",
+              "uid": "f33e3fc1-24df-4f35-b395-718f804c751e",
+              "field": "event FailedPostStartHook",
+              "value": "PostStartHook failed",
+              "time": "2026-10-02T19:11:03Z",
+              "count": 1,
+              "note": "fieldPath=spec.containers{app}"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-poststart-fail/poststart-fail",
+              "uid": "f33e3fc1-24df-4f35-b395-718f804c751e",
+              "field": "event Killing",
+              "value": "FailedPostStartHook",
+              "time": "2026-10-02T19:11:03Z",
+              "count": 1,
+              "note": "fieldPath=spec.containers{app}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (6 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)"
+  ]
+}

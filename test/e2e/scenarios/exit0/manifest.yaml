@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: exit0
+  labels: {app: exit0}
+spec:
+  restartPolicy: Never
+  containers:
+  - name: app
+    image: busybox:1.37
+    imagePullPolicy: IfNotPresent
+    command: ["sh", "-c", "echo finished; exit 0"]

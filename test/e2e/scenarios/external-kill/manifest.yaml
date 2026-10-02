@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: victim
+  labels: {app: victim}
+spec:
+  restartPolicy: Always
+  containers:
+  - name: app
+    image: busybox:1.37
+    imagePullPolicy: IfNotPresent
+    command: ["sleep", "31337"]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: killer
+  labels: {app: killer}
+spec:
+  hostPID: true
+  restartPolicy: Never
+  containers:
+  - name: killer
+    image: busybox:1.37
+    imagePullPolicy: IfNotPresent
+    securityContext: {privileged: true}
+    command:
+    - sh
+    - -c
+    - |
+      while true; do
+        pid=$(ps -o pid,args | grep '[s]leep 31337' | awk '{print $1}' | head -n 1)
+        if [ -n "$pid" ]; then kill -9 "$pid" && break; fi
+        sleep 2
+      done
+      sleep 3600

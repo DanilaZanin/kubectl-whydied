@@ -1,0 +1,13 @@
+{
+  "description": "restartPolicy Never, exit code 0: a normal completion",
+  "target": {"selector": "app=exit0", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "app-exit",
+    "confidence": "confirmed",
+    "evidenceKinds": ["pod-status"],
+    "expectedness": "expected",
+    "restartDecision": "not-restarting",
+    "contains": ["exitCode=0"]
+  }
+}

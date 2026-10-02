@@ -1,0 +1,11 @@
+{
+  "description": "the image cannot be pulled: ErrImagePull / ImagePullBackOff, message quoted verbatim",
+  "target": {"selector": "app=image-pull", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "image-pull-failure",
+    "confidence": "confirmed",
+    "evidenceKinds": ["pod-status"],
+    "contains": ["registry.invalid"]
+  }
+}

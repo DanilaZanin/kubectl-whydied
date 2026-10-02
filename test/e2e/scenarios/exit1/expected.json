@@ -1,0 +1,14 @@
+{
+  "description": "application exits with code 1 and the kubelet restarts it (CrashLoopBackOff)",
+  "target": {"selector": "app=exit1", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "app-exit",
+    "confidence": "confirmed",
+    "evidenceKinds": ["pod-status"],
+    "expectedness": "unexpected",
+    "restartDecision": "back-off|restarting",
+    "contains": ["exitCode=1"],
+    "forbidKinds": ["exit-signal-convention", "oom-kill-reported"]
+  }
+}

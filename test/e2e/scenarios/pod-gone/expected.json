@@ -1,0 +1,13 @@
+{
+  "description": "the pod was deleted and no longer exists: no data about the cause, events that still reference the name are listed",
+  "steps": [
+    {"wait": ["--for=condition=Ready", "pod/gone", "--timeout=120s"]},
+    {"kubectl": ["delete", "pod", "gone", "--now", "--wait=true"]}
+  ],
+  "target": {"name": "gone"},
+  "expect": {
+    "verdictKind": "pod-gone",
+    "confidence": "no data",
+    "contains": ["history is not available"]
+  }
+}

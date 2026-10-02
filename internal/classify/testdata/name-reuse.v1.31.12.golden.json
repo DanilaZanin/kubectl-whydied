@@ -1,0 +1,62 @@
+{
+  "observedAt": "2026-10-02T19:15:17.715154Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-name-reuse",
+    "name": "reuse",
+    "uid": "0a8cb4a0-40b4-437f-869d-e2d31a0414c6",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:15:16Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 0,
+      "currentState": "running since 2026-10-02T19:15:16Z",
+      "restart": {
+        "policy": "Always",
+        "decision": "running",
+        "detail": "running since 2026-10-02T19:15:16Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+      },
+      "verdicts": [
+        {
+          "kind": "no-termination",
+          "confidence": "confirmed",
+          "summary": "no termination is recorded for this container: it is running with restartCount=0 and no previous state",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-name-reuse/reuse",
+              "uid": "0a8cb4a0-40b4-437f-869d-e2d31a0414c6",
+              "field": "status.containerStatuses[app].state.running.startedAt",
+              "value": "2026-10-02T19:15:16Z",
+              "time": "2026-10-02T19:15:16Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-name-reuse/reuse",
+              "uid": "0a8cb4a0-40b4-437f-869d-e2d31a0414c6",
+              "field": "status.containerStatuses[app].restartCount",
+              "value": "0"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "5 event(s) for a pod with the same name but a different UID were ignored (UIDs: 7864ea97-c6d3-45cf-afbf-81935638f3e2). They belong to an earlier or later pod, not this one."
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (4 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)"
+  ]
+}

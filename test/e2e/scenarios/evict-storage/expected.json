@@ -1,0 +1,12 @@
+{
+  "description": "the pod writes more than the emptyDir sizeLimit; the kubelet evicts it (no DiskPressure needed)",
+  "timeoutSeconds": 240,
+  "target": {"selector": "app=evict-storage", "container": "app"},
+  "expect": {
+    "verdictKind": "eviction-storage-limit",
+    "confidence": "confirmed",
+    "evidenceKinds": ["pod-status"],
+    "forbidKinds": ["eviction-node-pressure"],
+    "contains": ["exceeds the limit"]
+  }
+}

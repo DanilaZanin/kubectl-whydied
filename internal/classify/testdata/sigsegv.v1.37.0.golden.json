@@ -1,0 +1,88 @@
+{
+  "observedAt": "2026-10-02T19:11:52.928133Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-sigsegv",
+    "name": "sigsegv",
+    "uid": "c38c31c9-774e-48df-8992-86d61df7ca43",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-1370-3240-worker",
+    "startTime": "2026-10-02T19:11:49Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 1,
+      "currentState": "running since 2026-10-02T19:11:50Z",
+      "termination": {
+        "source": "lastState.terminated",
+        "containerID": "containerd://26c9bbd7b17f236f0d6ec1ef0ab48668922a85c27c5a47999d5fa2cf56e160e2",
+        "exitCode": 139,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:11:49Z",
+        "finishedAt": "2026-10-02T19:11:50Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "running",
+        "detail": "running since 2026-10-02T19:11:50Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+      },
+      "verdicts": [
+        {
+          "kind": "exit-signal-convention",
+          "confidence": "likely",
+          "summary": "API reported exitCode=139; by convention that is SIGSEGV (128+11), but the API does not say what sent it",
+          "competing": [
+            "the application called exit(139) itself; the API cannot distinguish that from death by SIGSEGV"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sigsegv/sigsegv",
+              "uid": "c38c31c9-774e-48df-8992-86d61df7ca43",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "value": "139",
+              "time": "2026-10-02T19:11:50Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sigsegv/sigsegv",
+              "uid": "c38c31c9-774e-48df-8992-86d61df7ca43",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:11:50Z"
+            },
+            {
+              "kind": "convention",
+              "object": "Pod wd-sigsegv/sigsegv",
+              "uid": "c38c31c9-774e-48df-8992-86d61df7ca43",
+              "field": "exit code 128+n",
+              "value": "139 = 128+11 = SIGSEGV (shell/runtime convention, Linux numbering)",
+              "note": "convention only: the API signal field is shown only when the API set it"
+            }
+          ]
+        }
+      ],
+      "logTail": [
+        "Segmentation fault (core dumped)"
+      ],
+      "logsPrevious": true
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (4 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

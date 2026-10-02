@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: roll
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: roll}}
+  template:
+    metadata:
+      labels: {app: roll}
+    spec:
+      terminationGracePeriodSeconds: 90
+      containers:
+      - name: app
+        image: busybox:1.37
+        imagePullPolicy: IfNotPresent
+        command: ["sleep", "3600"]
+        env: [{name: REV, value: "1"}]

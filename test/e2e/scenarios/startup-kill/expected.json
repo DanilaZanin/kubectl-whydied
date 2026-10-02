@@ -1,0 +1,11 @@
+{
+  "description": "startup probe never succeeds; the kubelet kills the container (Killing event names the startup probe)",
+  "timeoutSeconds": 240,
+  "target": {"selector": "app=startup-kill", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "startup-probe-kill",
+    "confidence": "confirmed",
+    "evidenceKinds": ["event", "pod-status", "pod-spec"]
+  }
+}

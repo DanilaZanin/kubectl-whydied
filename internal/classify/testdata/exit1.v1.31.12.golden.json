@@ -1,0 +1,76 @@
+{
+  "observedAt": "2026-10-02T19:14:12.217446Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-exit1",
+    "name": "exit1",
+    "uid": "ef89defd-4490-4a4e-92b6-b08fbdd909b5",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:14:08Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 0,
+      "currentState": "terminated (exitCode=1, reason=Error)",
+      "termination": {
+        "source": "state.terminated",
+        "containerID": "containerd://8472812862b01b7ff4420b60bf2966e21ec8d60eace329d8ef225eb01d02e266",
+        "exitCode": 1,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:14:08Z",
+        "finishedAt": "2026-10-02T19:14:09Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "restarting",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures)"
+      },
+      "verdicts": [
+        {
+          "kind": "app-exit",
+          "confidence": "confirmed",
+          "summary": "the container's main process exited with exitCode=1 (API reported exitCode=1)",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-exit1/exit1",
+              "uid": "ef89defd-4490-4a4e-92b6-b08fbdd909b5",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "value": "1",
+              "time": "2026-10-02T19:14:09Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-exit1/exit1",
+              "uid": "ef89defd-4490-4a4e-92b6-b08fbdd909b5",
+              "field": "status.containerStatuses[app].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:14:09Z"
+            }
+          ]
+        }
+      ],
+      "logTail": [
+        "failing"
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (4 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

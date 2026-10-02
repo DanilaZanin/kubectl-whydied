@@ -1,0 +1,16 @@
+{
+  "description": "a Deployment rollout: the ReplicaSet deletes the old pod. Delete is confirmed from the SuccessfulDelete event; the rollout reason is likely, from revision numbers",
+  "timeoutSeconds": 200,
+  "steps": [
+    {"wait": ["--for=condition=Available", "deployment/roll", "--timeout=120s"]},
+    {"capturePod": "old"},
+    {"kubectl": ["set", "env", "deployment/roll", "REV=2"]}
+  ],
+  "target": {"name": "{{old}}", "selector": "app=roll"},
+  "expect": {
+    "verdictKind": "controller-delete",
+    "confidence": "confirmed",
+    "evidenceKinds": ["event", "owner"],
+    "contains": ["scale-reason-rollout"]
+  }
+}

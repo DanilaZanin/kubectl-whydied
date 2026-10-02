@@ -1,0 +1,95 @@
+{
+  "observedAt": "2026-10-02T19:10:01.288761Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-exit2",
+    "name": "exit2",
+    "uid": "eabc8a84-f64c-41b1-a130-c579f537ad9b",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-1370-3240-worker",
+    "startTime": "2026-10-02T19:09:54Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 1,
+      "currentState": "terminated (exitCode=2, reason=Error)",
+      "termination": {
+        "source": "state.terminated",
+        "containerID": "containerd://c3ffc86a2b42478e1f0eedca81e197df2b0e32e3f09e4f47a8e09d41db1502bf",
+        "exitCode": 2,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:09:56Z",
+        "finishedAt": "2026-10-02T19:09:57Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "restarting",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures)",
+        "evidence": [
+          {
+            "kind": "event",
+            "object": "Pod wd-exit2/exit2",
+            "uid": "eabc8a84-f64c-41b1-a130-c579f537ad9b",
+            "field": "event BackOff",
+            "value": "Back-off restarting failed container app in pod exit2_wd-exit2(eabc8a84-f64c-41b1-a130-c579f537ad9b)",
+            "time": "2026-10-02T19:09:58Z",
+            "count": 1,
+            "note": "fieldPath=spec.containers{app}"
+          }
+        ]
+      },
+      "verdicts": [
+        {
+          "kind": "app-exit",
+          "confidence": "confirmed",
+          "summary": "the container's main process exited with exitCode=2 (API reported exitCode=2); by convention 2 often means misuse of a shell builtin, but its meaning is defined by the program",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-exit2/exit2",
+              "uid": "eabc8a84-f64c-41b1-a130-c579f537ad9b",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "value": "2",
+              "time": "2026-10-02T19:09:57Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-exit2/exit2",
+              "uid": "eabc8a84-f64c-41b1-a130-c579f537ad9b",
+              "field": "status.containerStatuses[app].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:09:57Z"
+            },
+            {
+              "kind": "convention",
+              "object": "Pod wd-exit2/exit2",
+              "uid": "eabc8a84-f64c-41b1-a130-c579f537ad9b",
+              "field": "exit code",
+              "value": "2; by convention 2 often means misuse of a shell builtin, but its meaning is defined by the program"
+            }
+          ]
+        }
+      ],
+      "logTail": [
+        "failing"
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (5 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

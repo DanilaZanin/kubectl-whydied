@@ -1,0 +1,12 @@
+{
+  "description": "a child of the main process dies by SIGSEGV; the main process exits 139. Signal decoding is convention only",
+  "target": {"selector": "app=sigsegv", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "exit-signal-convention",
+    "confidence": "likely",
+    "evidenceKinds": ["pod-status", "convention"],
+    "contains": ["SIGSEGV"],
+    "forbidKinds": ["oom-kill-reported"]
+  }
+}

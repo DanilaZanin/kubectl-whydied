@@ -1,0 +1,76 @@
+{
+  "observedAt": "2026-10-02T19:14:08.882543Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-exit0",
+    "name": "exit0",
+    "uid": "eb7459f7-07a1-4f19-9d66-87efcef29f66",
+    "exists": true,
+    "phase": "Succeeded",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:14:05Z",
+    "restartPolicy": "Never"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 0,
+      "currentState": "terminated (exitCode=0, reason=Completed)",
+      "termination": {
+        "source": "state.terminated",
+        "containerID": "containerd://6e9140b7080280463cbc045ae44bf8b49369e8c727263d338d2532502756dac4",
+        "exitCode": 0,
+        "reason": "Completed",
+        "startedAt": "2026-10-02T19:14:05Z",
+        "finishedAt": "2026-10-02T19:14:05Z"
+      },
+      "expected": {
+        "state": "expected",
+        "why": "the container completed with exit code 0 and its restart policy is Never"
+      },
+      "restart": {
+        "policy": "Never",
+        "decision": "not-restarting",
+        "detail": "restart policy Never does not restart a container that ended with exitCode=0"
+      },
+      "verdicts": [
+        {
+          "kind": "app-exit",
+          "confidence": "confirmed",
+          "summary": "the container's main process exited with exitCode=0 (API reported exitCode=0)",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-exit0/exit0",
+              "uid": "eb7459f7-07a1-4f19-9d66-87efcef29f66",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "value": "0",
+              "time": "2026-10-02T19:14:05Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-exit0/exit0",
+              "uid": "eb7459f7-07a1-4f19-9d66-87efcef29f66",
+              "field": "status.containerStatuses[app].state.terminated.reason",
+              "value": "Completed",
+              "time": "2026-10-02T19:14:05Z"
+            }
+          ]
+        }
+      ],
+      "logTail": [
+        "finished"
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (4 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

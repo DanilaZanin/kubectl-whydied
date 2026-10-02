@@ -1,0 +1,141 @@
+{
+  "observedAt": "2026-10-02T19:10:52.105838Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-liveness-kill",
+    "name": "liveness-kill",
+    "uid": "23b4d78f-3dd7-4b8d-92c5-0237acded903",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-1370-3240-worker",
+    "startTime": "2026-10-02T19:10:10Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 1,
+      "currentState": "running since 2026-10-02T19:10:49Z",
+      "termination": {
+        "source": "lastState.terminated",
+        "containerID": "containerd://5c666d7224ba05677befb371585a5ad9608bc8778411f97c7561e06c6815df40",
+        "exitCode": 137,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:10:11Z",
+        "finishedAt": "2026-10-02T19:10:49Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "running",
+        "detail": "running since 2026-10-02T19:10:49Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+      },
+      "verdicts": [
+        {
+          "kind": "liveness-probe-kill",
+          "confidence": "confirmed",
+          "summary": "the kubelet reported stopping the container because it failed its liveness probe (Killing event names the probe and this container)",
+          "competing": [
+            "the internal reason for each probe failure is only in the Unhealthy event text (context lines)"
+          ],
+          "evidence": [
+            {
+              "kind": "event",
+              "object": "Pod wd-liveness-kill/liveness-kill",
+              "uid": "23b4d78f-3dd7-4b8d-92c5-0237acded903",
+              "field": "event Killing",
+              "value": "Container app failed liveness probe, will be restarted",
+              "time": "2026-10-02T19:10:19Z",
+              "count": 1,
+              "note": "fieldPath=spec.containers{app}"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-liveness-kill/liveness-kill",
+              "uid": "23b4d78f-3dd7-4b8d-92c5-0237acded903",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:10:49Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-liveness-kill/liveness-kill",
+              "uid": "23b4d78f-3dd7-4b8d-92c5-0237acded903",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:10:49Z"
+            },
+            {
+              "kind": "pod-spec",
+              "object": "Pod wd-liveness-kill/liveness-kill",
+              "uid": "23b4d78f-3dd7-4b8d-92c5-0237acded903",
+              "field": "spec.containers[app].livenessProbe",
+              "value": "exec [cat /tmp/healthy] periodSeconds=2 failureThreshold=2 timeoutSeconds=1",
+              "note": "failureThreshold is configured; the API does not report how many consecutive failures happened (event count is not a failure count)"
+            },
+            {
+              "kind": "event",
+              "object": "Pod wd-liveness-kill/liveness-kill",
+              "uid": "23b4d78f-3dd7-4b8d-92c5-0237acded903",
+              "field": "event Unhealthy",
+              "value": "Liveness probe failed: cat: can't open '/tmp/healthy': No such file or directory\n",
+              "time": "2026-10-02T19:10:19Z",
+              "firstTime": "2026-10-02T19:10:17Z",
+              "count": 2,
+              "note": "fieldPath=spec.containers{app}; event repeated 2 times (aggregated; first 2026-10-02T19:10:17Z, last 2026-10-02T19:10:19Z)"
+            }
+          ]
+        },
+        {
+          "kind": "exit-signal-convention",
+          "confidence": "likely",
+          "summary": "API reported exitCode=137; by convention that is SIGKILL (128+9), but the API does not say what sent it",
+          "competing": [
+            "the application called exit(137) itself; the API cannot distinguish that from death by SIGKILL",
+            "an OOM kill that the runtime did not label OOMKilled"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-liveness-kill/liveness-kill",
+              "uid": "23b4d78f-3dd7-4b8d-92c5-0237acded903",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:10:49Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-liveness-kill/liveness-kill",
+              "uid": "23b4d78f-3dd7-4b8d-92c5-0237acded903",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:10:49Z"
+            },
+            {
+              "kind": "convention",
+              "object": "Pod wd-liveness-kill/liveness-kill",
+              "uid": "23b4d78f-3dd7-4b8d-92c5-0237acded903",
+              "field": "exit code 128+n",
+              "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
+              "note": "convention only: the API signal field is shown only when the API set it"
+            }
+          ]
+        }
+      ],
+      "logsPrevious": true
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (6 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

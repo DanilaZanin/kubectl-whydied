@@ -1,0 +1,84 @@
+{
+  "observedAt": "2026-10-02T19:15:27.748962Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-pod-gone",
+    "name": "gone",
+    "exists": false
+  },
+  "verdicts": [
+    {
+      "kind": "pod-gone",
+      "confidence": "no data",
+      "summary": "pod not found; its status history is not available from the API",
+      "competing": [
+        "the pod was deleted by a user, a controller, preemption, eviction or garbage collection; none of that is recorded once the object is gone"
+      ],
+      "evidence": [
+        {
+          "kind": "event",
+          "object": "Pod wd-pod-gone/gone",
+          "uid": "181444df-8dc6-4126-8abd-8e8a3e5b795d",
+          "field": "event Scheduled",
+          "value": "Successfully assigned wd-pod-gone/gone to wd-13112-4526-worker",
+          "time": "2026-10-02T19:15:20Z",
+          "count": 1
+        },
+        {
+          "kind": "event",
+          "object": "Pod wd-pod-gone/gone",
+          "uid": "181444df-8dc6-4126-8abd-8e8a3e5b795d",
+          "field": "event Pulled",
+          "value": "Container image \"busybox:1.37\" already present on machine",
+          "time": "2026-10-02T19:15:21Z",
+          "count": 1,
+          "note": "fieldPath=spec.containers{app}"
+        },
+        {
+          "kind": "event",
+          "object": "Pod wd-pod-gone/gone",
+          "uid": "181444df-8dc6-4126-8abd-8e8a3e5b795d",
+          "field": "event Created",
+          "value": "Created container: app",
+          "time": "2026-10-02T19:15:21Z",
+          "count": 1,
+          "note": "fieldPath=spec.containers{app}"
+        },
+        {
+          "kind": "event",
+          "object": "Pod wd-pod-gone/gone",
+          "uid": "181444df-8dc6-4126-8abd-8e8a3e5b795d",
+          "field": "event Started",
+          "value": "Started container app",
+          "time": "2026-10-02T19:15:21Z",
+          "count": 1,
+          "note": "fieldPath=spec.containers{app}"
+        },
+        {
+          "kind": "event",
+          "object": "Pod wd-pod-gone/gone",
+          "uid": "181444df-8dc6-4126-8abd-8e8a3e5b795d",
+          "field": "event Killing",
+          "value": "Stopping container app",
+          "time": "2026-10-02T19:15:24Z",
+          "count": 1,
+          "note": "fieldPath=spec.containers{app}"
+        }
+      ]
+    }
+  ],
+  "containers": null,
+  "notes": [
+    "5 event(s) still reference this pod name (UIDs: 181444df-8dc6-4126-8abd-8e8a3e5b795d); they are listed as evidence and do not identify a cause by themselves"
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by pod name (5 found)"
+  ],
+  "gaps": [
+    {
+      "source": "pod/gone",
+      "reason": "not found: the pod no longer exists in the API; its status history is not available"
+    }
+  ]
+}

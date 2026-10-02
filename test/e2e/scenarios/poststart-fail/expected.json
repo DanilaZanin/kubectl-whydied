@@ -1,0 +1,10 @@
+{
+  "description": "the postStart hook fails; the kubelet records FailedPostStartHook and kills the container",
+  "target": {"selector": "app=poststart-fail", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "poststart-hook-failed",
+    "confidence": "confirmed",
+    "evidenceKinds": ["event"]
+  }
+}

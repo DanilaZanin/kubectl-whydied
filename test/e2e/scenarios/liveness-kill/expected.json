@@ -1,0 +1,12 @@
+{
+  "description": "liveness probe starts failing; the kubelet kills and restarts the container (Killing event names the probe)",
+  "timeoutSeconds": 240,
+  "target": {"selector": "app=liveness-kill", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "liveness-probe-kill",
+    "confidence": "confirmed",
+    "evidenceKinds": ["event", "pod-status", "pod-spec"],
+    "forbidKinds": ["oom-kill-reported"]
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "observedAt": "2026-10-02T19:16:15.500033Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-sidecar-stop",
+    "name": "sidecar-job-2srfv",
+    "uid": "c1eec3ef-3731-4473-8abf-f62ed42a3b13",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:15:37Z",
+    "restartPolicy": "Never"
+  },
+  "owners": [
+    {
+      "kind": "Job",
+      "name": "sidecar-job",
+      "uid": "1f2053d5-227c-4c61-b03d-00aa83cf092a",
+      "found": true
+    }
+  ],
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "side",
+      "role": "sidecar",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 0,
+      "currentState": "terminated (exitCode=137, reason=Error)",
+      "termination": {
+        "source": "state.terminated",
+        "containerID": "containerd://013121e020d0273ffbd5442d48ba168099856c5583b35b6b4d1827b42782d8d5",
+        "exitCode": 137,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:15:37Z",
+        "finishedAt": "2026-10-02T19:16:14Z"
+      },
+      "expected": {
+        "state": "expected",
+        "why": "a restartable init container (native sidecar) is stopped when the pod ends: all regular containers finished or the pod is terminating; exit codes such as 143 or 137 are normal for that shutdown"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "restarting",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures)"
+      },
+      "verdicts": [
+        {
+          "kind": "exit-signal-convention",
+          "confidence": "likely",
+          "summary": "API reported exitCode=137; by convention that is SIGKILL (128+9), but the API does not say what sent it",
+          "competing": [
+            "the application called exit(137) itself; the API cannot distinguish that from death by SIGKILL",
+            "an OOM kill that the runtime did not label OOMKilled"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sidecar-stop/sidecar-job-2srfv",
+              "uid": "c1eec3ef-3731-4473-8abf-f62ed42a3b13",
+              "field": "status.initContainerStatuses[side].state.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:16:14Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-sidecar-stop/sidecar-job-2srfv",
+              "uid": "c1eec3ef-3731-4473-8abf-f62ed42a3b13",
+              "field": "status.initContainerStatuses[side].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:16:14Z"
+            },
+            {
+              "kind": "convention",
+              "object": "Pod wd-sidecar-stop/sidecar-job-2srfv",
+              "uid": "c1eec3ef-3731-4473-8abf-f62ed42a3b13",
+              "field": "exit code 128+n",
+              "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
+              "note": "convention only: the API signal field is shown only when the API set it"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (8 found)",
+    "owner chain and owner events: Job/sidecar-job",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "description": "kubectl delete pod: the pod is terminating; the deleter is not recorded, so the verdict is likely and says so",
+  "steps": [
+    {"wait": ["--for=condition=Ready", "pod/victim", "--timeout=120s"]},
+    {"kubectl": ["delete", "pod", "victim", "--wait=false"]}
+  ],
+  "target": {"name": "victim"},
+  "expect": {
+    "verdictKind": "deletion-unattributed",
+    "confidence": "likely",
+    "evidenceKinds": ["pod-status"],
+    "competingContains": "audit log",
+    "forbidKinds": ["controller-delete", "preemption-scheduler", "eviction-api"]
+  }
+}

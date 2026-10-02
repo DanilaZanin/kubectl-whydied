@@ -1,0 +1,88 @@
+{
+  "observedAt": "2026-10-02T19:11:07.365135Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-preemption",
+    "name": "low",
+    "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-1370-3240-worker",
+    "startTime": "2026-10-02T19:11:06Z",
+    "deletionTimestamp": "2026-10-02T19:12:36Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": [
+    {
+      "kind": "preemption-scheduler",
+      "confidence": "confirmed",
+      "summary": "the scheduler preempted this pod to make room for a higher-priority pod",
+      "competing": [
+        "the DisruptionTarget condition shows a disruption was initiated; it does not by itself guarantee the disruption completed"
+      ],
+      "evidence": [
+        {
+          "kind": "pod-condition",
+          "object": "Pod wd-preemption/low",
+          "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+          "field": "status.conditions[DisruptionTarget]",
+          "value": "status=True reason=PreemptionByScheduler message=\"default-scheduler: preempting to accommodate a higher priority pod\"",
+          "time": "2026-10-02T19:11:06Z"
+        },
+        {
+          "kind": "event",
+          "object": "Pod wd-preemption/low",
+          "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+          "field": "event Preempted",
+          "value": "Preempted by pod 891191dc-c066-47ec-a30f-75eb6d17d4e1 on node wd-1370-3240-worker",
+          "time": "2026-10-02T19:11:06Z",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 0,
+      "currentState": "running since 2026-10-02T19:11:06Z",
+      "restart": {
+        "policy": "Always",
+        "decision": "running",
+        "detail": "running since 2026-10-02T19:11:06Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+      },
+      "verdicts": [
+        {
+          "kind": "no-termination",
+          "confidence": "confirmed",
+          "summary": "no termination is recorded for this container: it is running with restartCount=0 and no previous state; the pod is being deleted but the container has not stopped yet",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-preemption/low",
+              "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+              "field": "status.containerStatuses[app].state.running.startedAt",
+              "value": "2026-10-02T19:11:06Z",
+              "time": "2026-10-02T19:11:06Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-preemption/low",
+              "uid": "aad016b9-0369-44da-bd84-b8dc8dfa238e",
+              "field": "status.containerStatuses[app].restartCount",
+              "value": "0"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (6 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)"
+  ]
+}

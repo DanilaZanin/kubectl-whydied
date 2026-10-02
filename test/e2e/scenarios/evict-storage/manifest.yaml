@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: evict-storage
+  labels: {app: evict-storage}
+spec:
+  restartPolicy: Never
+  containers:
+  - name: app
+    image: busybox:1.37
+    imagePullPolicy: IfNotPresent
+    command: ["sh", "-c", "dd if=/dev/zero of=/data/fill bs=1M count=60; sleep 3600"]
+    volumeMounts: [{name: data, mountPath: /data}]
+  volumes:
+  - name: data
+    emptyDir: {sizeLimit: 10Mi}

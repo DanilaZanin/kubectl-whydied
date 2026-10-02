@@ -1,0 +1,19 @@
+{
+  "description": "a NoExecute taint is added to the node; the taint manager deletes the pod that does not tolerate it",
+  "timeoutSeconds": 200,
+  "steps": [
+    {"wait": ["--for=condition=Ready", "pod/tainted", "--timeout=120s"]},
+    {"capturePod": "tainted"},
+    {"kubectl": ["taint", "nodes", "{{node}}", "wd-e2e=1:NoExecute"], "noNamespace": true}
+  ],
+  "cleanup": [
+    {"kubectl": ["taint", "nodes", "{{node}}", "wd-e2e=1:NoExecute-"], "noNamespace": true, "allowFail": true}
+  ],
+  "target": {"name": "tainted"},
+  "expect": {
+    "verdictKind": "taint-eviction",
+    "confidence": "confirmed",
+    "evidenceKinds": ["pod-condition"],
+    "contains": ["wd-e2e=1:NoExecute"]
+  }
+}

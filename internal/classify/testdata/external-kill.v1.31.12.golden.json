@@ -1,0 +1,86 @@
+{
+  "observedAt": "2026-10-02T19:14:25.343062Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-external-kill",
+    "name": "victim",
+    "uid": "0e59cccf-05e2-40ac-8644-7ae2790d0741",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:14:21Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 1,
+      "currentState": "running since 2026-10-02T19:14:22Z",
+      "termination": {
+        "source": "lastState.terminated",
+        "containerID": "containerd://0bc3f636296d51fe6098a0a18e9591203f3679ce3d6ffdbe80c0c2ad8c60371b",
+        "exitCode": 137,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:14:22Z",
+        "finishedAt": "2026-10-02T19:14:22Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "running",
+        "detail": "running since 2026-10-02T19:14:22Z; restartCount=1 as reported now (it can reset when the pod is recreated)"
+      },
+      "verdicts": [
+        {
+          "kind": "exit-signal-convention",
+          "confidence": "likely",
+          "summary": "API reported exitCode=137; by convention that is SIGKILL (128+9), but the API does not say what sent it",
+          "competing": [
+            "the application called exit(137) itself; the API cannot distinguish that from death by SIGKILL",
+            "an OOM kill that the runtime did not label OOMKilled"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-external-kill/victim",
+              "uid": "0e59cccf-05e2-40ac-8644-7ae2790d0741",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:14:22Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-external-kill/victim",
+              "uid": "0e59cccf-05e2-40ac-8644-7ae2790d0741",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:14:22Z"
+            },
+            {
+              "kind": "convention",
+              "object": "Pod wd-external-kill/victim",
+              "uid": "0e59cccf-05e2-40ac-8644-7ae2790d0741",
+              "field": "exit code 128+n",
+              "value": "137 = 128+9 = SIGKILL (shell/runtime convention, Linux numbering)",
+              "note": "convention only: the API signal field is shown only when the API set it"
+            }
+          ]
+        }
+      ],
+      "logsPrevious": true
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (4 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

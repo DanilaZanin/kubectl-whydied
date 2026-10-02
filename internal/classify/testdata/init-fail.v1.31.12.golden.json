@@ -1,0 +1,88 @@
+{
+  "observedAt": "2026-10-02T19:14:32.038556Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-init-fail",
+    "name": "init-fail",
+    "uid": "890a71e8-4d77-4181-9544-507df955f632",
+    "exists": true,
+    "phase": "Pending",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:14:28Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "setup",
+      "role": "init",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 0,
+      "currentState": "terminated (exitCode=3, reason=Error)",
+      "termination": {
+        "source": "state.terminated",
+        "containerID": "containerd://4d5bf4ac2add3e05feffaedd140c914e0b667e137f87902b473c3030c7b8fc92",
+        "exitCode": 3,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:14:29Z",
+        "finishedAt": "2026-10-02T19:14:29Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "an init container exited non-zero; init containers must exit 0 for the pod to proceed"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "restarting",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures)",
+        "evidence": [
+          {
+            "kind": "event",
+            "object": "Pod wd-init-fail/init-fail",
+            "uid": "890a71e8-4d77-4181-9544-507df955f632",
+            "field": "event BackOff",
+            "value": "Back-off restarting failed container setup in pod init-fail_wd-init-fail(890a71e8-4d77-4181-9544-507df955f632)",
+            "time": "2026-10-02T19:14:29Z",
+            "count": 1,
+            "note": "fieldPath=spec.initContainers{setup}"
+          }
+        ]
+      },
+      "verdicts": [
+        {
+          "kind": "app-exit",
+          "confidence": "confirmed",
+          "summary": "the container's main process exited with exitCode=3 (API reported exitCode=3)",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-init-fail/init-fail",
+              "uid": "890a71e8-4d77-4181-9544-507df955f632",
+              "field": "status.initContainerStatuses[setup].state.terminated.exitCode",
+              "value": "3",
+              "time": "2026-10-02T19:14:29Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-init-fail/init-fail",
+              "uid": "890a71e8-4d77-4181-9544-507df955f632",
+              "field": "status.initContainerStatuses[setup].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:14:29Z"
+            }
+          ]
+        }
+      ],
+      "logTail": [
+        "init failing"
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (5 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

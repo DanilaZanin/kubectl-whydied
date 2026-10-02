@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: poststart-fail
+  labels: {app: poststart-fail}
+spec:
+  restartPolicy: Always
+  containers:
+  - name: app
+    image: busybox:1.37
+    imagePullPolicy: IfNotPresent
+    command: ["sleep", "3600"]
+    lifecycle:
+      postStart:
+        exec: {command: ["sh", "-c", "echo hook failing >&2; exit 1"]}

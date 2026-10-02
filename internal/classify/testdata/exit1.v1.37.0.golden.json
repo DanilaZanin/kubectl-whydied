@@ -1,0 +1,88 @@
+{
+  "observedAt": "2026-10-02T19:09:51.446927Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-exit1",
+    "name": "exit1",
+    "uid": "7c19a4f8-e2cf-43e0-ae7d-a032e4e5943f",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-1370-3240-worker",
+    "startTime": "2026-10-02T19:09:44Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 1,
+      "currentState": "terminated (exitCode=1, reason=Error)",
+      "termination": {
+        "source": "state.terminated",
+        "containerID": "containerd://2c57423ba58fad049a9dec81533f5b7a97ac884a14c96404d1d3c04a00fd763f",
+        "exitCode": 1,
+        "reason": "Error",
+        "startedAt": "2026-10-02T19:09:46Z",
+        "finishedAt": "2026-10-02T19:09:47Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "restarting",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures)",
+        "evidence": [
+          {
+            "kind": "event",
+            "object": "Pod wd-exit1/exit1",
+            "uid": "7c19a4f8-e2cf-43e0-ae7d-a032e4e5943f",
+            "field": "event BackOff",
+            "value": "Back-off restarting failed container app in pod exit1_wd-exit1(7c19a4f8-e2cf-43e0-ae7d-a032e4e5943f)",
+            "time": "2026-10-02T19:09:48Z",
+            "count": 1,
+            "note": "fieldPath=spec.containers{app}"
+          }
+        ]
+      },
+      "verdicts": [
+        {
+          "kind": "app-exit",
+          "confidence": "confirmed",
+          "summary": "the container's main process exited with exitCode=1 (API reported exitCode=1)",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-exit1/exit1",
+              "uid": "7c19a4f8-e2cf-43e0-ae7d-a032e4e5943f",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "value": "1",
+              "time": "2026-10-02T19:09:47Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-exit1/exit1",
+              "uid": "7c19a4f8-e2cf-43e0-ae7d-a032e4e5943f",
+              "field": "status.containerStatuses[app].state.terminated.reason",
+              "value": "Error",
+              "time": "2026-10-02T19:09:47Z"
+            }
+          ]
+        }
+      ],
+      "logTail": [
+        "failing"
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (5 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

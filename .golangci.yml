@@ -1,0 +1,42 @@
+version: "2"
+run:
+  timeout: 5m
+  build-tags:
+    - e2e
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+    - gosec
+    - bodyclose
+    - errorlint
+    - nilerr
+    - unconvert
+    - unparam
+    - copyloopvar
+  settings:
+    errcheck:
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+    gosec:
+      excludes:
+        - G304 # snapshot files are user-supplied paths by design
+        - G204 # the e2e harness runs kind, kubectl and docker with test-controlled args
+        - G306
+  exclusions:
+    generated: lax
+    rules:
+      - path: _test\.go
+        linters: [gosec, unparam]
+      - path: test/e2e
+        linters: [gosec, unparam]
+formatters:
+  enable:
+    - gofmt

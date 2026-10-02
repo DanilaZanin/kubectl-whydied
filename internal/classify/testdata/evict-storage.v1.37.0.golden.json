@@ -1,0 +1,117 @@
+{
+  "observedAt": "2026-10-02T19:09:41.647235Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-evict-storage",
+    "name": "evict-storage",
+    "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+    "exists": true,
+    "phase": "Failed",
+    "reason": "Evicted",
+    "message": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
+    "node": "wd-1370-3240-worker",
+    "startTime": "2026-10-02T19:09:12Z",
+    "restartPolicy": "Never"
+  },
+  "verdicts": [
+    {
+      "kind": "eviction-storage-limit",
+      "confidence": "confirmed",
+      "summary": "the kubelet evicted the pod because it exceeded a local storage limit (message quoted verbatim); this does not require node DiskPressure",
+      "evidence": [
+        {
+          "kind": "pod-status",
+          "object": "Pod wd-evict-storage/evict-storage",
+          "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+          "field": "status.reason",
+          "value": "Evicted"
+        },
+        {
+          "kind": "pod-status",
+          "object": "Pod wd-evict-storage/evict-storage",
+          "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+          "field": "status.message",
+          "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". "
+        },
+        {
+          "kind": "event",
+          "object": "Pod wd-evict-storage/evict-storage",
+          "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+          "field": "event Evicted",
+          "value": "Usage of EmptyDir volume \"data\" exceeds the limit \"10Mi\". ",
+          "time": "2026-10-02T19:09:38Z",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "busybox:1.37",
+      "restartCount": 1,
+      "currentState": "waiting: ContainerCreating",
+      "termination": {
+        "source": "lastState.terminated",
+        "exitCode": 137,
+        "reason": "ContainerStatusUnknown",
+        "message": "The container could not be located when the pod was deleted.  The container used to be Running"
+      },
+      "expected": {
+        "state": "expected",
+        "why": "the stop is part of pod termination: the pod status reason is Evicted"
+      },
+      "restart": {
+        "policy": "Never",
+        "decision": "unknown",
+        "detail": "waiting: ContainerCreating"
+      },
+      "verdicts": [
+        {
+          "kind": "status-unknown-synthesized",
+          "confidence": "confirmed",
+          "summary": "the kubelet could not observe how the container ended and synthesized exitCode=137; the exit code carries no information about the cause",
+          "competing": [
+            "any cause: the real exit status was never observed"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-evict-storage/evict-storage",
+              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+              "field": "status.containerStatuses[app].lastState.terminated.exitCode",
+              "value": "137"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-evict-storage/evict-storage",
+              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+              "field": "status.containerStatuses[app].lastState.terminated.reason",
+              "value": "ContainerStatusUnknown"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-evict-storage/evict-storage",
+              "uid": "1afe868e-cdb5-45ee-9bf6-278ae1918b18",
+              "field": "status.containerStatuses[app].lastState.terminated.message",
+              "value": "The container could not be located when the pod was deleted.  The container used to be Running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (6 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)"
+  ],
+  "gaps": [
+    {
+      "source": "logs/app",
+      "reason": "previous terminated container \"app\" in pod \"evict-storage\" not found"
+    }
+  ]
+}

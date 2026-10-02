@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sidecar-job
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels: {app: sidecar-job}
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: side
+        image: busybox:1.37
+        imagePullPolicy: IfNotPresent
+        restartPolicy: Always
+        command: ["sleep", "3600"]
+      containers:
+      - name: main
+        image: busybox:1.37
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "sleep 5; exit 0"]

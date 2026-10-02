@@ -1,0 +1,17 @@
+{
+  "description": "NEGATIVE: a pod name is reused by a new pod with a different UID; events and history of the first pod must not be attributed to the second",
+  "steps": [
+    {"wait": ["--for=jsonpath={.status.containerStatuses[0].restartCount}=1", "pod/reuse", "--timeout=120s"]},
+    {"kubectl": ["delete", "pod", "reuse", "--now", "--wait=true"]},
+    {"apply": "second.yaml"},
+    {"wait": ["--for=condition=Ready", "pod/reuse", "--timeout=120s"]}
+  ],
+  "target": {"name": "reuse"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "no-termination",
+    "confidence": "confirmed",
+    "forbidKinds": ["app-exit", "exit-signal-convention", "oom-kill-reported"],
+    "noteContains": "different UID"
+  }
+}

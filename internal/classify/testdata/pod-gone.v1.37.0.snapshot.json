@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "collectedAt": "2026-10-02T19:11:03.309867Z",
+  "namespace": "wd-pod-gone",
+  "name": "gone",
+  "events": [
+    {
+      "metadata": {
+        "name": "gone.18dacc2487e7a4be",
+        "namespace": "wd-pod-gone",
+        "uid": "60e9de9b-1f09-4baf-8bef-8a3f06c78120",
+        "resourceVersion": "1131",
+        "creationTimestamp": "2026-10-02T19:10:59Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-pod-gone",
+        "name": "gone",
+        "uid": "a81cb6a2-23bf-4fc4-8063-f0746dde9895",
+        "apiVersion": "v1",
+        "resourceVersion": "1128",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Pulled",
+      "message": "Container image \"busybox:1.37\" already present on machine and can be accessed by the pod",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:10:59Z",
+      "lastTimestamp": "2026-10-02T19:10:59Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "gone.18dacc248838f83e",
+        "namespace": "wd-pod-gone",
+        "uid": "26e0e3f2-7346-4d95-aff5-0e221c4874d9",
+        "resourceVersion": "1133",
+        "creationTimestamp": "2026-10-02T19:10:59Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-pod-gone",
+        "name": "gone",
+        "uid": "a81cb6a2-23bf-4fc4-8063-f0746dde9895",
+        "apiVersion": "v1",
+        "resourceVersion": "1128",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Created",
+      "message": "Container created",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:10:59Z",
+      "lastTimestamp": "2026-10-02T19:10:59Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "gone.18dacc248a2d717f",
+        "namespace": "wd-pod-gone",
+        "uid": "f5ee1213-602a-4a78-ba64-2087bae622dd",
+        "resourceVersion": "1134",
+        "creationTimestamp": "2026-10-02T19:10:59Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-pod-gone",
+        "name": "gone",
+        "uid": "a81cb6a2-23bf-4fc4-8063-f0746dde9895",
+        "apiVersion": "v1",
+        "resourceVersion": "1128",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Started",
+      "message": "Container started",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:10:59Z",
+      "lastTimestamp": "2026-10-02T19:10:59Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    },
+    {
+      "metadata": {
+        "name": "gone.18dacc24912bb3fb",
+        "namespace": "wd-pod-gone",
+        "uid": "8fec4db4-6fb7-4058-ac31-6dcd2a4bfb27",
+        "resourceVersion": "1129",
+        "creationTimestamp": "2026-10-02T19:10:59Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-pod-gone",
+        "name": "gone",
+        "uid": "a81cb6a2-23bf-4fc4-8063-f0746dde9895",
+        "apiVersion": "v1",
+        "resourceVersion": "1127"
+      },
+      "reason": "Scheduled",
+      "message": "Successfully assigned wd-pod-gone/gone to wd-1370-3240-worker",
+      "source": {
+        "component": "default-scheduler"
+      },
+      "firstTimestamp": "2026-10-02T19:10:59Z",
+      "lastTimestamp": "2026-10-02T19:10:59Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": ""
+    },
+    {
+      "metadata": {
+        "name": "gone.18dacc24ac697058",
+        "namespace": "wd-pod-gone",
+        "uid": "28aac23a-3a9a-47a9-95f9-b5a1ca403b4d",
+        "resourceVersion": "1137",
+        "creationTimestamp": "2026-10-02T19:10:59Z"
+      },
+      "involvedObject": {
+        "kind": "Pod",
+        "namespace": "wd-pod-gone",
+        "name": "gone",
+        "uid": "a81cb6a2-23bf-4fc4-8063-f0746dde9895",
+        "apiVersion": "v1",
+        "resourceVersion": "1128",
+        "fieldPath": "spec.containers{app}"
+      },
+      "reason": "Killing",
+      "message": "Stopping container app",
+      "source": {
+        "component": "kubelet",
+        "host": "wd-1370-3240-worker"
+      },
+      "firstTimestamp": "2026-10-02T19:10:59Z",
+      "lastTimestamp": "2026-10-02T19:10:59Z",
+      "count": 1,
+      "type": "Normal",
+      "eventTime": null,
+      "reportingComponent": "kubelet",
+      "reportingInstance": "wd-1370-3240-worker"
+    }
+  ],
+  "gaps": [
+    {
+      "source": "pod/gone",
+      "reason": "not found: the pod no longer exists in the API; its status history is not available"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "description": "a child of the main process dies by SIGTERM; the main process exits 143",
+  "target": {"selector": "app=sigterm", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "exit-signal-convention",
+    "confidence": "likely",
+    "evidenceKinds": ["pod-status", "convention"],
+    "contains": ["SIGTERM"],
+    "forbidKinds": ["oom-kill-reported"]
+  }
+}

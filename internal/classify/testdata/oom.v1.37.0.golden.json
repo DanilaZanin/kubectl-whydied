@@ -1,0 +1,99 @@
+{
+  "observedAt": "2026-10-02T19:10:59.113665Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-oom",
+    "name": "oom",
+    "uid": "ef87093c-a755-45a7-91ee-47b3ab2f787b",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-1370-3240-worker",
+    "startTime": "2026-10-02T19:10:55Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": null,
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 1,
+      "currentState": "terminated (exitCode=137, reason=OOMKilled)",
+      "termination": {
+        "source": "state.terminated",
+        "containerID": "containerd://6107cf87781008b8d58d546b8bfd40bba5c89799edbcb730b03a685a2651cc5e",
+        "exitCode": 137,
+        "reason": "OOMKilled",
+        "startedAt": "2026-10-02T19:10:56Z",
+        "finishedAt": "2026-10-02T19:10:56Z"
+      },
+      "expected": {
+        "state": "unexpected",
+        "why": "the container stopped with a non-zero exit code while its pod was not being terminated"
+      },
+      "restart": {
+        "policy": "Always",
+        "decision": "restarting",
+        "detail": "restart policy Always restarts this container (with back-off after repeated failures)",
+        "evidence": [
+          {
+            "kind": "event",
+            "object": "Pod wd-oom/oom",
+            "uid": "ef87093c-a755-45a7-91ee-47b3ab2f787b",
+            "field": "event BackOff",
+            "value": "Back-off restarting failed container app in pod oom_wd-oom(ef87093c-a755-45a7-91ee-47b3ab2f787b)",
+            "time": "2026-10-02T19:10:57Z",
+            "count": 1,
+            "note": "fieldPath=spec.containers{app}"
+          }
+        ]
+      },
+      "verdicts": [
+        {
+          "kind": "oom-kill-reported",
+          "confidence": "confirmed",
+          "summary": "the runtime reported an OOM kill for this container instance (API reported exitCode=137, reason=OOMKilled)",
+          "competing": [
+            "OOM level is unknown: the same reason is reported for a container cgroup limit, a pod-level cgroup limit and node-wide memory exhaustion",
+            "memory usage at kill time is not available from the API"
+          ],
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-oom/oom",
+              "uid": "ef87093c-a755-45a7-91ee-47b3ab2f787b",
+              "field": "status.containerStatuses[app].state.terminated.exitCode",
+              "value": "137",
+              "time": "2026-10-02T19:10:56Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-oom/oom",
+              "uid": "ef87093c-a755-45a7-91ee-47b3ab2f787b",
+              "field": "status.containerStatuses[app].state.terminated.reason",
+              "value": "OOMKilled",
+              "time": "2026-10-02T19:10:56Z"
+            },
+            {
+              "kind": "pod-spec",
+              "object": "Pod wd-oom/oom",
+              "uid": "ef87093c-a755-45a7-91ee-47b3ab2f787b",
+              "field": "spec.containers[app].resources.limits.memory",
+              "value": "spec memory limit 32Mi"
+            }
+          ]
+        }
+      ],
+      "logTail": [
+        "allocating"
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (5 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)",
+    "previous container logs"
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "observedAt": "2026-10-02T19:17:02.229894Z",
+  "window": "5m0s",
+  "pod": {
+    "namespace": "wd-user-delete",
+    "name": "victim",
+    "uid": "d6cd0dbd-b014-40d1-a9ed-3bacbab3b2c0",
+    "exists": true,
+    "phase": "Running",
+    "node": "wd-13112-4526-worker",
+    "startTime": "2026-10-02T19:17:00Z",
+    "deletionTimestamp": "2026-10-02T19:18:31Z",
+    "restartPolicy": "Always"
+  },
+  "verdicts": [
+    {
+      "kind": "deletion-unattributed",
+      "confidence": "likely",
+      "summary": "the pod is being deleted (metadata.deletionTimestamp is set) and no controller event, DisruptionTarget condition or eviction status names a cause; consistent with a direct client delete (for example kubectl delete), but the API does not record who asked",
+      "competing": [
+        "a controller or operator that does not emit a SuccessfulDelete event",
+        "events expired (about one hour by default); the API server audit log is not readable by this tool"
+      ],
+      "evidence": [
+        {
+          "kind": "pod-status",
+          "object": "Pod wd-user-delete/victim",
+          "uid": "d6cd0dbd-b014-40d1-a9ed-3bacbab3b2c0",
+          "field": "metadata.deletionTimestamp",
+          "value": "2026-10-02T19:18:31Z",
+          "time": "2026-10-02T19:18:31Z"
+        },
+        {
+          "kind": "pod-status",
+          "object": "Pod wd-user-delete/victim",
+          "uid": "d6cd0dbd-b014-40d1-a9ed-3bacbab3b2c0",
+          "field": "metadata.deletionGracePeriodSeconds",
+          "value": "90"
+        }
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "name": "app",
+      "role": "regular",
+      "image": "docker.io/library/busybox:1.37",
+      "restartCount": 0,
+      "currentState": "running since 2026-10-02T19:17:01Z",
+      "restart": {
+        "policy": "Always",
+        "decision": "running",
+        "detail": "running since 2026-10-02T19:17:01Z; restartCount=0 as reported now (it can reset when the pod is recreated)"
+      },
+      "verdicts": [
+        {
+          "kind": "no-termination",
+          "confidence": "confirmed",
+          "summary": "no termination is recorded for this container: it is running with restartCount=0 and no previous state; the pod is being deleted but the container has not stopped yet",
+          "evidence": [
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-user-delete/victim",
+              "uid": "d6cd0dbd-b014-40d1-a9ed-3bacbab3b2c0",
+              "field": "status.containerStatuses[app].state.running.startedAt",
+              "value": "2026-10-02T19:17:01Z",
+              "time": "2026-10-02T19:17:01Z"
+            },
+            {
+              "kind": "pod-status",
+              "object": "Pod wd-user-delete/victim",
+              "uid": "d6cd0dbd-b014-40d1-a9ed-3bacbab3b2c0",
+              "field": "status.containerStatuses[app].restartCount",
+              "value": "0"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "checked": [
+    "pod status and spec",
+    "events by involvedObject.uid for the pod (4 found)",
+    "owner chain (pod has no controller)",
+    "node conditions, taints, labels and node events (current state only)"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "description": "container exceeds its memory limit; the runtime reports OOMKilled",
+  "target": {"selector": "app=oom", "container": "app"},
+  "expect": {
+    "container": "app",
+    "verdictKind": "oom-kill-reported",
+    "confidence": "confirmed",
+    "evidenceKinds": ["pod-status", "pod-spec"],
+    "competingContains": "OOM level is unknown",
+    "expectedness": "unexpected",
+    "notContains": ["increase limits"]
+  }
+}

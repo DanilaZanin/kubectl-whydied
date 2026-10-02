@@ -1,0 +1,12 @@
+{
+  "description": "an init container exits 3; the main container never starts",
+  "target": {"selector": "app=init-fail", "container": "setup"},
+  "expect": {
+    "container": "setup",
+    "verdictKind": "app-exit",
+    "confidence": "confirmed",
+    "role": "init",
+    "expectedness": "unexpected",
+    "contains": ["exitCode=3"]
+  }
+}

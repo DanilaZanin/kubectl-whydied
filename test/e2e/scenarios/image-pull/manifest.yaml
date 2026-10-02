@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: image-pull
+  labels: {app: image-pull}
+spec:
+  containers:
+  - name: app
+    image: registry.invalid/wd-e2e/does-not-exist:1.0

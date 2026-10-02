@@ -1,0 +1,19 @@
+{
+  "description": "kubectl drain evicts the pod through the Eviction API; the pod ignores SIGTERM so it stays visible while terminating",
+  "timeoutSeconds": 200,
+  "steps": [
+    {"wait": ["--for=condition=Ready", "pod/drained", "--timeout=120s"]},
+    {"capturePod": "drained"},
+    {"kubectl": ["drain", "{{node}}", "--force", "--ignore-daemonsets", "--delete-emptydir-data", "--timeout=15s"], "noNamespace": true, "allowFail": true}
+  ],
+  "cleanup": [
+    {"kubectl": ["uncordon", "{{node}}"], "noNamespace": true, "allowFail": true}
+  ],
+  "target": {"name": "drained"},
+  "expect": {
+    "verdictKind": "eviction-api",
+    "confidence": "confirmed",
+    "evidenceKinds": ["pod-condition"],
+    "forbidKinds": ["controller-delete"]
+  }
+}
