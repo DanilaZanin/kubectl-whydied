@@ -60,9 +60,12 @@ go install github.com/DanilaZanin/kubectl-whydied/cmd/kubectl-whydied@latest
 # Release binary: download the archive for your platform from the GitHub releases page,
 # unpack it, and put kubectl-whydied on your PATH. kubectl finds it as `kubectl whydied`.
 
-# Krew: plugins/whydied.yaml is a template with sha256 placeholders. The release workflow
-# fills it from the release checksums (scripts/krew-manifest.sh) and attaches whydied.yaml
-# to the GitHub release. It is not in the krew index yet; install from the attached file.
+# Krew, from my index (github.com/DanilaZanin/krew-index, not the central one)
+kubectl krew index add danilazanin https://github.com/DanilaZanin/krew-index.git
+kubectl krew install danilazanin/whydied
+
+# plugins/whydied.yaml is the manifest template. The release workflow fills it from the
+# release checksums (scripts/krew-manifest.sh) and attaches whydied.yaml to the GitHub release.
 ```
 
 ## Usage
